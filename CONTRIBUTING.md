@@ -61,10 +61,6 @@ pip install -r tests/test_requirements.txt
     ```bash
     flake8
     ```
-    and
-    ```bash
-    pylint
-    ```
     You can fix the linting errors either manually or with the packages
     `autopep8` or `black` for example.
     
