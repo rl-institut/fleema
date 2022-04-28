@@ -6,7 +6,7 @@ https://github.com/rl-institut/workshop/tree/master/test-driven-development.
 Otherwise https://docs.pytest.org/en/latest/ and https://docs.python.org/3/library/unittest.html
 are also good support.
 """
-import src.simulation
+import module
 
 
 # this function will not run as a test as its name does not start by "test_"
