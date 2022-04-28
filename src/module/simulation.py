@@ -1,10 +1,10 @@
 class Simulation:
     """
-    This class can import a specified config directory and build the scenario. It also contains the run function,
-    which starts the simulation.
+    This class can import a specified config directory and build the scenario.
+    It also contains the run function, which starts the simulation.
     """
 
-    def __init__(self, config_path=None):
+    def __init__(self, config_path):
         self.config_path = config_path
 
     def read_config(self):
