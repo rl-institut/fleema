@@ -11,11 +11,11 @@ Running the program
 -------------------
 
 To run this from the command line, go to the root folder of this repository,
-then type `python -m src.module` into the terminal.
+then type ``python -m src.module`` into the terminal.
 
 In PyCharm, this can be set up as a run configuration:
 
 * create a new python configuration
 * choose module name instead of script path
-* input the module name `module`
+* input the module name ``module``
 * set the root directory of this repository as the working directory
