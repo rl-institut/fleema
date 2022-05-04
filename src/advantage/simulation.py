@@ -6,6 +6,7 @@ class Simulation:
 
     def __init__(self, config_path):
         self.config_path = config_path
+        self.read_config()
 
     def read_config(self):
         if self.config_path:

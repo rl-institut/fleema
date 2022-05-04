@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-import location
 
 
 class Vehicle:
@@ -16,7 +15,7 @@ class Vehicle:
                  soc: float,
                  availability: bool,
                  rotation: str = None,
-                 current_location: location.Location = None
+                 current_location: object = None
                  ):
         self.vehicle_type = vehicle_type
         self.status = status
