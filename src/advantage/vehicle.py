@@ -42,7 +42,8 @@ class VehicleType:
     name:               type name
     capacity:           battery capacity in kWh
     base_consumption:        in kWh/km ?
-    charging_curve:     example: [[0, 50], [0.8, 50], [1, 20]], first number is SoC, second the possible max power
+    charging_curve:     example: [[0, 50], [0.8, 50], [1, 20]], first number is SoC, second the
+                        possible max power
     min_charging_power: least amount of charging power possible, as a share of max power
     """
     name: str
