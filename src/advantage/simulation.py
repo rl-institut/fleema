@@ -1,6 +1,6 @@
 class Simulation:
     """
-    This class can import a specified config directory and build the data.
+    This class can import a specified config directory and build the scenarios.
     It also contains the run function, which starts the simulation.
     """
 
