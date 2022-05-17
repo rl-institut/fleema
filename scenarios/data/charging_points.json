@@ -1,0 +1,40 @@
+{
+  "charging_point_types": {
+    "opportunity": {
+        "name": "autonomous bus - opportunity charging",
+        "capacity": 50,
+        "min_charging_power": 0,
+        "v2g": false,
+        "v2g_power_factor": 0.5
+    },
+    "depot": {
+        "name": "autonomous bus - depot charging",
+        "capacity": 150,
+        "charging_curve": [[0, 150], [0.8, 150], [1, 150]], (???)
+        "min_charging_power": 0,
+        "v2g": false,
+        "v2g_power_factor": 0.5
+    }, },
+  "induktive": {
+        "name": "autonomous bus - inductive charging",
+        "capacity": 150,
+        "charging_curve": [[0, 150], [0.8, 150], [1, 150]], (???)
+        "min_charging_power": 0,
+        "v2g": false,
+        "v2g_power_factor": 0.5
+    }, },
+
+  "charging__points": {
+    "Kirche": {
+      "charging_type": "AB_oppb",
+      "EE": ,
+      "number_charging_points": 1,
+
+    },
+    "parking lot": {
+      "charging_type": "AB_oppb",
+      "EE": ,
+      "number_charging_points": 1
+     }
+}
+}
