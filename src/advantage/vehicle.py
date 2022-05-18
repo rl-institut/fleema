@@ -26,12 +26,19 @@ class Vehicle:
         self.output = None
         self.task = None
 
-    def charge(self):
+    def charge(self, trip, power, charging_type):
         # call spiceev charging depending on soc, location, task
+        self.status = 'charging'
+        usable_power = min(power, self.vehicle_type.charging_capacity[charging_type])
+        self.soc = min(self.soc + trip.park_time * usable_power / self.car_type.battery_capacity, 1)
+        # self._update_activity(trip.park_timestamp, trip.park_start, trip.park_time,
+                              # nominal_charging_capacity=power, charging_power=usable_power)
         return
 
-    def drive(self):
+    def drive(self, trip):
         # call drive api with task, soc, ...
+        self.status = 'driving'
+        self.soc -= self.car_type.consumption * trip.distance / self.car_type.battery_capacity
         return
 
 
