@@ -14,16 +14,16 @@
     },
 
   "charging__points": {
-    "Kirche": {
-      "charging_type": "AB_oppb",
+    "Marktplatz": {
+      "type": "inductive_50",
       "EE": ,
-      "number_charging_points": 1,
+      "number_charging_points": 3,
 
     },
-    "parking lot": {
-      "charging_type": "AB_oppb",
+    "Bahnhof": {
+      "type": "inductive_50",
       "EE": ,
-      "number_charging_points": 1
+      "number_charging_points": 1,
      }
 }
 }
