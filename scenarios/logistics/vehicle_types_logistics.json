@@ -2,21 +2,21 @@
   "vehicle_types": {
     "TE_hc": {
         "name": "Tracteasy - high_cap",
-        "capacity": 66,
+        "battery_capacity": 66,
         "charging_curve": [[0, 150], [0.8, 150], [1, 150]],
-        "min_charging_power": 0,
+        "max_charging_power": 0,
     },
      "TE_mc": {
         "name": "Tracteasy - medium_cap",
-        "capacity": 44,
+        "battery_capacity": 44,
         "charging_curve": [[0, 150], [0.8, 150], [1, 150]],
-        "min_charging_power": 0,
+        "max_charging_power": 0,
     },
        "TE_lc": {
         "name": "Tracteasy - low_cap",
-        "capacity": 22,
+        "battery_capacity": 22,
         "charging_curve": [[0, 150], [0.8, 150], [1, 150]],
-        "min_charging_power": 0,
+        "max_charging_power": 0,
     }
   }
 }
