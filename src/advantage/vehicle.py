@@ -34,7 +34,7 @@ class Vehicle:
             "use_case": [],
             "soc": [],
             "charging_demand": [],
-            "nominal_charging_capacity": [],  # rethink these?
+            "nominal_charging_capacity": [],
             "charging_power": [],
             "consumption": []
         }
@@ -66,7 +66,7 @@ class Vehicle:
     def drive(self, trip):
         # call drive api with task, soc, ...
         self.status = 'driving'
-        self.soc -= self.vehicle_type.consumption * trip.distance / self.vehicle_type.battery_capacity
+        self.soc -= self.vehicle_type.base_consumption * trip.distance / self.vehicle_type.battery_capacity
         self._update_activity(trip.drive_timestamp, trip.drive_start, trip.drive_time)
         self.status = trip.destination
 
@@ -103,6 +103,7 @@ class VehicleType:
     name: str
     battery_capacity: float
     base_consumption: float
+    charging_capacity: dict
     charging_curve: list
     min_charging_power: float
 
