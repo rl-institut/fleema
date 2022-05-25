@@ -3,7 +3,7 @@ import csv
 
 dict_db = {}
 config = ConfigParser()
-config.read(open(r'scenarios/default/scenario.cfg'))
+config.read(open(r'scenarios/public_transport_base/scenario.cfg'))
 for sect in config.sections():
    print('Section:', sect)
    for k,v in config.items(sect):
@@ -12,7 +12,7 @@ for sect in config.sections():
 
 
 def wrapper():
-#    input_file = csv.DictReader(open("scenarios/default/schedule.csv"))
+#    input_file = csv.DictReader(open("scenarios/public_transport_base/schedule.csv"))
 #        for row in input_file
 #    print row
 

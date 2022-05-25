@@ -1,0 +1,5 @@
+line;departure_name;departure_time;arrival_time;arrival_name;distance;pause;rotation_id;vehicle_type
+LINE_0;Marktplatz;07.03.2022 00:00;07.03.2022 07:07;Artrium;0.370;0.062;SH_oppb-0;
+LINE_0;Artrium;07.03.2022 07:07;07.03.2022 07:14;Therme;0.320;0.053;SH_oppb-0;
+LINE_0;Therme;07.03.2022 07:14;07.03.2022 07:21;Gries;0.850;0.14;SH_oppb-0;
+LINE_0;Therme;07.03.2022 07:21;07.03.2022 07:28;Gries;0.530;0.088;SH_oppb-0;

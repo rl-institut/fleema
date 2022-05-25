@@ -4,19 +4,22 @@
         "name": "Tracteasy - high_cap",
         "battery_capacity": 66,
         "charging_curve": [[0, 150], [0.8, 150], [1, 150]],
-        "max_charging_power": 0,
+        "power_ac": 22,
+        "power_dc": 100
     },
      "TE_mc": {
         "name": "Tracteasy - medium_cap",
         "battery_capacity": 44,
         "charging_curve": [[0, 150], [0.8, 150], [1, 150]],
-        "max_charging_power": 0,
+        "power_ac": 22,
+        "power_dc": 100
     },
        "TE_lc": {
         "name": "Tracteasy - low_cap",
         "battery_capacity": 22,
         "charging_curve": [[0, 150], [0.8, 150], [1, 150]],
-        "max_charging_power": 0,
+        "power_ac": 22,
+        "power_dc": 100
     }
   }
 }
