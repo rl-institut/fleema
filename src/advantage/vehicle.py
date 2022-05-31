@@ -23,7 +23,6 @@ class Vehicle:
         self.availability = availability
         self.rotation = rotation
         self.current_location = current_location
-        self.output = None
         self.task = None
 
         self.output = {
@@ -31,7 +30,7 @@ class Vehicle:
             "event_start": [],
             "event_time": [],
             "location": [],
-            "use_case": [],
+            "status": [],
             "soc": [],
             "charging_demand": [],
             "nominal_charging_capacity": [],
