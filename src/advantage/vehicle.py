@@ -91,7 +91,7 @@ class Vehicle:
 @dataclass
 class VehicleType:
     """
-    The VehicleType contains static vehicle scenarios.
+    The VehicleType contains static vehicle data.
     name:               type name
     capacity:           battery capacity in kWh
     base_consumption:        in kWh/km ?
