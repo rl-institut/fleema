@@ -1,0 +1,12 @@
+{
+  "vehicle_types": {
+    "GS_124": {
+        "name": "Volk_EFZ_80_N",
+        "capacity": 124,
+        "charging_curve": [[0, 150], [0.8, 150], [1, 150]],
+        "max. Geschwindigkeit": 15,
+        "power_ac": 22,
+        "power_dc": 100
+    }
+  }
+}

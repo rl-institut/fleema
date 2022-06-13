@@ -1,0 +1,5 @@
+departure_name,arrival_name,distance,time
+Station-0,Station-1,1.8, 0,12
+Station-1,Station-0,1.8,0.12
+Station-0,Station-1,1.8, 0,12
+Station-1,Station-0,1.8,0.12
