@@ -1,4 +1,29 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+
+
+@dataclass
+class VehicleType:
+    """
+    The VehicleType contains static vehicle data.
+    name:               type name
+    capacity:           battery capacity in kWh
+    base_consumption:        in kWh/km ?
+    charging_curve:     example: [[0, 50], [0.8, 50], [1, 20]], first number is SoC, second the
+                        possible max power
+    min_charging_power: least amount of charging power possible, as a share of max power
+    """
+    name: str = "vehicle_name"
+    battery_capacity: float = 50.
+    base_consumption: float = 0.
+    charging_capacity: dict = field(default_factory=dict)
+    charging_curve: list = field(default_factory=list)
+    min_charging_power: float = 0.
+
+
+# example inherited class as proof of concept, remove later if unused
+@dataclass
+class BusType(VehicleType):
+    max_passenger_number: int = 0
 
 
 class Vehicle:
@@ -10,10 +35,10 @@ class Vehicle:
     """
 
     def __init__(self,
-                 vehicle_type: object,
-                 status: str,
-                 soc: float,
-                 availability: bool,
+                 vehicle_type: "VehicleType" = VehicleType(),
+                 status: str = "parking",
+                 soc: float = 1,
+                 availability: bool = True,
                  rotation: str = None,
                  current_location: object = None
                  ):
@@ -86,28 +111,3 @@ class Vehicle:
             return abs(min(round(last_consumption, 4), 0))
         else:
             return 0
-
-
-@dataclass
-class VehicleType:
-    """
-    The VehicleType contains static vehicle data.
-    name:               type name
-    capacity:           battery capacity in kWh
-    base_consumption:        in kWh/km ?
-    charging_curve:     example: [[0, 50], [0.8, 50], [1, 20]], first number is SoC, second the
-                        possible max power
-    min_charging_power: least amount of charging power possible, as a share of max power
-    """
-    name: str
-    battery_capacity: float
-    base_consumption: float
-    charging_capacity: dict
-    charging_curve: list
-    min_charging_power: float
-
-
-# example inherited class as proof of concept, remove later if unused
-@dataclass
-class BusType(VehicleType):
-    max_passenger_number: int

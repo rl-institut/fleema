@@ -6,9 +6,9 @@ class Location:
     """
     Location object contains id, type and various properties
     """
-    location_id: str
-    status: str
-    type: str
+    location_id: str = ""
+    status: str = "available"
+    type: str = "hpc"
     charger_properties: dict = None
     grid_info: dict = None
     output = None
