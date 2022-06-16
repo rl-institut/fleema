@@ -2,17 +2,15 @@ import advantage.vehicle as vehicle
 import pytest
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture()
 def car():
     car_type = vehicle.VehicleType(battery_capacity=30, base_consumption=0.2)
     car = vehicle.Vehicle(vehicle_type=car_type, soc=0.5)
     return car
 
 
-def test_constructor():
-    bus_type = vehicle.VehicleType(battery_capacity=100, base_consumption=0.4)
-    bus = vehicle.Vehicle(vehicle_type=bus_type, soc=1, availability=True)
-    assert bus.vehicle_type.battery_capacity == 100
+def test_constructor(car):
+    assert car.vehicle_type.battery_capacity == 30
 
 
 def test_drive(car):

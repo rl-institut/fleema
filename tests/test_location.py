@@ -2,7 +2,7 @@ import advantage.location as location
 import pytest
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture()
 def parking_spot():
     parking_spot = location.Location(charger_properties={}, grid_info={})
     return parking_spot
