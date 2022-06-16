@@ -10,7 +10,13 @@ def car():
 
 
 def test_constructor(car):
-    assert car.vehicle_type.battery_capacity == 30
+    error_list = []
+    if car.vehicle_type.battery_capacity != 30:
+        error_list.append(f"Battery capacity is {car.vehicle_type.battery_capacity}, should be 30")
+    if car.vehicle_type.base_consumption != 0.2:
+        error_list.append(f"Battery capacity is {car.vehicle_type.base_consumption}, should be 0.2")
+
+    assert not error_list,  "errors occured:\n{}".format("\n".join(error_list))
 
 
 def test_drive(car):
