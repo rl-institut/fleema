@@ -1,4 +1,4 @@
-import advantage.location as location
+import src.advantage.location as location
 import pytest
 
 

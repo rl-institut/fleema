@@ -1,4 +1,4 @@
-import advantage.vehicle as vehicle
+import src.advantage.vehicle as vehicle
 import pytest
 
 
