@@ -1,0 +1,33 @@
+{
+  "charging_point_types": {
+    "conductive_50": {
+      "capacity": 50,
+      "min_charging_power": 0
+    },
+    "CEE-Socket-0": {
+      "capacity": 11,
+      "min_charging_power": 0
+    },
+    "CEE-Socket-1": {
+      "capacity": 22,
+      "min_charging_power": 0
+    }
+  }
+  "charging__points": {
+    "Depot": {
+      "type": "conductive_50",
+      "EE":,
+      "number_charging_points": 3
+    }
+    "Socketstation-0": {
+      "type": "CEE-Socket-0",
+      "EE":,
+      "number_charging_points": 3
+    }
+    "Socketstation-1": {
+      "type": "CEE-Socket-1",
+      "EE": ,
+      "number_charging_points": 2
+    }
+  }
+}
