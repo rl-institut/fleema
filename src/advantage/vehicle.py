@@ -5,22 +5,26 @@ from dataclasses import dataclass, field
 class VehicleType:
     """
     The VehicleType contains static vehicle data.
-    name:               type name
-    capacity:           battery capacity in kWh
-    base_consumption:        in kWh/km ?
+    name:               vehicle type name
+    battery_capacity:   battery capacity in kWh
+    soc_min:            minimum state of charge that should remain in battery after a drive
+    base_consumption:   in kWh/km ?
+    charging_capacity:  dict containing values for fast (dc) and slow (ac) charging
     charging_curve:     example: [[0, 50], [0.8, 50], [1, 20]], first number is SoC, second the
                         possible max power
     min_charging_power: least amount of charging power possible, as a share of max power
     """
     name: str = "vehicle_name"
     battery_capacity: float = 50.
+    soc_min: float = 0.
     base_consumption: float = 0.
     charging_capacity: dict = field(default_factory=dict)
     charging_curve: list = field(default_factory=list)
     min_charging_power: float = 0.
+    label: str = None
 
 
-# example inherited class as proof of concept, remove later if unused
+# example inherited class as proof of concept, TODO remove later if unused
 @dataclass
 class BusType(VehicleType):
     max_passenger_number: int = 0
@@ -95,6 +99,10 @@ class Vehicle:
         self.status = trip.destination
 
         return
+
+    @property
+    def usable_soc(self):
+        return self.soc - self.vehicle_type.soc_min
 
     def _get_last_charging_demand(self):
         if len(self.output["soc"]) > 1:
