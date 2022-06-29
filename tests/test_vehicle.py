@@ -92,3 +92,18 @@ def test_charge_input_checks(car, time_series):
     time_stamp = step_to_timestamp(time_series, start_step)
     with pytest.raises(TypeError, match="Argument has wrong type."):
         car.charge(time_stamp, start_step, time="-1", power=11, new_soc=0.8)
+
+
+def test_park_result(car, time_series):
+    output_size = len(car.output["timestamp"])
+    start_step = 5
+    time_stamp = step_to_timestamp(time_series, start_step)
+    car.park(time_stamp, start_step, 10)
+    assert output_size + 1 == len(car.output["timestamp"])
+
+
+def test_park_input_checks(car, time_series):
+    start_step = 5
+    time_stamp = step_to_timestamp(time_series, start_step)
+    with pytest.raises(TypeError, match="Argument has wrong type."):
+        car.park(time_stamp, start_step, "-1")

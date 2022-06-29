@@ -108,12 +108,18 @@ class Vehicle:
         if (self.soc - new_soc >
                 self.vehicle_type.base_consumption * time / 60 * 100 / self.vehicle_type.battery_capacity):
             raise ValueError("Consumption too high.")
-        # if new_soc - self.soc > time * power / 60 / self.vehicle_type.battery_capacity:
-        #     raise ValueError("SoC can't be reached in specified time window with given power.")
         self.status = 'driving'
         self.soc = new_soc
         self._update_activity(timestamp, start, time)
         self.status = destination
+
+    def park(self, timestamp, start, time):
+        if not all(isinstance(i, int) or isinstance(i, float) for i in [start, time]):
+            raise TypeError("Argument has wrong type.")
+        if not all(i >= 0 for i in [start, time]):
+            raise ValueError("Arguments can't be negative.")
+        self.status = "parking"
+        self._update_activity(timestamp, start, time)
 
     @property
     def usable_soc(self):
