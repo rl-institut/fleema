@@ -125,6 +125,19 @@ class Vehicle:
     def usable_soc(self):
         return self.soc - self.vehicle_type.soc_min
 
+    @property
+    def scenario_info(self):
+        scenario_dict = {
+            f"{self.vehicle_type.name}_0": {
+                "connected_charging_station": self.current_location,
+                "estimated_time_of_departure": "2018-01-01T08:15:00+02:00",
+                "desired_soc": 1,
+                "soc": self.soc,
+                "vehicle_type": self.vehicle_type.name
+            }
+        }
+        return scenario_dict
+
     def _get_last_charging_demand(self):
         if len(self.output["soc"]) > 1:
             charging_demand = (self.output["soc"][-1] - self.output["soc"][-2])

@@ -107,3 +107,9 @@ def test_park_input_checks(car, time_series):
     time_stamp = step_to_timestamp(time_series, start_step)
     with pytest.raises(TypeError, match="Argument has wrong type."):
         car.park(time_stamp, start_step, "-1")
+
+
+def test_scenario_info(car):
+    assert car.scenario_info["vehicle_name_0"]["soc"] == 0.5
+
+#  TODO use in code: spice_ev_scenario["constants"]["vehicles"].update(car.scenario_info)
