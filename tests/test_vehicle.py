@@ -38,15 +38,35 @@ def test_constructor(car):
     assert not error_list,  "errors occured:\n{}".format("\n".join(error_list))
 
 
-def test_drive(car):
-    soc_start = car.soc
-    # car.drive()
-    car.soc -= 0.3
-    assert car.soc < soc_start
+def test_drive_result(car, time_series):
+    start_step = 5
+    time_stamp = step_to_timestamp(time_series, start_step)
+    car.drive(time_stamp, start_step, time=10, destination="station_1", new_soc=0.45)
+    assert car.soc == 0.45
+
+
+def test_drive_bad_soc(car, time_series):
+    start_step = 5
+    time_stamp = step_to_timestamp(time_series, start_step)
+    with pytest.raises(ValueError, match="SoC of vehicle can't be higher after driving."):
+        car.drive(time_stamp, start_step, time=60, destination="station_1", new_soc=0.7)
+
+
+def test_drive_sanity(car, time_series):
+    start_step = 5
+    time_stamp = step_to_timestamp(time_series, start_step)
+    with pytest.raises(ValueError, match="Consumption too high."):
+        car.drive(time_stamp, start_step, time=2, destination="station_1", new_soc=0.1)
+
+
+def test_drive_input_checks(car, time_series):
+    start_step = 5
+    time_stamp = step_to_timestamp(time_series, start_step)
+    with pytest.raises(TypeError, match="Argument has wrong type."):
+        car.charge(time_stamp, start_step, time="-1", power=11, new_soc=0.8)
 
 
 def test_charge_result(car, time_series):
-    # charge gets called with time, charging station power, charging type and station efficiency
     start_step = 5
     time_stamp = step_to_timestamp(time_series, start_step)
     car.charge(time_stamp, start_step, time=60, power=11, new_soc=0.8)
@@ -54,15 +74,13 @@ def test_charge_result(car, time_series):
 
 
 def test_charge_bad_soc(car, time_series):
-    # charge gets called with time, charging station power, charging type and station efficiency
     start_step = 5
     time_stamp = step_to_timestamp(time_series, start_step)
     with pytest.raises(ValueError, match="SoC of vehicle can't be lower after charging."):
         car.charge(time_stamp, start_step, time=60, power=11, new_soc=0.3)
 
 
-def test_charge_too_much_energy(car, time_series):
-    # charge gets called with time, charging station power, charging type and station efficiency
+def test_charge_sanity(car, time_series):
     start_step = 5
     time_stamp = step_to_timestamp(time_series, start_step)
     with pytest.raises(ValueError, match="SoC can't be reached in specified time window with given power."):
@@ -70,7 +88,6 @@ def test_charge_too_much_energy(car, time_series):
 
 
 def test_charge_input_checks(car, time_series):
-    # charge gets called with time, charging station power, charging type and station efficiency
     start_step = 5
     time_stamp = step_to_timestamp(time_series, start_step)
     with pytest.raises(TypeError, match="Argument has wrong type."):

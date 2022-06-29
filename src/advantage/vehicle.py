@@ -85,8 +85,8 @@ class Vehicle:
         # TODO this requires a SpiceEV scenario object
         if not all(isinstance(i, int) or isinstance(i, float) for i in [start, time, power, new_soc]):
             raise TypeError("Argument has wrong type.")
-        if not all(i > 0 for i in [start, time, power, new_soc]):
-            raise ValueError("Arguments have to be bigger than 0.")
+        if not all(i >= 0 for i in [start, time, power, new_soc]):
+            raise ValueError("Arguments can't be negative.")
         if new_soc < self.soc:
             raise ValueError("SoC of vehicle can't be lower after charging.")
         if new_soc - self.soc > time * power / 60 / self.vehicle_type.battery_capacity:
@@ -95,12 +95,25 @@ class Vehicle:
         self.soc = new_soc
         self._update_activity(timestamp, start, time, charging_power=power)
 
-    def drive(self, trip):
+    def drive(self, timestamp, start, time, destination, new_soc):
         # call drive api with task, soc, ...
+        if not all(isinstance(i, int) or isinstance(i, float) for i in [start, time, new_soc]):
+            raise TypeError("Argument has wrong type.")
+        if not isinstance(destination, str):
+            raise TypeError("Argument has wrong type.")
+        if not all(i >= 0 for i in [start, time, new_soc]):
+            raise ValueError("Arguments can't be negative.")
+        if new_soc > self.soc:
+            raise ValueError("SoC of vehicle can't be higher after driving.")
+        if (self.soc - new_soc >
+                self.vehicle_type.base_consumption * time / 60 * 100 / self.vehicle_type.battery_capacity):
+            raise ValueError("Consumption too high.")
+        # if new_soc - self.soc > time * power / 60 / self.vehicle_type.battery_capacity:
+        #     raise ValueError("SoC can't be reached in specified time window with given power.")
         self.status = 'driving'
-        self.soc -= self.vehicle_type.base_consumption * trip.distance / self.vehicle_type.battery_capacity
-        self._update_activity(trip.drive_timestamp, trip.drive_start, trip.drive_time)
-        self.status = trip.destination
+        self.soc = new_soc
+        self._update_activity(timestamp, start, time)
+        self.status = destination
 
     @property
     def usable_soc(self):
