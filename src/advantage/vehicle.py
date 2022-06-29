@@ -128,12 +128,27 @@ class Vehicle:
     @property
     def scenario_info(self):
         scenario_dict = {
-            f"{self.vehicle_type.name}_0": {
-                "connected_charging_station": self.current_location,
-                "estimated_time_of_departure": "2018-01-01T08:15:00+02:00",
-                "desired_soc": 1,
-                "soc": self.soc,
-                "vehicle_type": self.vehicle_type.name
+            "constants": {
+                "vehicle_types": {
+                    self.vehicle_type.name: {
+                        "name": self.vehicle_type.name,
+                        "capacity": self.vehicle_type.battery_capacity,
+                        "mileage": self.vehicle_type.base_consumption * 100,
+                        "charging_curve": self.vehicle_type.charging_curve,
+                        "min_charging_power": self.vehicle_type.min_charging_power,
+                        "v2g": False,
+                        "v2g_power_factor": 0.5
+                    }
+                },
+                "vehicles": {
+                    f"{self.vehicle_type.name}_0": {
+                        "connected_charging_station": self.current_location,
+                        "estimated_time_of_departure": "",  # TODO change this somewhere else
+                        "desired_soc": 1,
+                        "soc": self.soc,
+                        "vehicle_type": self.vehicle_type.name
+                    }
+                }
             }
         }
         return scenario_dict

@@ -110,6 +110,4 @@ def test_park_input_checks(car, time_series):
 
 
 def test_scenario_info(car):
-    assert car.scenario_info["vehicle_name_0"]["soc"] == 0.5
-
-#  TODO use in code: spice_ev_scenario["constants"]["vehicles"].update(car.scenario_info)
+    assert car.scenario_info["constants"]["vehicles"]["vehicle_name_0"]["soc"] == 0.5
