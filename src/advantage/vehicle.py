@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from src.advantage.location import Location
 
 
 @dataclass
@@ -44,7 +45,7 @@ class Vehicle:
                  soc: float = 1,
                  availability: bool = True,
                  rotation: str = None,
-                 current_location: object = None
+                 current_location: "Location" = None
                  ):
         self.vehicle_type = vehicle_type
         self.status = status
@@ -142,8 +143,7 @@ class Vehicle:
                 },
                 "vehicles": {
                     f"{self.vehicle_type.name}_0": {
-                        "connected_charging_station": self.current_location,
-                        "estimated_time_of_departure": "",  # TODO change this somewhere else
+                        # "connected_charging_station": self.current_location.location_id,
                         "desired_soc": 1,
                         "soc": self.soc,
                         "vehicle_type": self.vehicle_type.name
