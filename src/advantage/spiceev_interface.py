@@ -1,4 +1,5 @@
 import datetime
+from src.scenario import Scenario
 
 
 def get_spice_ev_scenario_dict(vehicle, location, timestamp, time):
@@ -18,3 +19,8 @@ def get_spice_ev_scenario_dict(vehicle, location, timestamp, time):
         departure_time.isoformat()
 
     return spice_ev_dict
+
+
+def run_spice_ev(spice_ev_dict, strategy):
+    spice = Scenario(spice_ev_dict)
+    spice.run(strategy, {})

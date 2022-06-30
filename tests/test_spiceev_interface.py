@@ -1,7 +1,7 @@
-import src.advantage.vehicle as vehicle
-import src.advantage.location as location
-from src.advantage.util.conversions import step_to_timestamp
-from src.advantage.spiceev_interface import get_spice_ev_scenario_dict
+import advantage.vehicle as vehicle
+import advantage.location as location
+from advantage.util.conversions import step_to_timestamp
+from advantage.spiceev_interface import get_spice_ev_scenario_dict, run_spice_ev
 
 import pytest
 import datetime
@@ -28,8 +28,15 @@ def time_series():
     return time_series
 
 
-def test_call_spice_ev(car, time_series, spot):
+def test_create_dict(car, time_series, spot):
     start_step = 5
     time_stamp = step_to_timestamp(time_series, start_step)
     spice_dict = get_spice_ev_scenario_dict(car, spot, time_stamp, 10)
     assert "vehicles" in spice_dict["constants"].keys()
+
+
+def test_run_spice_ev(car, time_series, spot):
+    start_step = 5
+    time_stamp = step_to_timestamp(time_series, start_step)
+    spice_dict = get_spice_ev_scenario_dict(car, spot, time_stamp, 10)
+    run_spice_ev(spice_dict, "balanced")

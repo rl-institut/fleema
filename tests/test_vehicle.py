@@ -1,5 +1,5 @@
-import src.advantage.vehicle as vehicle
-from src.advantage.util.conversions import step_to_timestamp
+import advantage.vehicle as vehicle
+from advantage.util.conversions import step_to_timestamp
 
 import pytest
 import datetime

@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from src.advantage.location import Location
+from advantage.location import Location
 
 
 @dataclass
