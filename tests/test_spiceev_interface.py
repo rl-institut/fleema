@@ -1,5 +1,6 @@
 import advantage.vehicle as vehicle
 import advantage.location as location
+import advantage.charger as charger
 from advantage.util.conversions import step_to_timestamp
 from advantage.spiceev_interface import get_spice_ev_scenario_dict, run_spice_ev
 
@@ -10,14 +11,16 @@ import pandas as pd
 
 @pytest.fixture()
 def car():
-    car_type = vehicle.VehicleType(battery_capacity=30, base_consumption=0.2)
+    car_type = vehicle.VehicleType(battery_capacity=30, base_consumption=0.2,
+                                   charging_curve=[[0, 11], [0.8, 11], [1, 11]])
     car = vehicle.Vehicle(vehicle_type=car_type, soc=0.5)
     return car
 
 
 @pytest.fixture()
 def spot():
-    spot = location.Location()
+    charge_spot = charger.Charger()
+    spot = location.Location(chargers=[charge_spot], grid_info={"max_power": 150})
     return spot
 
 

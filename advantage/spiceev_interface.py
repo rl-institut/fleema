@@ -1,6 +1,8 @@
 import datetime
 from src.scenario import Scenario
 
+from advantage.util.helpers import deep_update
+
 
 def get_spice_ev_scenario_dict(vehicle, location, timestamp, time):
     scenario_dict = {
@@ -13,7 +15,7 @@ def get_spice_ev_scenario_dict(vehicle, location, timestamp, time):
         "constants": {}
     }
     spice_ev_dict = dict(scenario_dict, **vehicle.scenario_info)
-    # spice_ev_dict.update(location.scenario_info)  # TODO implement
+    deep_update(spice_ev_dict, location.scenario_info)
     departure_time = timestamp + datetime.timedelta(minutes=time)
     spice_ev_dict["constants"]["vehicles"][f"{vehicle.vehicle_type.name}_0"]["estimated_time_of_departure"] = \
         departure_time.isoformat()
