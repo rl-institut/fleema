@@ -48,8 +48,8 @@ class Location:
                         "max_power": 22,
                         "min_power": 0,
                         "parent": "GC1"
-                      }
                     }
+                }
             }
         }
         return scenario_dict

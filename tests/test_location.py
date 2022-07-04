@@ -4,7 +4,7 @@ import pytest
 
 @pytest.fixture()
 def parking_spot():
-    parking_spot = location.Location(charger_properties={}, grid_info={})
+    parking_spot = location.Location(grid_info={})
     return parking_spot
 
 
