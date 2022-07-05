@@ -37,9 +37,9 @@ def test_create_dict(car, time_series, spot):
     spice_dict = get_spice_ev_scenario_dict(car, spot, time_stamp, 10)
     error_list = []
     if "vehicles" not in spice_dict["constants"].keys():
-        error_list.append(f"Vehicles is not in constants.")
+        error_list.append("Vehicles is not in constants.")
     if "vehicle_types" not in spice_dict["constants"].keys():
-        error_list.append(f"Vehicle_types is not in constants.")
+        error_list.append("Vehicle_types is not in constants.")
 
     assert not error_list, "errors occured:\n{}".format("\n".join(error_list))
 
