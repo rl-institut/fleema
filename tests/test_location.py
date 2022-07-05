@@ -1,10 +1,11 @@
 import advantage.location as location
+import advantage.charger as charger
 import pytest
 
 
 @pytest.fixture()
 def parking_spot():
-    parking_spot = location.Location(grid_info={})
+    parking_spot = location.Location(grid_info={}, chargers=[charger.Charger()])
     return parking_spot
 
 

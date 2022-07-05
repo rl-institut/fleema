@@ -2,8 +2,6 @@ from dataclasses import dataclass, field
 
 from typing import List
 
-from advantage.charger import Charger
-
 
 @dataclass
 class Location:
