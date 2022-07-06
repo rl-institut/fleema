@@ -1,5 +1,10 @@
 from dataclasses import dataclass
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from advantage.vehicle import Vehicle
+
 
 @dataclass
 class Charger:

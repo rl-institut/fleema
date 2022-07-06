@@ -1,8 +1,9 @@
 from dataclasses import dataclass, field
 
-from typing import List
+from typing import List, TYPE_CHECKING
 
-from advantage.charger import Charger
+if TYPE_CHECKING:
+    from advantage.charger import Charger
 
 
 @dataclass

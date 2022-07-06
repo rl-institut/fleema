@@ -1,10 +1,11 @@
 import advantage.location as location
+import advantage.charger as charger
 import pytest
 
 # neue location erzeugen, absichtlich falsch (zB. vehicle in charger liste)
 @pytest.fixture()
 def parking_spot():
-    parking_spot = location.Location(grid_info={})
+    parking_spot = location.Location(grid_info={}, chargers=[charger.Charger()])
     return parking_spot
 
 @pytest.fixture()

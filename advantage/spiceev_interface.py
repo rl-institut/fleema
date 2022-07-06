@@ -12,7 +12,13 @@ def get_spice_ev_scenario_dict(vehicle, location, timestamp, time):
             "n_intervals": time,
             "discharge_limit": 0.5
         },
-        "constants": {}
+        "constants": {},
+        "events": {
+            "grid_operator_signals": {},
+            "external_load": {},
+            "energy_feed_in": {},
+            "vehicle_events": {}
+        }
     }
     spice_ev_dict = dict(scenario_dict, **vehicle.scenario_info)
     deep_update(spice_ev_dict, location.scenario_info)
