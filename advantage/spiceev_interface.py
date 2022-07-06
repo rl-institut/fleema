@@ -30,5 +30,6 @@ def get_spice_ev_scenario_dict(vehicle, location, timestamp, time):
 
 
 def run_spice_ev(spice_ev_dict, strategy):
-    spice = Scenario(spice_ev_dict)
-    spice.run(strategy, {})
+    scenario = Scenario(spice_ev_dict)
+    scenario.run(strategy, {})
+    return scenario
