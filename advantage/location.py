@@ -24,6 +24,9 @@ class Location:
         # TODO check if grid power > 0
         return isinstance(self.grid_info, dict)
 
+    def availability(self):
+        return (self.status)
+
     @property
     def scenario_info(self):
         scenario_dict = {
