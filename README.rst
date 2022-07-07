@@ -29,6 +29,10 @@ As a Developer
     * ``pytest``
     * ``tox``
 
+| Note: PyCharm might tell you that it can't find the advantage module.
+| In that case you have to right click the folder "src" and select
+| "Mark Directory as" -> "Sources Root"
+
 
 Running the program
 -------------------
