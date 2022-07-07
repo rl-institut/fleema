@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
     from advantage.vehicle import Vehicle
@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 @dataclass
 class Charger:
     name: str = ""
-    connected_vehicle: "Vehicle" = None
+    connected_vehicle: Optional["Vehicle"] = None
     # TODO: add charger info
 
     @property

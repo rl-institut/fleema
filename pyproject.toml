@@ -1,10 +1,6 @@
 [build-system]
 requires = [
-    # For PEP 517 and PEP 518 support
-    # https://pip.pypa.io/en/stable/cli/pip/#pep-517-and-518-support
-    # setuptools_scm v6 requires setuptools >= 45
     "setuptools >= 40.8.0",
-    # Needs setuptools_scm v5 for Python <3.6
     "setuptools_scm[toml] >= 5, <7",
     "wheel",
 ]
@@ -15,3 +11,16 @@ addopts = "--cov=advantage"
 testpaths = [
   "tests"
 ]
+
+[tool.mypy]
+mypy_path = "advantage"
+check_untyptes_defs = true
+disallow_any_generics = true
+ignore_missing_imports = true
+no_implicit_optional = true
+show_error_codes = true
+strict_equality = true
+warn_redundant_casts = true
+warn_return_any = true
+warn_unused_configs = true
+no_implicit_reexport = true
