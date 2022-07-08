@@ -2,6 +2,11 @@ advantage-tool
 ==============
 A tool for the energy management of an autonomous vehicle fleet in the ADVANTAGE project
 
+|tests|
+
+.. |tests| image:: https://github.com/rl-institut/advantage-tool/actions/workflows/python-package.yml/badge.svg
+      :target: https://github.com/rl-institut/advantage-tool/actions/workflows/python-package.yml
+
 Get started
 -----------
 
