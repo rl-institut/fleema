@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 
-from typing import List, TYPE_CHECKING
+from typing import List, TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
     from advantage.charger import Charger
@@ -15,7 +15,7 @@ class Location:
     status: str = "available"
     type: str = "hpc"
     chargers: List["Charger"] = field(default_factory=list)
-    grid_info: dict = None
+    grid_info: Optional[dict] = None
     output = None
 
     def has_charger(self):
