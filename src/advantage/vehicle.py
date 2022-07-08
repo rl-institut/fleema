@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 from advantage.location import Location
+from typing import Optional
 
 
 @dataclass
@@ -22,7 +23,7 @@ class VehicleType:
     charging_capacity: dict = field(default_factory=dict)
     charging_curve: list = field(default_factory=list)
     min_charging_power: float = 0.
-    label: str = None
+    label: Optional[str] = None
 
 
 # example inherited class as proof of concept, TODO remove later if unused
@@ -44,8 +45,8 @@ class Vehicle:
                  status: str = "parking",
                  soc: float = 1,
                  availability: bool = True,
-                 rotation: str = None,
-                 current_location: "Location" = None
+                 rotation: Optional[str] = None,
+                 current_location: Optional["Location"] = None
                  ):
         self.vehicle_type = vehicle_type
         self.status = status
@@ -55,7 +56,7 @@ class Vehicle:
         self.current_location = current_location
         self.task = None
 
-        self.output = {
+        self.output: dict = {
             "timestamp": [],
             "event_start": [],
             "event_time": [],
