@@ -23,8 +23,8 @@ def grid():
 
 
 def test_constructor():
-    obj = location.Location(type="hpc")
-    assert obj.type == "hpc"
+    obj = location.Location(location_id="school")
+    assert obj.location_id == "school"
 
 
 def test_grid(parking_spot):
@@ -35,8 +35,8 @@ def test_charger(parking_spot):
     assert parking_spot.has_charger()
 
 
-def test_availability(parking_spot):
-    assert parking_spot.availability()
+# def test_availability(parking_spot):
+#     assert parking_spot.availability()
 
 
 def test_available_charger():
