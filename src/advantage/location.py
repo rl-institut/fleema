@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import field
 
 from typing import List, TYPE_CHECKING, Optional
 
@@ -6,17 +6,19 @@ if TYPE_CHECKING:
     from advantage.charger import Charger
 
 
-@dataclass
 class Location:
     """
     Location object contains id, type and various properties
     """
-    location_id: str = ""
-    status: str = "available"
-    type: str = "hpc"
-    chargers: List["Charger"] = field(default_factory=list)
-    grid_info: Optional[dict] = None
-    output = None
+    def __init__(self,
+                 location_id: str = "",
+                 chargers: List["Charger"] = field(default_factory=list),
+                 grid_info: Optional[dict] = None
+                 ):
+        self.location_id = location_id
+        self.chargers = chargers
+        self.grid_info = grid_info
+        self.output = None
 
     def has_charger(self):
         return len(self.chargers)
@@ -26,7 +28,7 @@ class Location:
         return isinstance(self.grid_info, dict)
 
     def availability(self):
-        return (self.status)
+        pass
 
     @property
     def scenario_info(self):
