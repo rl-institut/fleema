@@ -19,7 +19,8 @@ def car():
 
 @pytest.fixture()
 def spot():
-    charge_spot = charger.Charger()
+    # TODO input actual values for Charger
+    charge_spot = charger.Charger("spot", [])
     spot = location.Location(chargers=[charge_spot], grid_info={"max_power": 150})
     return spot
 
