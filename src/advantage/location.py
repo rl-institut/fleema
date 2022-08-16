@@ -18,15 +18,18 @@ class Location:
     grid_info: Optional[dict] = None
     output = None
 
-    def has_charger(self):
+    @property
+    def num_chargers(self):
         return len(self.chargers)
 
-    def has_grid_connection(self):
+    @property
+    def grid_connection(self):
         # TODO check if grid power > 0
         return isinstance(self.grid_info, dict)
 
-    def availability(self):
-        return (self.status)
+    @property
+    def available(self):
+        return None
 
     @property
     def scenario_info(self):
