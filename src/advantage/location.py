@@ -1,5 +1,3 @@
-from dataclasses import field
-
 from typing import List, TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
@@ -8,15 +6,21 @@ if TYPE_CHECKING:
 
 class Location:
     """
-    Location object contains id, type and various properties
+    Location object contains name, type and various properties
+    name:               location name
+    type:               location type. "depot", "station", ...
+    chargers:           list of chargers at the location
+    grid_info:          dict with grid connection, load and generator time series, ...
     """
     def __init__(self,
-                 location_id: str = "",
-                 chargers: List["Charger"] = field(default_factory=list),
+                 location_name: str = "",
+                 location_type: str = "",
+                 chargers: Optional[List["Charger"]] = None,
                  grid_info: Optional[dict] = None
                  ):
-        self.location_id = location_id
-        self.chargers = chargers
+        self.name = location_name
+        self.type = location_type
+        self.chargers = chargers if chargers else []
         self.grid_info = grid_info
         self.output = None
 
