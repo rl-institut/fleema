@@ -1,19 +1,28 @@
 from dataclasses import dataclass
-
-from typing import TYPE_CHECKING, Optional
-
-if TYPE_CHECKING:
-    from advantage.vehicle import Vehicle
+from typing import Optional
 
 
 @dataclass
 class Charger:
-    name: str = ""
-    connected_vehicle: Optional["Vehicle"] = None
-    # TODO: add charger info
+    """
+    Dataclass containing all information about a single charging station.
+    name: str:              Name/ID of the station
+    charging_points:list:   List with information about each charging point. One dictionary per charging point
+                            [
+                            {"plugs": ["Type2", "AC"], "plug_power": [22, 3.7],
+                            "charging_type": ["conductive", "conductive"]},
+                            {...}
+                            ]
+    """
+    name: str
+    charging_points: list
 
     @property
-    def scenario_info(self):
+    def num_points(self) -> int:
+        return len(self.charging_points)
+
+    @property
+    def scenario_info(self) -> dict:
         scenario_dict = {
             "constants": {
                 "charging_stations": {
