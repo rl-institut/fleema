@@ -50,7 +50,7 @@ class Location:
                         }
                     }
                 },
-                # TODO for charger in self.chargers: scenario_dict.update(charger.scenario_info)
+                # TODO for charger in self.chargers: deep_update(scenario_dict, charger.scenario_info)
                 "charging_stations": {
                     "CS_sprinter_0": {
                         "max_power": 11,
