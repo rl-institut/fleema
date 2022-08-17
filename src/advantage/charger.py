@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List
+from typing import List, Dict
 
 from advantage.util.helpers import deep_update
 
@@ -44,9 +44,9 @@ class Charger:
     def num_points(self) -> int:
         return len(self.charging_points)
 
-    def scenario_info_by_plugs(self, plug_types: List[str]) -> dict:
+    def scenario_info_by_plugs(self, plug_types: List[str]) -> Dict[str, Dict[str, Dict[str, Dict[str, object]]]]:
         if self.num_points:
-            scenario_dict = {
+            scenario_dict: Dict[str, Dict[str, Dict[str, Dict[str, object]]]] = {
                 "constants": {
                     "charging_stations": {
                     }
