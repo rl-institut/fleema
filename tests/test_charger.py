@@ -25,11 +25,16 @@ def test_num_charger(wallbox):
 
 
 def test_scenario_info(wallbox):
-    i = wallbox.scenario_info_by_plugs(["Type2", "Schuke", "ChaDeMo"])
+    i = wallbox.get_scenario_info("home_1_0", ["Type2", "Schuko", "ChaDeMo"])
     assert i["constants"]["charging_stations"]["home_1_0"]["max_power"] == 11
+
+
+def test_scenario_info_wrong_id(wallbox):
+    with pytest.raises(ValueError, match="Point ID home doesn't match any Points in charger home_1"):
+        wallbox.get_scenario_info("home", ["Type2", "Schuko", "ChaDeMo"])
 
 
 def test_scenario_info_no_charging_points():
     ch = charger.Charger("charger", [])
     with pytest.raises(ValueError, match="Scenario dictionary requested of charger charger with no charging points"):
-        ch.scenario_info_by_plugs(["Schuko"])
+        ch.get_scenario_info("0", ["Schuko"])

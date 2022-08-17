@@ -26,7 +26,9 @@ class ChargingPoint:
                 break
             else:
                 idx = self.plugs.index(plug_type)
-                max_power = self.power[idx]
+                power = self.power[idx]
+                if power > max_power:
+                    max_power = power
         return max_power
 
 
@@ -44,7 +46,8 @@ class Charger:
     def num_points(self) -> int:
         return len(self.charging_points)
 
-    def scenario_info_by_plugs(self, plug_types: List[str]) -> Dict[str, Dict[str, Dict[str, Dict[str, object]]]]:
+    def get_scenario_info(self, point_id: str, plug_types: List[str]) \
+            -> Dict[str, Dict[str, Dict[str, Dict[str, object]]]]:
         if self.num_points:
             scenario_dict: Dict[str, Dict[str, Dict[str, Dict[str, object]]]] = {
                 "constants": {
@@ -52,19 +55,25 @@ class Charger:
                     }
                 }
             }
+            point_found = False
             for cp in self.charging_points:
-                cp_dict = {
-                    "constants": {
-                        "charging_stations": {
-                            cp.id: {
-                                "max_power": cp.get_info(plug_types),
-                                "min_power": 0,
-                                "parent": "GC1"
+                if cp.id == point_id:
+                    point_found = True
+                    cp_dict = {
+                        "constants": {
+                            "charging_stations": {
+                                cp.id: {
+                                    "max_power": cp.get_info(plug_types),
+                                    "min_power": 0,
+                                    "parent": "GC1"
+                                }
                             }
                         }
                     }
-                }
-                deep_update(scenario_dict, cp_dict)
-            return scenario_dict
+                    deep_update(scenario_dict, cp_dict)
+            if point_found:
+                return scenario_dict
+            else:
+                raise ValueError(f"Point ID {point_id} doesn't match any Points in charger {self.name}")
         else:
             raise ValueError(f"Scenario dictionary requested of charger {self.name} with no charging points")
