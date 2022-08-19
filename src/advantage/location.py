@@ -8,18 +8,18 @@ class Location:
     """
     Location object contains name, type and various properties
     name:               location name
-    type:               location type. "depot", "station", ...
+    location_type:               location type. "depot", "station", ...
     chargers:           list of chargers at the location
     grid_info:          dict with grid connection, load and generator time series, ...
     """
     def __init__(self,
-                 location_name: str = "",
+                 name: str = "",
                  location_type: str = "",
                  chargers: Optional[List["Charger"]] = None,
                  grid_info: Optional[dict] = None
                  ):
-        self.name = location_name
-        self.type = location_type
+        self.name = name
+        self.location_type = location_type
         self.chargers = chargers if chargers else []
         self.grid_info = grid_info
         self.output = None
