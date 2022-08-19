@@ -6,7 +6,8 @@ import pytest
 # neue location erzeugen, absichtlich falsch (zB. vehicle in charger liste)
 @pytest.fixture()
 def parking_spot():
-    parking_spot = location.Location(grid_info={}, chargers=[charger.Charger(name="charger_1")])
+    # TODO input actual values for Charger
+    parking_spot = location.Location(grid_info={}, chargers=[charger.Charger("charger_1", [])])
     return parking_spot
 
 
