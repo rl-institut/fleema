@@ -40,11 +40,12 @@ class Location:
         return None
 
     def get_scenario_info(self, point_id: str, plug_types: List[str]):
+        power = self.grid_info["power"] if self.grid_info else 0
         scenario_dict = {
             "constants": {
                 "grid_connectors": {
                     "GC1": {
-                        "max_power": self.grid_info["power"],
+                        "max_power": power,
                         "cost": {
                             "type": "fixed",
                             "value": 0.3
