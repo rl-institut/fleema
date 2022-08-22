@@ -1,4 +1,5 @@
 from typing import List, TYPE_CHECKING, Optional
+from advantage.util.helpers import deep_update
 
 if TYPE_CHECKING:
     from advantage.charger import Charger
@@ -8,9 +9,10 @@ class Location:
     """
     Location object contains name, type and various properties
     name:               location name
-    location_type:               location type. "depot", "station", ...
+    location_type:      location type. "depot", "station", ...
     chargers:           list of chargers at the location
-    grid_info:          dict with grid connection, load and generator time series, ...
+    grid_info:          dict with grid connection in kW, load and generator time series, ...
+                        example: {"power": 50, "load": load_df, "generator": gen_df}
     """
     def __init__(self,
                  name: str = "",
@@ -37,32 +39,21 @@ class Location:
     def available(self):
         return None
 
-    @property
-    def scenario_info(self):
+    def get_scenario_info(self, point_id: str, plug_types: List[str]):
         scenario_dict = {
             "constants": {
                 "grid_connectors": {
                     "GC1": {
-                        "max_power": self.grid_info["max_power"],
+                        "max_power": self.grid_info["power"],
                         "cost": {
                             "type": "fixed",
                             "value": 0.3
                         }
                     }
-                },
-                # TODO for charger in self.chargers: deep_update(scenario_dict, charger.scenario_info)
-                "charging_stations": {
-                    "CS_sprinter_0": {
-                        "max_power": 11,
-                        "min_power": 0,
-                        "parent": "GC1"
-                    },
-                    "CS_golf_0": {
-                        "max_power": 22,
-                        "min_power": 0,
-                        "parent": "GC1"
-                    }
                 }
             }
         }
+        for ch in self.chargers:
+            info = ch.get_scenario_info(point_id, plug_types)
+            deep_update(scenario_dict, info)
         return scenario_dict

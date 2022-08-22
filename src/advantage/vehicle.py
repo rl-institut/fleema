@@ -14,6 +14,7 @@ class VehicleType:
     charging_capacity:  dict containing values for fast (dc) and slow (ac) charging
     charging_curve:     example: [[0, 50], [0.8, 50], [1, 20]], first number is SoC, second the
                         possible max power
+    plugs:              list of plugs this vehicle can use, ["Type2", "Schuko"]
     min_charging_power: least amount of charging power possible, as a share of max power
     """
     name: str = "vehicle_name"
@@ -22,6 +23,7 @@ class VehicleType:
     base_consumption: float = 0.
     charging_capacity: dict = field(default_factory=dict)
     charging_curve: list = field(default_factory=list)
+    plugs: list[str] = field(default_factory=list)
     min_charging_power: float = 0.
     label: Optional[str] = None
 
