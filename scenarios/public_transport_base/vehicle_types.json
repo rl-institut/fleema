@@ -21,7 +21,7 @@
         "power_ac": 22,
         "power_dc": 100,
         "mileage": "data/examples/energy_consumption_example.csv",
-        "hc": "winter",
+        "hc": "winter"
     }
   }
 }
