@@ -2,28 +2,28 @@
   "charging_point_types": {
     "conductive_50": {
         "capacity": 50,
-        "min_charging_power": 0,
+        "min_charging_power": 0
     },
     "conductive_150": {
         "capacity": 150,
-        "min_charging_power": 0,
+        "min_charging_power": 0
     },
   "inductive_50": {
         "capacity": 50,
-        "min_charging_power": 0,
+        "min_charging_power": 0
     },
 
   "charging__points": {
     "Marktplatz": {
       "type": "inductive_50",
-      "EE": ,
-      "number_charging_points": 3,
-
-    },
+      "EE": null,
+      "number_charging_points": 3
+      },
     "Bahnhof": {
       "type": "inductive_50",
-      "EE": ,
-      "number_charging_points": 1,
-     }
-}
+      "EE": null,
+      "number_charging_points": 1
+      }
+    }
+  }
 }

@@ -42,19 +42,24 @@ class Simulation:
 
         schedule = pd.read_csv(pathlib.Path(scenario_path, cfg["files"]["schedule"]), sep=',', index_col=0)
 
+        vehicle_types_file = cfg["files"]["vehicle_types"]
+        ext = vehicle_types_file.split('.')[-1]
+        if ext != "json":
+            print("File extension mismatch: vehicle type file should be .json")
+        with open(pathlib.Path(scenario_path, cfg["files"]["vehicle_types"])) as f:
+            vehicle_types = json.load(f)
+
+        charging_points_file = cfg["files"]["charging_points"]
+        ext = charging_points_file.split('.')[-1]
+        if ext != "json":
+            print("File extension mismatch: charging_point file should be .json")
+        with open(pathlib.Path(scenario_path, cfg["files"]["charging_points"])) as f:
+            charging_points = json.load(f)
+
         start_date = cfg.get("basic", "start_date")
         start_date = date_string_to_datetime(start_date)
         end_date = cfg.get("basic", "end_date")
         end_date = date_string_to_datetime(end_date)
-
-        # TODO get options from config
-        # car_output = cfg.getboolean("output", "vehicle_csv", fallback=True)
-        # grid_output = cfg.getboolean("output", "grid_time_series_csv", fallback=True)
-        # plot_options = {"by_region": cfg.getboolean("output", "plot_grid_time_series_split", fallback=False),
-        #                 "all_in_one": cfg.getboolean("output", "plot_grid_time_series_collective", fallback=False)}
-
-        with open(pathlib.Path(scenario_path, cfg["files"]["vehicle_types"]), "r") as f:
-            vehicle_types = json.load(f)
 
         cfg_dict = {  # "step_size": cfg.getint("basic", "stepsize"),
                     "soc_min": cfg.getfloat("basic", "soc_min"),
