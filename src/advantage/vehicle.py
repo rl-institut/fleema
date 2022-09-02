@@ -23,7 +23,7 @@ class VehicleType:
     base_consumption: float = 0.
     charging_capacity: dict = field(default_factory=dict)
     charging_curve: list = field(default_factory=list)
-    plugs: list[str] = field(default_factory=list)
+    plugs: list = field(default_factory=list)
     min_charging_power: float = 0.
     label: Optional[str] = None
 
