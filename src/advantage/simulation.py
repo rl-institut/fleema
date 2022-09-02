@@ -12,7 +12,7 @@ class Simulation:
     It also contains the run function, which starts the simulation.
     """
 
-    def __init__(self):
+    def __init__(self, schedule, vehicle_types, charging_points, cfg_dict):
         pass
 
     def run(self):
@@ -61,13 +61,12 @@ class Simulation:
         end_date = cfg.get("basic", "end_date")
         end_date = date_string_to_datetime(end_date)
 
-        cfg_dict = {  # "step_size": cfg.getint("basic", "stepsize"),
+        cfg_dict = {
                     "soc_min": cfg.getfloat("basic", "soc_min"),
-                    # "charging_threshold": cfg.getfloat("basic", "charging_threshold"),
                     "rng_seed": cfg["sim_params"].getint("seed", None),
                     "start_date": start_date,
-                    "end_date": end_date
+                    "end_date": end_date,
+                    "num_threads": cfg.getint('sim_params', 'num_threads')
                     }
-        num_threads = cfg.getint('sim_params', 'num_threads')
 
-        return Simulation()
+        return Simulation(schedule, vehicle_types, charging_points, cfg_dict)
