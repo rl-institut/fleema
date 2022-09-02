@@ -1,6 +1,5 @@
-from dataclasses import field
-
 from typing import List, TYPE_CHECKING, Optional
+from advantage.util.helpers import deep_update
 
 if TYPE_CHECKING:
     from advantage.charger import Charger
@@ -8,54 +7,54 @@ if TYPE_CHECKING:
 
 class Location:
     """
-    Location object contains id, type and various properties
+    Location object contains name, type and various properties
+    name:               location name
+    location_type:      location type. "depot", "station", ...
+    chargers:           list of chargers at the location
+    grid_info:          dict with grid connection in kW, load and generator time series, ...
+                        example: {"power": 50, "load": load_df, "generator": gen_df}
     """
     def __init__(self,
-                 location_id: str = "",
-                 chargers: List["Charger"] = field(default_factory=list),
+                 name: str = "",
+                 location_type: str = "",
+                 chargers: Optional[List["Charger"]] = None,
                  grid_info: Optional[dict] = None
                  ):
-        self.location_id = location_id
-        self.chargers = chargers
+        self.name = name
+        self.location_type = location_type
+        self.chargers = chargers if chargers else []
         self.grid_info = grid_info
         self.output = None
 
-    def has_charger(self):
+    @property
+    def num_chargers(self):
         return len(self.chargers)
 
-    def has_grid_connection(self):
+    @property
+    def grid_connection(self):
         # TODO check if grid power > 0
         return isinstance(self.grid_info, dict)
 
-    def availability(self):
-        pass
-
     @property
-    def scenario_info(self):
+    def available(self):
+        return None
+
+    def get_scenario_info(self, point_id: str, plug_types: List[str]):
+        power = self.grid_info["power"] if self.grid_info else 0
         scenario_dict = {
             "constants": {
                 "grid_connectors": {
                     "GC1": {
-                        "max_power": self.grid_info["max_power"],
+                        "max_power": power,
                         "cost": {
                             "type": "fixed",
                             "value": 0.3
                         }
                     }
-                },
-                # TODO for charger in self.chargers: scenario_dict.update(charger.scenario_info)
-                "charging_stations": {
-                    "CS_sprinter_0": {
-                        "max_power": 11,
-                        "min_power": 0,
-                        "parent": "GC1"
-                    },
-                    "CS_golf_0": {
-                        "max_power": 22,
-                        "min_power": 0,
-                        "parent": "GC1"
-                    }
                 }
             }
         }
+        for ch in self.chargers:
+            info = ch.get_scenario_info(point_id, plug_types)
+            deep_update(scenario_dict, info)
         return scenario_dict

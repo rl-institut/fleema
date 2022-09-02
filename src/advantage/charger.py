@@ -18,7 +18,7 @@ class ChargingPoint:
     power: list
     type: str
 
-    def get_info(self, plug_types: List[str]):
+    def get_power(self, plug_types: List[str]):
         """Returns max power for a specific plug type (0 if the plug doesn't exist at this point)"""
         max_power = 0
         for plug_type in plug_types:
@@ -63,7 +63,7 @@ class Charger:
                         "constants": {
                             "charging_stations": {
                                 cp.id: {
-                                    "max_power": cp.get_info(plug_types),
+                                    "max_power": cp.get_power(plug_types),
                                     "min_power": 0,
                                     "parent": "GC1"
                                 }

@@ -12,7 +12,7 @@ import pandas as pd
 @pytest.fixture()
 def car():
     car_type = vehicle.VehicleType(battery_capacity=30, base_consumption=0.2,
-                                   charging_curve=[[0, 11], [0.8, 11], [1, 11]])
+                                   charging_curve=[[0, 11], [0.8, 11], [1, 11]], plugs=["Type2", "Schuko"])
     car = vehicle.Vehicle(vehicle_type=car_type, soc=0.5)
     return car
 
@@ -20,8 +20,8 @@ def car():
 @pytest.fixture()
 def spot():
     # TODO input actual values for Charger
-    charge_spot = charger.Charger("spot", [])
-    spot = location.Location(chargers=[charge_spot], grid_info={"max_power": 150})
+    charge_spot = charger.Charger("spot", [charger.ChargingPoint("point", ["Type2"], [22], "conductive")])
+    spot = location.Location(chargers=[charge_spot], grid_info={"power": 150})
     return spot
 
 
@@ -35,7 +35,7 @@ def time_series():
 def test_create_dict(car, time_series, spot):
     start_step = 5
     time_stamp = step_to_timestamp(time_series, start_step)
-    spice_dict = get_spice_ev_scenario_dict(car, spot, time_stamp, 10)
+    spice_dict = get_spice_ev_scenario_dict(car, spot, "point", time_stamp, 10)
     error_list = []
     if "vehicles" not in spice_dict["constants"].keys():
         error_list.append("Vehicles is not in constants.")
@@ -48,9 +48,8 @@ def test_create_dict(car, time_series, spot):
 def test_run_spice_ev(car, time_series, spot):
     start_step = 5
     time_stamp = step_to_timestamp(time_series, start_step)
-    spice_dict = get_spice_ev_scenario_dict(car, spot, time_stamp, 10)
-    # TODO: add proper charging station in dict functions
-    spice_dict["constants"]["vehicles"]["vehicle_name_0"]["connected_charging_station"] = "CS_sprinter_0"
+    spice_dict = get_spice_ev_scenario_dict(car, spot, "point", time_stamp, 10)
+    spice_dict["constants"]["vehicles"]["vehicle_name_0"]["connected_charging_station"] = "point"
     scenario = run_spice_ev(spice_dict, "balanced")
     # check if soc is higher than before
     assert scenario.socs[-1][0] > car.soc
