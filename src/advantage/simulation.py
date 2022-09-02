@@ -16,8 +16,9 @@ class Simulation:
 
     def __init__(self, schedule, vehicle_types, charging_points, cfg_dict):
         self.soc_min = cfg_dict["soc_min"]
-        self.min_charging_power = cfg_dict["min_charging_power"]  # TODO add this to charging stations
+        # TODO check if it's enough to have min_charging_power in vehicle, else add to charger
         self.rng_seed = cfg_dict["rng_seed"]
+        self.min_charging_power = cfg_dict["min_charging_power"]
         self.start_date = cfg_dict["start_date"]
         self.end_date = cfg_dict["end_date"]
         self.num_threads = cfg_dict["num_threads"]
@@ -25,11 +26,16 @@ class Simulation:
         self.schedule = schedule
 
         # use other args to create objects
-        self.vehicle_types = []
+        self.vehicle_types = {}
         for name, info in vehicle_types.items():
-            vt = vehicle.VehicleType(name, info["capacity"], self.soc_min, info["charging_power"], info["charging_curve"])
-            self.vehicle_types.append(vt)
-        self.charging_points = charging_points
+            self.vehicle_types[name] = vehicle.VehicleType(name, info["capacity"], self.soc_min, 0,
+                                                           info["charging_power"], info["charging_curve"],
+                                                           self.min_charging_power)
+
+        for name, info in charging_points["charging_point_types"].items():
+            pass
+        for name, info in charging_points["charging_points"].items():
+            pass
 
         self.run()
 
