@@ -3,6 +3,8 @@ import pathlib
 import pandas as pd
 import json
 
+import advantage.vehicle as vehicle
+
 from advantage.util.conversions import date_string_to_datetime
 
 
@@ -13,7 +15,23 @@ class Simulation:
     """
 
     def __init__(self, schedule, vehicle_types, charging_points, cfg_dict):
-        pass
+        self.soc_min = cfg_dict["soc_min"]
+        self.min_charging_power = cfg_dict["min_charging_power"]  # TODO add this to charging stations
+        self.rng_seed = cfg_dict["rng_seed"]
+        self.start_date = cfg_dict["start_date"]
+        self.end_date = cfg_dict["end_date"]
+        self.num_threads = cfg_dict["num_threads"]
+
+        self.schedule = schedule
+
+        # use other args to create objects
+        self.vehicle_types = []
+        for name, info in vehicle_types.items():
+            vt = vehicle.VehicleType(name, info["capacity"], self.soc_min, info["charging_power"], info["charging_curve"])
+            self.vehicle_types.append(vt)
+        self.charging_points = charging_points
+
+        self.run()
 
     def run(self):
         pass
@@ -48,6 +66,7 @@ class Simulation:
             print("File extension mismatch: vehicle type file should be .json")
         with open(pathlib.Path(scenario_path, cfg["files"]["vehicle_types"])) as f:
             vehicle_types = json.load(f)
+        vehicle_types = vehicle_types["vehicle_types"]
 
         charging_points_file = cfg["files"]["charging_points"]
         ext = charging_points_file.split('.')[-1]
@@ -62,7 +81,8 @@ class Simulation:
         end_date = date_string_to_datetime(end_date)
 
         cfg_dict = {
-                    "soc_min": cfg.getfloat("basic", "soc_min"),
+                    "soc_min": cfg.getfloat("charging", "soc_min"),
+                    "min_charging_power": cfg.getfloat("charging", "min_charging_power"),
                     "rng_seed": cfg["sim_params"].getint("seed", None),
                     "start_date": start_date,
                     "end_date": end_date,
