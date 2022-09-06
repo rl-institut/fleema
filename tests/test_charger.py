@@ -6,7 +6,7 @@ import pytest
 @pytest.fixture()
 def wallbox():
     point_list = [
-        charger.ChargingPoint("home_1_0", ["Type2", "Schuko"], [11, 3.7], "conductive")
+        charger.ChargingPoint("home_1_0", [charger.PlugType("Type2", 11, "conductive")])
     ]
     wallbox = charger.Charger("home_1", point_list)
     return wallbox
