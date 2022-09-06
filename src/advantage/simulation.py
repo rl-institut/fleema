@@ -33,10 +33,11 @@ class Simulation:
             self.vehicle_types[name] = vehicle.VehicleType(name, info["capacity"], self.soc_min, 0,
                                                            info["charging_power"], info["charging_curve"],
                                                            self.min_charging_power)
-        # TODO create locations from schedule
+
         self.locations = {}
         for location_name in self.schedule.departure_name.unique():
             self.locations[location_name] = Location(location_name)
+            
         self.plug_types = {}
         for name, info in charging_points["plug_types"].items():
             self.plug_types[name] = PlugType(name, info["capacity"])  # TODO implement, these include plug, power etc
@@ -59,7 +60,7 @@ class Simulation:
         """
         scenario_path = pathlib.Path("scenarios", scenario_name)
         if not scenario_path.is_dir():
-            raise FileNotFoundError(f'Scenario "{scenario_path.stem}" not found in ./scenarios .')
+            raise FileNotFoundError(f'Scenario {scenario_name} not found in ./scenarios.')
 
         # read config file
         cfg = cp.ConfigParser()

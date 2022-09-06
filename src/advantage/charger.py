@@ -29,7 +29,7 @@ class ChargingPoint:
         """Returns max power for a specific plug type (0 if the plug doesn't exist at this point)"""
         max_power = 0.
         for plug in self.plugs:
-            if plug.name not in plug_types:  # TODO check if this works
+            if plug.name not in plug_types:
                 continue
             else:
                 power = plug.capacity
