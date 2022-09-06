@@ -3,7 +3,9 @@ import pathlib
 import pandas as pd
 import json
 
+from advantage.location import Location
 import advantage.vehicle as vehicle
+from advantage.charger import Charger, PlugType
 
 from advantage.util.conversions import date_string_to_datetime
 
@@ -31,13 +33,18 @@ class Simulation:
             self.vehicle_types[name] = vehicle.VehicleType(name, info["capacity"], self.soc_min, 0,
                                                            info["charging_power"], info["charging_curve"],
                                                            self.min_charging_power)
-
-        for name, info in charging_points["charging_point_types"].items():
-            pass
+        # TODO create locations from schedule
+        self.locations = {}
+        for location_name in self.schedule.departure_name.unique():
+            self.locations[location_name] = Location(location_name)
+        self.plug_types = {}
+        for name, info in charging_points["plug_types"].items():
+            self.plug_types[name] = PlugType(name, info["capacity"])  # TODO implement, these include plug, power etc
         for name, info in charging_points["charging_points"].items():
-            pass
-
-        self.run()
+            # TODO add chargers to locations based on charging_points
+            plug_types = [p for p in self.plug_types.values() if p.name in info["plug_types"]]
+            charger = Charger.from_json(name, info["number_charging_points"], plug_types)
+            self.locations[name].chargers.append(charger)
 
     def run(self):
         pass
