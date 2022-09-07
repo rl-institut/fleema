@@ -4,24 +4,20 @@
         "name": "articulated bus - opportunity charging",
         "capacity": 50,
         "charging_curve": [[0, 150], [0.8, 150], [1, 150]],
-        "power_ac": 22,
-        "power_dc": 100
+        "charging_power": {"Type2": 22, "Schuko": 3.7}
     },
     "SH_oppb-0": {
         "name": "shuttle bus - opportunity charging",
         "capacity": 20,
         "charging_curve": [[0, 150], [0.8, 150], [1, 150]],
-        "power_ac": 22,
-        "power_dc": 100
+        "charging_power": {"Type2": 22, "Schuko": 3.7}
     },
     "SH_oppb-1": {
         "name": "shuttle bus - opportunity charging",
         "capacity": 20,
         "charging_curve": [[0, 250], [0.8, 250], [1, 250]],
-        "power_ac": 22,
-        "power_dc": 100,
-        "mileage": "data/examples/energy_consumption_example.csv",
-        "hc": "winter",
+        "charging_power": {"Type2": 22, "Schuko": 3.7},
+        "hc": "winter"
     }
   }
 }

@@ -11,7 +11,7 @@ class VehicleType:
     battery_capacity:   battery capacity in kWh
     soc_min:            minimum state of charge that should remain in battery after a drive
     base_consumption:   in kWh/km ?
-    charging_capacity:  dict containing values for fast (dc) and slow (ac) charging
+    charging_capacity:  dict containing values for each viable plug and their respective power
     charging_curve:     example: [[0, 50], [0.8, 50], [1, 20]], first number is SoC, second the
                         possible max power
     plugs:              list of plugs this vehicle can use, ["Type2", "Schuko"]
@@ -20,7 +20,7 @@ class VehicleType:
     name: str = "vehicle_name"
     battery_capacity: float = 50.
     soc_min: float = 0.
-    base_consumption: float = 0.
+    base_consumption: float = 0.  # TODO decide if this is necessary
     charging_capacity: dict = field(default_factory=dict)
     charging_curve: list = field(default_factory=list)
     plugs: list = field(default_factory=list)

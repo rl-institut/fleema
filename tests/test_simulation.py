@@ -1,17 +1,20 @@
-"""
-run these tests with `pytest tests/test_simulation.py` or `pytest tests` or simply `pytest`
-pytest will look for all files starting with "test_" and run all functions
-within this file. For basic example of tests you can look at our workshop
-https://github.com/rl-institut/workshop/tree/master/test-driven-development.
-Otherwise https://docs.pytest.org/en/latest/ and https://docs.python.org/3/library/unittest.html
-are also good support.
-"""
-# import module
+from advantage.simulation import Simulation
+
+import pytest
 
 
-# each test is described in a function, the function must start with "test_"
-# something has to be asserted within the function
-def test_object():
-    # obj = module.simulation.Simulation()
-    # assert obj.exists()
+def test_from_config():
+    simulation = Simulation.from_config("public_transport_base")
+    assert simulation.num_threads
+
+
+def test_bad_config_name():
+    scenario_name = "bad_name"
+    with pytest.raises(FileNotFoundError, match="Scenario bad_name not found in ./scenarios."):
+        Simulation.from_config(scenario_name)
+
+
+def test_run():
+    simulation = Simulation.from_config("public_transport_base")
+    simulation.run()
     assert True
