@@ -37,7 +37,7 @@ class Simulation:
         self.locations = {}
         for location_name in self.schedule.departure_name.unique():
             self.locations[location_name] = Location(location_name)
-            
+
         self.plug_types = {}
         for name, info in charging_points["plug_types"].items():
             self.plug_types[name] = PlugType(name, info["capacity"])  # TODO implement, these include plug, power etc
