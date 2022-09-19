@@ -48,6 +48,8 @@ class Simulation:
             self.locations[name].chargers.append(charger)
 
     def run(self):
+        # TODO create initial charging schedules / tasks (where?)
+        # TODO start fleet management (includes loop)
         pass
 
     @classmethod
