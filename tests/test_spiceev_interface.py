@@ -11,8 +11,8 @@ import pandas as pd
 
 @pytest.fixture()
 def car():
-    car_type = vehicle.VehicleType(battery_capacity=30, base_consumption=0.2,
-                                   charging_curve=[[0, 11], [0.8, 11], [1, 11]], plugs=["Type2", "Schuko"])
+    car_type = vehicle.VehicleType(battery_capacity=30, base_consumption=0.2, charging_capacity={"Type2": 22},
+                                   charging_curve=[[0, 11], [0.8, 11], [1, 11]])
     car = vehicle.Vehicle(vehicle_type=car_type, soc=0.5)
     return car
 
