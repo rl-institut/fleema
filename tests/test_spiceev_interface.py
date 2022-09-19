@@ -20,7 +20,7 @@ def car():
 @pytest.fixture()
 def spot():
     # TODO input actual values for Charger
-    charge_spot = charger.Charger.from_json("point", 1, [charger.PlugType("Type2", 22, "conductive")])
+    charge_spot = charger.Charger.from_json("point", 1, [charger.PlugType("Type2_22", 22, "Type2")])
     spot = location.Location(chargers=[charge_spot], grid_info={"power": 150})
     return spot
 
