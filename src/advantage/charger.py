@@ -119,7 +119,7 @@ class Charger:
             raise ValueError(f"Scenario dictionary requested of charger {self.name} with no charging points")
 
     @classmethod
-    def from_json(cls, name, number_charging_points: int, plug_types: list):
+    def from_json(cls, name, number_charging_points: int, plug_types: List["PlugType"]):
         """This classmethod returns an instance of Charger with an initialized charging_points attribute."""
         cp_list = []
         for i in range(number_charging_points):
