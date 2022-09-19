@@ -10,7 +10,7 @@ class PlugType:
     """
     name: str
     capacity: float
-    charging_type: Optional[str] = None
+    plug: Optional[str] = None
 
 
 @dataclass
@@ -25,11 +25,11 @@ class ChargingPoint:
     id: str
     plugs: List["PlugType"]
 
-    def get_power(self, plug_types: List[str]):  # TODO maybe give list of PlugType instead
+    def get_power(self, plug_types: List[str]):
         """Returns max power for a specific plug type (0 if the plug doesn't exist at this point)"""
         max_power = 0.
         for plug in self.plugs:
-            if plug.name not in plug_types:
+            if plug.plug not in plug_types:
                 continue
             else:
                 power = plug.capacity
