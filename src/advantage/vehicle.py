@@ -7,28 +7,28 @@ from typing import Optional
 class VehicleType:
     """The VehicleType contains static vehicle data.
 
-    Attributes
-    ----------
-    name : str
-        Vehicle type name.
-    battery_capacity : float
-        Battery capacity in kWh.
-    soc_min : float
-        Minimum state of charge that should remain in battery after a drive.
-    base_consumption : float
-        In kWh/km ?
-    charging_capacity : dict
-        Dictionary containing values for each viable plug and their respective power.
-    charging_curve : list
-        List of list with two numbers. First number is SoC (state of charge) and second the possible max power.
-        Example: [[0, 50], [0.8, 50], [1, 20]].
-    plugs : list
-        List of plugs this vehicle can use. Example: ["Type2", "Schuko"].
-    min_charging_power : float
-        Least amount of charging power possible, as a share of max power.
-    label : str, optional
+     Attributes
+     ----------
+     name : str
+         Vehicle type name.
+     battery_capacity : float
+         Battery capacity in kWh.
+     soc_min : float
+         Minimum state of charge that should remain in battery after a drive.
+     base_consumption : float
+         In kWh/km ?
+     charging_capacity : dict
+         Dictionary containing values for each viable plug and their respective power.
+     charging_curve : list
+         List of list with two numbers. First number is SoC (state of charge) and second the possible max power.
+         Example: [[0, 50], [0.8, 50], [1, 20]].
+     plugs : list
+         List of plugs this vehicle can use. Example: ["Type2", "Schuko"].
+     min_charging_power : float
+         Least amount of charging power possible, as a share of max power.
+     label : str, optional
 
-    """
+     """
     name: str = "vehicle_name"
     battery_capacity: float = 50.
     soc_min: float = 0.
@@ -81,7 +81,7 @@ class Vehicle:
                  vehicle_type: "VehicleType" = VehicleType(),
                  status: str = "parking",
                  soc: float = 1,
-                 availability: bool = True,
+                 availability: bool = True,     # TODO Warum availability, wenn es schon einen Status gibt?
                  rotation: Optional[str] = None,
                  current_location: Optional["Location"] = None
                  ):
@@ -106,7 +106,7 @@ class Vehicle:
             "consumption": []
         }
 
-    def _update_activity(self, timestamp, event_start, event_time, charging_power=0):
+    def _update_activity(self, timestamp, event_start, event_time, observer, charging_power=0):
         """Records newest energy and activity in the attributes soc and output."""
         self.soc = round(self.soc, 4)
         self.output["timestamp"].append(timestamp)
@@ -118,8 +118,9 @@ class Vehicle:
         self.output["charging_demand"].append(self._get_last_charging_demand())
         self.output["charging_power"].append(charging_power)
         self.output["consumption"].append(self._get_last_consumption())
+        observer.update_vehicle(self)
 
-    def charge(self, timestamp, start, time, power, new_soc):
+    def charge(self, timestamp, start, time, power, new_soc, observer=None):
         """This method simulates charging and updates therefore the attributes status and soc."""
         # TODO call spiceev charging depending on soc, location, task
         # TODO this requires a SpiceEV scenario object
@@ -133,9 +134,9 @@ class Vehicle:
             raise ValueError("SoC can't be reached in specified time window with given power.")
         self.status = 'charging'
         self.soc = new_soc
-        self._update_activity(timestamp, start, time, charging_power=power)
+        self._update_activity(timestamp, start, time, observer, charging_power=power)
 
-    def drive(self, timestamp, start, time, destination, new_soc):
+    def drive(self, timestamp, start, time, destination, new_soc, simulation_state):
         """This method simulates driving and updates therefore the attributes status and soc."""
         # call drive api with task, soc, ...
         if not all(isinstance(i, int) or isinstance(i, float) for i in [start, time, new_soc]):
