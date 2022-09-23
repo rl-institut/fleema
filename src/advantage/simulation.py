@@ -6,6 +6,7 @@ import json
 from advantage.location import Location
 import advantage.vehicle as vehicle
 from advantage.charger import Charger, PlugType
+from advantage.simulation_state import SimulationState
 
 from advantage.util.conversions import date_string_to_datetime
 
@@ -47,9 +48,13 @@ class Simulation:
             charger = Charger.from_json(name, info["number_charging_points"], plug_types)
             self.locations[name].chargers.append(charger)
 
+        self.simulation_state = SimulationState(self.locations)
+
     def run(self):
         # TODO create initial charging schedules / tasks (where?)
         # TODO start fleet management (includes loop)
+
+
         pass
 
     @classmethod

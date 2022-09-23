@@ -46,7 +46,7 @@ class Vehicle:
                  vehicle_type: "VehicleType" = VehicleType(),
                  status: str = "parking",
                  soc: float = 1,
-                 availability: bool = True,
+                 availability: bool = True,     # TODO Warum availability, wenn es schon einen Status gibt?
                  rotation: Optional[str] = None,
                  current_location: Optional["Location"] = None
                  ):
@@ -71,7 +71,7 @@ class Vehicle:
             "consumption": []
         }
 
-    def _update_activity(self, timestamp, event_start, event_time, charging_power=0):
+    def _update_activity(self, timestamp, event_start, event_time, observer, charging_power=0):
         """Records newest energy and activity"""
         self.soc = round(self.soc, 4)
         self.output["timestamp"].append(timestamp)
@@ -83,8 +83,9 @@ class Vehicle:
         self.output["charging_demand"].append(self._get_last_charging_demand())
         self.output["charging_power"].append(charging_power)
         self.output["consumption"].append(self._get_last_consumption())
+        observer.update_vehicle(self)
 
-    def charge(self, timestamp, start, time, power, new_soc):
+    def charge(self, timestamp, start, time, power, new_soc, observer=None):
         # TODO call spiceev charging depending on soc, location, task
         # TODO this requires a SpiceEV scenario object
         if not all(isinstance(i, int) or isinstance(i, float) for i in [start, time, power, new_soc]):
@@ -97,9 +98,9 @@ class Vehicle:
             raise ValueError("SoC can't be reached in specified time window with given power.")
         self.status = 'charging'
         self.soc = new_soc
-        self._update_activity(timestamp, start, time, charging_power=power)
+        self._update_activity(timestamp, start, time, observer, charging_power=power)
 
-    def drive(self, timestamp, start, time, destination, new_soc):
+    def drive(self, timestamp, start, time, destination, new_soc, simulation_state):
         # call drive api with task, soc, ...
         if not all(isinstance(i, int) or isinstance(i, float) for i in [start, time, new_soc]):
             raise TypeError("Argument has wrong type.")
