@@ -33,5 +33,5 @@ def test_constructor(sim_state):
 def test_drive_result(car, time_series, sim_state):
     start_step = 5
     time_stamp = step_to_timestamp(time_series, start_step)
-    car.drive(time_stamp, start_step, time=10, destination="station_1", new_soc=0.45, sim_state)
+    car.drive(time_stamp, start_step, 10, "station_1", 0.45, sim_state)
     assert sim_state.active_vehicles    # TODO check if car is in here
