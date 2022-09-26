@@ -48,12 +48,12 @@ class Simulation:
             charger = Charger.from_json(name, info["number_charging_points"], plug_types)
             self.locations[name].chargers.append(charger)
 
-        self.simulation_state = SimulationState(self.locations)
+        # Instantiation of Observer
+        self.observer = SimulationState(self)
 
     def run(self):
         # TODO create initial charging schedules / tasks (where?)
         # TODO start fleet management (includes loop)
-
 
         pass
 

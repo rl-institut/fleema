@@ -15,35 +15,18 @@ class SimulationState:
     - update each timestep
     """
 
-    def __init__(self, locations):
-        self.active_vehicles = {'busy': []}
-        self.inactive_vehicles = {
-            'parking': [],  # has no job in the pipeline
-            'charging': []}  # is charging and has a following job
-
-# Wie viele states soll es geben? (parken, fahren...)
+    def __init__(self):
+        self.driving_vehicles = {'driving': []}  # is busy with a job
+        self.parking_vehicles = {'parking': []}  # is ready for the next job
+        self.charging_vehicles = {'charging': []}  # vehicle is charging
 
     def update_vehicle(self, vehicle: "Vehicle"):
-        active_vehicles = {'busy': []}
-        inactive_vehicles = {
-            'parking': [],  # has no job in the pipeline
-            'charging': [],  # is charging and has a following job
-            'end_trip': []}  # is ending its last job
-
-        if vehicle.status == "parking":
-            inactive_vehicles["parking"].append(vehicle.vehicle_type)
+        if vehicle.status == "driving":
+            driving_vehicles["driving"].append(vehicle.vehicle_type)
+        elif vehicle.status == "parking":
+            parking_vehicles["parking"].append(vehicle.vehicle_type)
         elif vehicle.status == "charging":
-            inactive_vehicles["charging"].append(vehicle.vehicle_type)
-        elif vehicle.status == "end_trip":
-            inactive_vehicles["end_trip"].append(vehicle.vehicle_type)
-        else:
-            active_vehicles["busy"].append(vehicle.vehicle_type)
-
-        state_locations = {
-            "name": [vehicle.name],
-            "rotation": [vehicle.rotation],
-            "current_location": [vehicle.current_location],
-        }
+            charging_vehicles["charging"].append(vehicle.vehicle_type)
 
 
 charging_schedule = pd.DataFrame(columns=["start", "end", "vehicle", "location", "demand"])
