@@ -106,7 +106,7 @@ class Vehicle:
             "consumption": []
         }
 
-    def _update_activity(self, timestamp, event_start, event_time, observer, charging_power=0):
+    def _update_activity(self, timestamp, event_start, event_time, simulation_state, charging_power=0):
         """Records newest energy and activity in the attributes soc and output."""
         self.soc = round(self.soc, 4)
         self.output["timestamp"].append(timestamp)
@@ -118,7 +118,7 @@ class Vehicle:
         self.output["charging_demand"].append(self._get_last_charging_demand())
         self.output["charging_power"].append(charging_power)
         self.output["consumption"].append(self._get_last_consumption())
-        observer.update_vehicle(self)
+        simulation_state.update_vehicle(self)
 
     def charge(self, timestamp, start, time, power, new_soc, observer=None):
         """This method simulates charging and updates therefore the attributes status and soc."""
@@ -135,6 +135,7 @@ class Vehicle:
         self.status = 'charging'
         self.soc = new_soc
         self._update_activity(timestamp, start, time, observer, charging_power=power)
+        # TODO wie übertrage ich update acticity in den simulation_state?
 
     def drive(self, timestamp, start, time, destination, new_soc, simulation_state):
         """This method simulates driving and updates therefore the attributes status and soc."""
@@ -155,14 +156,19 @@ class Vehicle:
         self._update_activity(timestamp, start, time)
         self.status = destination
 
-    def park(self, timestamp, start, time):
+        simulation_state.update_vehicle(self.status)
+        # TODO wie übertrage ich update acticity in den simulation_state?
+
+    def park(self, timestamp, start, time, simulation_state):
         """This method simulates parking and updates therefore the attribute status."""
         if not all(isinstance(i, int) or isinstance(i, float) for i in [start, time]):
             raise TypeError("Argument has wrong type.")
         if not all(i >= 0 for i in [start, time]):
             raise ValueError("Arguments can't be negative.")
         self.status = "parking"
-        self._update_activity(timestamp, start, time)
+        self._update_activity(timestamp, start, time, observer)
+        # TODO wie übertrage ich update acticity in den simulation_state?
+        simulation_state.update_vehicle(self.status)
 
     @property
     def usable_soc(self):
