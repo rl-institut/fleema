@@ -43,7 +43,6 @@ class VehicleType:
         return list(self.charging_capacity.keys())
 
 
-
 # example inherited class as proof of concept, TODO remove later if unused
 @dataclass
 class BusType(VehicleType):
