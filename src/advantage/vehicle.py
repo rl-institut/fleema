@@ -85,6 +85,7 @@ class Vehicle:
                  rotation: Optional[str] = None,
                  current_location: Optional["Location"] = None
                  ):
+        self.vehicle_ID
         self.vehicle_type = vehicle_type
         self.status = status
         self.soc = soc
@@ -135,9 +136,8 @@ class Vehicle:
         self.status = 'charging'
         self.soc = new_soc
         self._update_activity(timestamp, start, time, observer, charging_power=power)
-        # TODO wie übertrage ich update acticity in den simulation_state?
 
-    def drive(self, timestamp, start, time, destination, new_soc, simulation_state):
+    def drive(self, timestamp, start, time, destination, new_soc, observer):
         """This method simulates driving and updates therefore the attributes status and soc."""
         # call drive api with task, soc, ...
         if not all(isinstance(i, int) or isinstance(i, float) for i in [start, time, new_soc]):
@@ -153,11 +153,8 @@ class Vehicle:
             raise ValueError("Consumption too high.")
         self.status = 'driving'
         self.soc = new_soc
-        self._update_activity(timestamp, start, time)
+        self._update_activity(timestamp, start, time, observer)
         self.status = destination
-
-        simulation_state.update_vehicle(self.status)
-        # TODO wie übertrage ich update acticity in den simulation_state?
 
     def park(self, timestamp, start, time, simulation_state):
         """This method simulates parking and updates therefore the attribute status."""
@@ -167,8 +164,6 @@ class Vehicle:
             raise ValueError("Arguments can't be negative.")
         self.status = "parking"
         self._update_activity(timestamp, start, time, observer)
-        # TODO wie übertrage ich update acticity in den simulation_state?
-        simulation_state.update_vehicle(self.status)
 
     @property
     def usable_soc(self):
