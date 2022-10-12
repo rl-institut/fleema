@@ -48,7 +48,7 @@ class Simulation:
             charger = Charger.from_json(name, info["number_charging_points"], plug_types)
             self.locations[name].chargers.append(charger)
 
-        # Instantiation of Observer
+        # Instantiation of observer
         self.observer = SimulationState(self)
 
     def run(self):

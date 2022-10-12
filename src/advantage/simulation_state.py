@@ -16,17 +16,24 @@ class SimulationState:
     """
 
     def __init__(self):
-        self.driving_vehicles = {'driving': []}  # is busy with a job
-        self.parking_vehicles = {'parking': []}  # is ready for the next job
-        self.charging_vehicles = {'charging': []}  # vehicle is charging
+        self.driving_vehicles = []  # is busy with a job
+        self.parking_vehicles = []  # is ready for the next job
+        self.charging_vehicles = []  # vehicle is charging
+
+    def remove_vehicle(self, vehicle: "Vehicle"):           # eventuell dict mit {key, value}
+        if vehicle in (self.driving_vehicles or self.parking_vehicles or self.charging_vehicles):
+            self.driving_vehicles.remove(vehicle)
+            self.parking_vehicles.remove(vehicle)
+            self.charging_vehicles.remove(vehicle)
 
     def update_vehicle(self, vehicle: "Vehicle"):
-        if vehicle.status == "driving":
-            driving_vehicles["driving"].append(vehicle.vehicle_type)
-        elif vehicle.status == "parking":
-            parking_vehicles["parking"].append(vehicle.vehicle_type)
-        elif vehicle.status == "charging":
-            charging_vehicles["charging"].append(vehicle.vehicle_type)
+        self.remove_vehicle(vehicle)
+        if vehicle.status == "driving" and vehicle not in self.driving_vehicles:
+            self.driving_vehicles.append(vehicle)
+        elif vehicle.status == "parking" and vehicle not in self.parking_vehicles:
+            self.parking_vehicles.append(vehicle)
+        elif vehicle.status == "charging" and vehicle not in self.charging_vehicles:
+            self.charging_vehicles.append(vehicle)
 
 
 charging_schedule = pd.DataFrame(columns=["start", "end", "vehicle", "location", "demand"])

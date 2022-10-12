@@ -23,7 +23,7 @@ def time_series():
 
 @pytest.fixture()
 def sim_state():
-    return SimulationState(None)
+    return SimulationState()
 
 
 def test_constructor(sim_state):
