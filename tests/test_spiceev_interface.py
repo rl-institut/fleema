@@ -11,8 +11,8 @@ import pandas as pd
 
 @pytest.fixture()
 def car():
-    car_type = vehicle.VehicleType(battery_capacity=30, base_consumption=0.2,
-                                   charging_curve=[[0, 11], [0.8, 11], [1, 11]], plugs=["Type2", "Schuko"])
+    car_type = vehicle.VehicleType(battery_capacity=30, base_consumption=0.2, charging_capacity={"Type2": 22},
+                                   charging_curve=[[0, 11], [0.8, 11], [1, 11]])
     car = vehicle.Vehicle(vehicle_type=car_type, soc=0.5)
     return car
 
@@ -20,7 +20,7 @@ def car():
 @pytest.fixture()
 def spot():
     # TODO input actual values for Charger
-    charge_spot = charger.Charger.from_json("point", 1, [charger.PlugType("Type2", 22, "conductive")])
+    charge_spot = charger.Charger.from_json("point", 1, [charger.PlugType("Type2_22", 22, "Type2")])
     spot = location.Location(chargers=[charge_spot], grid_info={"power": 150})
     return spot
 
