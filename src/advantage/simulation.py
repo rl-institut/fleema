@@ -2,6 +2,7 @@ import configparser as cp
 import pathlib
 import pandas as pd
 import json
+import datetime
 
 from advantage.location import Location
 import advantage.vehicle as vehicle
@@ -23,9 +24,13 @@ class Simulation:
         self.min_charging_power = cfg_dict["min_charging_power"]
         self.start_date = cfg_dict["start_date"]
         self.end_date = cfg_dict["end_date"]
+        time_steps: datetime.timedelta = self.end_date - self.start_date + datetime.timedelta(days=1)
+        self.time_steps = int(time_steps.total_seconds() / 60)
         self.num_threads = cfg_dict["num_threads"]
+        self.simulation_type = "schedule"  # TODO implement in config (schedule vs ondemand)
 
         self.schedule = schedule
+        self.events = []
 
         # use other args to create objects
         self.vehicle_types = {}
@@ -47,10 +52,36 @@ class Simulation:
             charger = Charger.from_json(name, info["number_charging_points"], plug_types)
             self.locations[name].chargers.append(charger)
 
-    def run(self):
-        # TODO create initial charging schedules / tasks (where?)
-        # TODO start fleet management (includes loop)
+    def _create_initial_schedule(self):
+        # creates tasks from self.schedule and assigns them to the vehicles
+        # creates self.events: List of timesteps where an event happens
+        # TODO check similar functions in ebus toolbox
         pass
+
+    def _distribute_charging_slots(self):
+        pass
+
+    def _run_scheduled(self):
+        # TODO create initial charging schedules / tasks
+        self._create_initial_schedule()
+        self._distribute_charging_slots()
+        # TODO start fleet management (includes loop)
+        for step in self.time_steps:
+            if not self.events[0] == step:
+                continue
+            # start all current tasks (charge, drive)
+            pass
+
+    def _run_ondemand(self):
+        pass
+
+    def run(self):
+        if self.simulation_type == "schedule":
+            self._run_scheduled
+        elif self.simulation_type == "ondemand":
+            self._run_ondemand
+        else:
+            raise ValueError(f"Unrecognized simulation type {self.simulation_type}!")
 
     @classmethod
     def from_config(cls, scenario_name):
