@@ -59,6 +59,12 @@ class Simulation:
         pass
 
     def _distribute_charging_slots(self):
+        # TODO implement schedule decision making here
+        # go through all vehicles, check SoC after all tasks (end of day). continues if <20%
+        # get possible charging slots
+        # evaluate charging slots
+        # distribute slots by highest total score (?)
+        # for conflicts, check amount of charging spots at location and total possible power
         pass
 
     def _run_scheduled(self):
@@ -66,7 +72,7 @@ class Simulation:
         self._create_initial_schedule()
         self._distribute_charging_slots()
         # TODO start fleet management (includes loop)
-        for step in self.time_steps:
+        for step in range(self.time_steps):
             if not self.events[0] == step:
                 continue
             # start all current tasks (charge, drive)

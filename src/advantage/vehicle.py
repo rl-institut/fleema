@@ -59,7 +59,7 @@ class Vehicle:
         self.availability = availability
         self.rotation = rotation
         self.current_location = current_location
-        self.task = None
+        self.tasks = None
 
         self.output: dict = {
             "timestamp": [],
@@ -86,6 +86,12 @@ class Vehicle:
         self.output["charging_demand"].append(self._get_last_charging_demand())
         self.output["charging_power"].append(charging_power)
         self.output["consumption"].append(self._get_last_consumption())
+
+    def add_tasks(self, tasks):
+        # IDEA: create tasks and add them (data format?)
+        # next upcoming tasks is a function of vehicle, taking a time step as input and giving the next task
+        # observer stores upcoming task list?
+        pass
 
     def charge(self, timestamp, start, time, power, new_soc):
         # TODO call spiceev charging depending on soc, location, task
