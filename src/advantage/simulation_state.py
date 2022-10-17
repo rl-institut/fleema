@@ -1,4 +1,3 @@
-import pandas as pd
 from advantage.vehicle import Vehicle
 
 
@@ -20,20 +19,20 @@ class SimulationState:
         self.parking_vehicles = []  # is ready for the next job
         self.charging_vehicles = []  # vehicle is charging
 
-    def remove_vehicle(self, vehicle: "Vehicle"):           # eventuell dict mit {key, value}
-        if vehicle in (self.driving_vehicles or self.parking_vehicles or self.charging_vehicles):
-            self.driving_vehicles.remove(vehicle)
-            self.parking_vehicles.remove(vehicle)
-            self.charging_vehicles.remove(vehicle)
+        # charging_schedule = pd.DataFrame(columns=["start", "end", "vehicle", "location", "demand"])
+
+    def remove_vehicle(self, vehicle: "Vehicle"):
+        lists = [self.driving_vehicles, self.parking_vehicles, self.charging_vehicles]
+        for current_list in lists:
+            if vehicle in current_list:
+                current_list.remove(vehicle)
 
     def update_vehicle(self, vehicle: "Vehicle"):
         self.remove_vehicle(vehicle)
-        if vehicle.status == "driving" and vehicle not in self.driving_vehicles:
+        # TODO add enum for status
+        if vehicle.status == "driving":
             self.driving_vehicles.append(vehicle)
-        elif vehicle.status == "parking" and vehicle not in self.parking_vehicles:
+        elif vehicle.status == "parking":
             self.parking_vehicles.append(vehicle)
-        elif vehicle.status == "charging" and vehicle not in self.charging_vehicles:
+        elif vehicle.status == "charging":
             self.charging_vehicles.append(vehicle)
-
-
-charging_schedule = pd.DataFrame(columns=["start", "end", "vehicle", "location", "demand"])

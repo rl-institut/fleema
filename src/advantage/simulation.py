@@ -49,7 +49,7 @@ class Simulation:
             self.locations[name].chargers.append(charger)
 
         # Instantiation of observer
-        self.observer = SimulationState(self)
+        self.observer = SimulationState()
 
     def run(self):
         # TODO create initial charging schedules / tasks (where?)
