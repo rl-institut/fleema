@@ -7,6 +7,7 @@ import datetime
 from advantage.location import Location
 import advantage.vehicle as vehicle
 from advantage.charger import Charger, PlugType
+from advantage.simulation_state import SimulationState
 
 from advantage.util.conversions import date_string_to_datetime
 
@@ -51,6 +52,18 @@ class Simulation:
             plug_types = [p for p in self.plug_types.values() if p.name in info["plug_types"]]
             charger = Charger.from_json(name, info["number_charging_points"], plug_types)
             self.locations[name].chargers.append(charger)
+            
+        # Instantiation of observer
+        self.observer = SimulationState()
+
+    def _create_initial_schedule(self):
+        # creates tasks from self.schedule and assigns them to the vehicles
+        # creates self.events: List of timesteps where an event happens
+        # TODO check similar functions in ebus toolbox
+        pass
+
+        # Instantiation of observer
+        self.observer = SimulationState()
 
     def _create_initial_schedule(self):
         # creates tasks from self.schedule and assigns them to the vehicles
