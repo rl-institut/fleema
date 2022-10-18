@@ -39,6 +39,7 @@ class Simulation:
             self.vehicle_types[name] = vehicle.VehicleType(name, info["capacity"], self.soc_min, 0,
                                                            info["charging_power"], info["charging_curve"],
                                                            self.min_charging_power)
+        self.vehicles = {}
 
         self.locations = {}
         for location_name in self.schedule.departure_name.unique():
@@ -52,15 +53,6 @@ class Simulation:
             plug_types = [p for p in self.plug_types.values() if p.name in info["plug_types"]]
             charger = Charger.from_json(name, info["number_charging_points"], plug_types)
             self.locations[name].chargers.append(charger)
-            
-        # Instantiation of observer
-        self.observer = SimulationState()
-
-    def _create_initial_schedule(self):
-        # creates tasks from self.schedule and assigns them to the vehicles
-        # creates self.events: List of timesteps where an event happens
-        # TODO check similar functions in ebus toolbox
-        pass
 
         # Instantiation of observer
         self.observer = SimulationState()
@@ -69,7 +61,12 @@ class Simulation:
         # creates tasks from self.schedule and assigns them to the vehicles
         # creates self.events: List of timesteps where an event happens
         # TODO check similar functions in ebus toolbox
-        pass
+        vehicle_ids = self.schedule.groupby(by="vehicle_id")
+        for vehicle_id, index in vehicle_ids.groups.items():
+            vehicle_type = self.schedule.loc[index, "vehicle_type"].unique()
+            if len(vehicle_type) != 1:
+                raise ValueError(f"Vehicle number {vehicle_id} has multiple vehicle types assigned to it!")
+            self.vehicles[vehicle_id] = vehicle.Vehicle(vehicle_id, self.vehicle_types[vehicle_type[0]])
 
     def _distribute_charging_slots(self):
         # TODO implement schedule decision making here
@@ -86,7 +83,7 @@ class Simulation:
         self._distribute_charging_slots()
         # TODO start fleet management (includes loop)
         for step in range(self.time_steps):
-            if not self.events[0] == step:
+            if len(self.events) and not self.events[0] == step:
                 continue
             # start all current tasks (charge, drive)
             pass
@@ -96,9 +93,9 @@ class Simulation:
 
     def run(self):
         if self.simulation_type == "schedule":
-            self._run_scheduled
+            self._run_scheduled()
         elif self.simulation_type == "ondemand":
-            self._run_ondemand
+            self._run_ondemand()
         else:
             raise ValueError(f"Unrecognized simulation type {self.simulation_type}!")
 
@@ -124,7 +121,7 @@ class Simulation:
         except Exception:
             raise FileNotFoundError(f"Cannot read config file {cfg_file} - malformed?")
 
-        schedule = pd.read_csv(pathlib.Path(scenario_path, cfg["files"]["schedule"]), sep=',', index_col=0)
+        schedule = pd.read_csv(pathlib.Path(scenario_path, cfg["files"]["schedule"]), sep=',')
 
         vehicle_types_file = cfg["files"]["vehicle_types"]
         ext = vehicle_types_file.split('.')[-1]
