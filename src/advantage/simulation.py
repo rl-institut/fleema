@@ -1,3 +1,9 @@
+"""
+This script includes the Simulation class.
+
+Class:  Simulation
+"""
+
 import configparser as cp
 import pathlib
 import pandas as pd
@@ -14,6 +20,18 @@ class Simulation:
     """
     This class can import a specified config directory and build the scenarios.
     It also contains the run function, which starts the simulation.
+
+    :param schedule: A table with information about the specific route of the given vehicle fleet.
+    :type schedule: Dataframe
+    :param vehicle_types: A Dictionary with the given types of vehicles and their features that are used
+    in the scenario.
+    :type vehicle_types: dict
+    :param charging_points: A Dictionary with the given types of charging points and their features
+    that are used in the scenario.
+    :type charging_points: dict
+    :param cfg_dict: A Dictionary with configuration details which are used in the Simulation class
+    to influence the outcome.
+    :type cfg_dict: dict
     """
 
     def __init__(self, schedule, vehicle_types, charging_points, cfg_dict):
@@ -104,5 +122,9 @@ class Simulation:
                     "end_date": end_date,
                     "num_threads": cfg.getint('sim_params', 'num_threads')
                     }
+
+
+
+        print(cfg_dict)
 
         return Simulation(schedule, vehicle_types, charging_points, cfg_dict)
