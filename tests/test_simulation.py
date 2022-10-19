@@ -17,4 +17,4 @@ def test_bad_config_name():
 def test_run():
     simulation = Simulation.from_config("public_transport_base")
     simulation.run()
-    assert True
+    assert len(simulation.vehicles)

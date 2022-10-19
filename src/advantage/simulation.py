@@ -3,13 +3,14 @@ import pathlib
 import pandas as pd
 import json
 import datetime
+from typing import List, Dict
 
 from advantage.location import Location
-import advantage.vehicle as vehicle
+from advantage.vehicle import Vehicle, VehicleType, Task
 from advantage.charger import Charger, PlugType
 from advantage.simulation_state import SimulationState
 
-from advantage.util.conversions import date_string_to_datetime
+from advantage.util.conversions import date_string_to_datetime, datetime_string_to_datetime
 
 
 class Simulation:
@@ -18,28 +19,29 @@ class Simulation:
     It also contains the run function, which starts the simulation.
     """
 
-    def __init__(self, schedule, vehicle_types, charging_points, cfg_dict):
+    def __init__(self, schedule: pd.DataFrame, vehicle_types, charging_points, cfg_dict):
         self.soc_min = cfg_dict["soc_min"]
         # TODO check if it's enough to have min_charging_power in vehicle, else add to charger
         self.rng_seed = cfg_dict["rng_seed"]
         self.min_charging_power = cfg_dict["min_charging_power"]
         self.start_date = cfg_dict["start_date"]
         self.end_date = cfg_dict["end_date"]
+        self.step_size = cfg_dict["step_size"]
         time_steps: datetime.timedelta = self.end_date - self.start_date + datetime.timedelta(days=1)
-        self.time_steps = int(time_steps.total_seconds() / 60)
+        self.time_steps = int(time_steps.total_seconds() / 60 / self.step_size)
         self.num_threads = cfg_dict["num_threads"]
         self.simulation_type = "schedule"  # TODO implement in config (schedule vs ondemand)
 
         self.schedule = schedule
-        self.events = []
+        self.events: List[tuple[int, "Vehicle"]] = []
 
         # use other args to create objects
         self.vehicle_types = {}
         for name, info in vehicle_types.items():
-            self.vehicle_types[name] = vehicle.VehicleType(name, info["capacity"], self.soc_min, 0,
-                                                           info["charging_power"], info["charging_curve"],
-                                                           self.min_charging_power)
-        self.vehicles = {}
+            self.vehicle_types[name] = VehicleType(name, info["capacity"], self.soc_min, 0,
+                                                   info["charging_power"], info["charging_curve"],
+                                                   self.min_charging_power)
+        self.vehicles: Dict[str | int, "Vehicle"] = {}
 
         self.locations = {}
         for location_name in self.schedule.departure_name.unique():
@@ -57,16 +59,33 @@ class Simulation:
         # Instantiation of observer
         self.observer = SimulationState()
 
+    def _vehicles_from_schedule(self):
+        vehicle_ids = self.schedule.groupby(by="vehicle_id")
+        for vehicle_id, index in vehicle_ids.groups.items():
+            vehicle_type = self.schedule.loc[index, "vehicle_type"].unique()  # type: ignore
+            if len(vehicle_type) != 1:
+                raise ValueError(f"Vehicle number {vehicle_id} has multiple vehicle types assigned to it!")
+            self.vehicles[vehicle_id] = Vehicle(vehicle_id, self.vehicle_types[vehicle_type[0]])  # type: ignore
+
+    def _task_from_schedule(self, row):
+        vehicle = self.vehicles[row.vehicle_id]
+        task = Task(
+            self.locations[row.departure_name],
+            self.locations[row.arrival_name],
+            self.datetime_to_timesteps(row.departure_time),
+            self.datetime_to_timesteps(row.arrival_time),
+            "driving"
+        )
+        vehicle.add_task(task)
+        pass
+
     def _create_initial_schedule(self):
         # creates tasks from self.schedule and assigns them to the vehicles
         # creates self.events: List of timesteps where an event happens
         # TODO check similar functions in ebus toolbox
-        vehicle_ids = self.schedule.groupby(by="vehicle_id")
-        for vehicle_id, index in vehicle_ids.groups.items():
-            vehicle_type = self.schedule.loc[index, "vehicle_type"].unique()
-            if len(vehicle_type) != 1:
-                raise ValueError(f"Vehicle number {vehicle_id} has multiple vehicle types assigned to it!")
-            self.vehicles[vehicle_id] = vehicle.Vehicle(vehicle_id, self.vehicle_types[vehicle_type[0]])
+        self._vehicles_from_schedule()
+        self.schedule.apply(self._task_from_schedule, axis=1)
+        print("hi")
 
     def _distribute_charging_slots(self):
         # TODO implement schedule decision making here
@@ -75,7 +94,8 @@ class Simulation:
         # evaluate charging slots
         # distribute slots by highest total score (?)
         # for conflicts, check amount of charging spots at location and total possible power
-        pass
+        for veh in self.vehicles:
+            pass
 
     def _run_scheduled(self):
         # TODO create initial charging schedules / tasks
@@ -98,6 +118,11 @@ class Simulation:
             self._run_ondemand()
         else:
             raise ValueError(f"Unrecognized simulation type {self.simulation_type}!")
+
+    def datetime_to_timesteps(self, datetime_str):
+        delta = datetime_string_to_datetime(datetime_str) - self.start_date
+        diff_in_minutes = delta.total_seconds() / 60
+        return diff_in_minutes / self.step_size
 
     @classmethod
     def from_config(cls, scenario_name):
@@ -149,7 +174,8 @@ class Simulation:
                     "rng_seed": cfg["sim_params"].getint("seed", None),
                     "start_date": start_date,
                     "end_date": end_date,
-                    "num_threads": cfg.getint('sim_params', 'num_threads')
+                    "num_threads": cfg.getint("sim_params", "num_threads"),
+                    "step_size": cfg.getint("basic", "step_size")
                     }
 
         return Simulation(schedule, vehicle_types, charging_points, cfg_dict)

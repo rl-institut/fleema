@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from advantage.location import Location
-from typing import Optional
+from typing import Optional, List
 
 
 @dataclass
@@ -31,10 +31,15 @@ class VehicleType:
         return list(self.charging_capacity.keys())
 
 
-# example inherited class as proof of concept, TODO remove later if unused
 @dataclass
-class BusType(VehicleType):
-    max_passenger_number: int = 0
+class Task:
+    """
+    """
+    departure_point: "Location"
+    arrival_point: "Location"
+    departure_time: int
+    arrival_time: int
+    task: str
 
 
 class Vehicle:
@@ -61,7 +66,7 @@ class Vehicle:
         self.availability = availability
         self.rotation = rotation
         self.current_location = current_location
-        self.tasks = None
+        self.tasks: List["Task"] = []
 
         self.output: dict = {
             "timestamp": [],
@@ -83,7 +88,6 @@ class Vehicle:
         self.output["event_start"].append(event_start)
         self.output["event_time"].append(event_time)
         self.output["location"].append(self.status)
-        # self.output["use_case"].append(self._get_usecase())
         self.output["soc"].append(self.soc)
         self.output["charging_demand"].append(self._get_last_charging_demand())
         self.output["charging_power"].append(charging_power)
@@ -91,11 +95,11 @@ class Vehicle:
         if simulation_state is not None:
             simulation_state.update_vehicle(self)
 
-    def add_tasks(self, tasks):
+    def add_task(self, task: "Task"):
         # IDEA: create tasks and add them (data format?)
         # next upcoming tasks is a function of vehicle, taking a time step as input and giving the next task
         # observer stores upcoming task list?
-        pass
+        self.tasks.append(task)
 
     def charge(self, timestamp, start, time, power, new_soc, observer=None):
         # TODO call spiceev charging depending on soc, location, task
