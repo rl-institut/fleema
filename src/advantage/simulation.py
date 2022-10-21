@@ -77,7 +77,6 @@ class Simulation:
             "driving"
         )
         vehicle.add_task(task)
-        pass
 
     def _create_initial_schedule(self):
         # creates tasks from self.schedule and assigns them to the vehicles
@@ -85,12 +84,12 @@ class Simulation:
         # TODO check similar functions in ebus toolbox
         self._vehicles_from_schedule()
         self.schedule.apply(self._task_from_schedule, axis=1)
-        print("hi")
 
     def _distribute_charging_slots(self):
-        # TODO implement schedule decision making here
         # go through all vehicles, check SoC after all tasks (end of day). continues if <20%
+        # TODO write vehicle funtion end_of_day_soc()
         # get possible charging slots
+        # TODO write vehicle function get_breaks(Optional param time_horizon, default end of day)
         # evaluate charging slots
         # distribute slots by highest total score (?)
         # for conflicts, check amount of charging spots at location and total possible power
@@ -98,7 +97,6 @@ class Simulation:
             pass
 
     def _run_scheduled(self):
-        # TODO create initial charging schedules / tasks
         self._create_initial_schedule()
         self._distribute_charging_slots()
         # TODO start fleet management (includes loop)
