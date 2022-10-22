@@ -3,7 +3,7 @@ import pathlib
 import pandas as pd
 import json
 import datetime
-from typing import List, Dict
+from typing import List, Dict, Union
 
 from advantage.location import Location
 from advantage.vehicle import Vehicle, VehicleType, Task
@@ -41,7 +41,7 @@ class Simulation:
             self.vehicle_types[name] = VehicleType(name, info["capacity"], self.soc_min, 0,
                                                    info["charging_power"], info["charging_curve"],
                                                    self.min_charging_power)
-        self.vehicles: Dict[str | int, "Vehicle"] = {}
+        self.vehicles: Dict[Union[str, int], "Vehicle"] = {}
 
         self.locations = {}
         for location_name in self.schedule.departure_name.unique():
@@ -87,7 +87,7 @@ class Simulation:
 
     def _distribute_charging_slots(self):
         # go through all vehicles, check SoC after all tasks (end of day). continues if <20%
-        # TODO write vehicle funtion end_of_day_soc()
+        # TODO write vehicle function end_of_day_soc()
         # get possible charging slots
         # TODO write vehicle function get_breaks(Optional param time_horizon, default end of day)
         # evaluate charging slots

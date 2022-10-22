@@ -1,3 +1,4 @@
+import datetime
 from dataclasses import dataclass, field
 from advantage.location import Location
 from typing import Optional, List
@@ -100,6 +101,22 @@ class Vehicle:
         # next upcoming tasks is a function of vehicle, taking a time step as input and giving the next task
         # observer stores upcoming task list?
         self.tasks.append(task)
+
+    def get_predicted_soc(self, time_horizon: int):
+        consumption = 0
+        for task in self.tasks:
+            if task.arrival_time < time_horizon and task.task == "driving":
+                # TODO run task through driving simulation, add result to consumption
+                pass
+        return self.soc - consumption
+
+    def get_breaks(self, time_horizon: int):
+        breaks = []  # TODO figure out data format for breaks and tasks
+        for task in self.tasks:
+            if task.arrival_time < time_horizon and task.task == "driving":
+                # TODO exclude these time slots from breaks
+                pass
+        return breaks
 
     def charge(self, timestamp, start, time, power, new_soc, observer=None):
         # TODO call spiceev charging depending on soc, location, task
