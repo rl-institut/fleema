@@ -29,6 +29,7 @@ class Simulation:
         self.step_size = cfg_dict["step_size"]
         time_steps: datetime.timedelta = self.end_date - self.start_date + datetime.timedelta(days=1)
         self.time_steps = int(time_steps.total_seconds() / 60 / self.step_size)
+        self.end_of_day_steps = None
         self.num_threads = cfg_dict["num_threads"]
         self.simulation_type = "schedule"  # TODO implement in config (schedule vs ondemand)
 
@@ -59,6 +60,16 @@ class Simulation:
         # Instantiation of observer
         self.observer = SimulationState()
 
+    def _get_end_of_day_timestep(self, step):
+        if self.end_of_day_steps is None:
+            steps_per_day = 1440 / self.step_size
+            days = int(self.time_steps / steps_per_day)
+            self.end_of_day_steps = [d * steps_per_day for d in range(days)]
+        for i in self.end_of_day_steps:
+            if step < i:
+                return step
+        raise ValueError(f"Step {step} higher than end of day time steps: {self.end_of_day_steps}")
+
     def _vehicles_from_schedule(self):
         vehicle_ids = self.schedule.groupby(by="vehicle_id")
         for vehicle_id, index in vehicle_ids.groups.items():
@@ -85,7 +96,7 @@ class Simulation:
         self._vehicles_from_schedule()
         self.schedule.apply(self._task_from_schedule, axis=1)
 
-    def _distribute_charging_slots(self):
+    def _distribute_charging_slots(self, step):
         # go through all vehicles, check SoC after all tasks (end of day). continues if <20%
         # TODO write vehicle function end_of_day_soc()
         # get possible charging slots
@@ -93,12 +104,16 @@ class Simulation:
         # evaluate charging slots
         # distribute slots by highest total score (?)
         # for conflicts, check amount of charging spots at location and total possible power
-        for veh in self.vehicles:
-            pass
+        for veh in self.vehicles.values():
+            end_of_day_soc = veh.get_predicted_soc(step)
+            if end_of_day_soc < 0.2:
+                pass
+            else:
+                pass
 
     def _run_scheduled(self):
         self._create_initial_schedule()
-        self._distribute_charging_slots()
+        self._distribute_charging_slots(self._get_end_of_day_timestep(0))
         # TODO start fleet management (includes loop)
         for step in range(self.time_steps):
             if len(self.events) and not self.events[0] == step:

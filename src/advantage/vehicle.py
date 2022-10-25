@@ -1,4 +1,4 @@
-import datetime
+import pandas as pd
 from dataclasses import dataclass, field
 from advantage.location import Location
 from typing import Optional, List
@@ -68,6 +68,8 @@ class Vehicle:
         self.rotation = rotation
         self.current_location = current_location
         self.tasks: List["Task"] = []
+        self.schedule = None    # TODO add dataframe which has information for all timesteps.
+                                # includes charging and driving tasks
 
         self.output: dict = {
             "timestamp": [],
@@ -108,7 +110,7 @@ class Vehicle:
             if task.arrival_time < time_horizon and task.task == "driving":
                 # TODO run task through driving simulation, add result to consumption
                 pass
-        return self.soc - consumption
+        return self.soc - consumption / self.vehicle_type.battery_capacity
 
     def get_breaks(self, time_horizon: int):
         breaks = []  # TODO figure out data format for breaks and tasks
