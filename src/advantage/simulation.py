@@ -113,7 +113,7 @@ class Simulation:
 
     def _run_scheduled(self):
         self._create_initial_schedule()
-        self._distribute_charging_slots(self._get_end_of_day_timestep(0))
+        self._distribute_charging_slots(self.time_steps)
         # TODO start fleet management (includes loop)
         for step in range(self.time_steps):
             if len(self.events) and not self.events[0] == step:
