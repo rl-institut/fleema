@@ -9,6 +9,7 @@ from advantage.location import Location
 from advantage.vehicle import Vehicle, VehicleType, Task
 from advantage.charger import Charger, PlugType
 from advantage.simulation_state import SimulationState
+from advantage.simulation_type import class_from_str
 
 from advantage.util.conversions import date_string_to_datetime, datetime_string_to_datetime
 
@@ -60,7 +61,7 @@ class Simulation:
         # Instantiation of observer
         self.observer = SimulationState()
 
-    def _get_end_of_day_timestep(self, step):
+    def get_end_of_day_timestep(self, step):
         if self.end_of_day_steps is None:
             steps_per_day = 1440 / self.step_size
             days = int(self.time_steps / steps_per_day)
@@ -70,7 +71,7 @@ class Simulation:
                 return step
         raise ValueError(f"Step {step} higher than end of day time steps: {self.end_of_day_steps}")
 
-    def _vehicles_from_schedule(self):
+    def vehicles_from_schedule(self):
         vehicle_ids = self.schedule.groupby(by="vehicle_id")
         for vehicle_id, index in vehicle_ids.groups.items():
             vehicle_type = self.schedule.loc[index, "vehicle_type"].unique()  # type: ignore
@@ -78,7 +79,7 @@ class Simulation:
                 raise ValueError(f"Vehicle number {vehicle_id} has multiple vehicle types assigned to it!")
             self.vehicles[vehicle_id] = Vehicle(vehicle_id, self.vehicle_types[vehicle_type[0]])  # type: ignore
 
-    def _task_from_schedule(self, row):
+    def task_from_schedule(self, row):
         vehicle = self.vehicles[row.vehicle_id]
         task = Task(
             self.locations[row.departure_name],
@@ -89,48 +90,9 @@ class Simulation:
         )
         vehicle.add_task(task)
 
-    def _create_initial_schedule(self):
-        # creates tasks from self.schedule and assigns them to the vehicles
-        # creates self.events: List of timesteps where an event happens
-        # TODO check similar functions in ebus toolbox
-        self._vehicles_from_schedule()
-        self.schedule.apply(self._task_from_schedule, axis=1)
-
-    def _distribute_charging_slots(self, step):
-        # go through all vehicles, check SoC after all tasks (end of day). continues if <20%
-        # TODO write vehicle function end_of_day_soc()
-        # get possible charging slots
-        # TODO write vehicle function get_breaks(Optional param time_horizon, default end of day)
-        # evaluate charging slots
-        # distribute slots by highest total score (?)
-        # for conflicts, check amount of charging spots at location and total possible power
-        for veh in self.vehicles.values():
-            end_of_day_soc = veh.get_predicted_soc(step)
-            if end_of_day_soc < 0.2:
-                pass
-            else:
-                pass
-
-    def _run_scheduled(self):
-        self._create_initial_schedule()
-        self._distribute_charging_slots(self.time_steps)
-        # TODO start fleet management (includes loop)
-        for step in range(self.time_steps):
-            if len(self.events) and not self.events[0] == step:
-                continue
-            # start all current tasks (charge, drive)
-            pass
-
-    def _run_ondemand(self):
-        pass
-
     def run(self):
-        if self.simulation_type == "schedule":
-            self._run_scheduled()
-        elif self.simulation_type == "ondemand":
-            self._run_ondemand()
-        else:
-            raise ValueError(f"Unrecognized simulation type {self.simulation_type}!")
+        sim = class_from_str(self.simulation_type)(self)
+        sim.run()
 
     def datetime_to_timesteps(self, datetime_str):
         delta = datetime_string_to_datetime(datetime_str) - self.start_date
