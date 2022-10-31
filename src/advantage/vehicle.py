@@ -1,5 +1,5 @@
 import pandas as pd
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, asdict
 from advantage.location import Location
 from typing import Optional, List
 
@@ -42,6 +42,14 @@ class Task:
     arrival_time: int
     task: str
 
+    @property
+    def data_dict(self):
+        return asdict(self)
+
+    @property
+    def dataframe(self):
+        return pd.DataFrame.from_dict(self.data_dict)
+
 
 class Vehicle:
     """
@@ -68,8 +76,7 @@ class Vehicle:
         self.rotation = rotation
         self.current_location = current_location
         self.tasks: List["Task"] = []
-        self.schedule = None    # TODO add dataframe which has information for all timesteps.
-                                # includes charging and driving tasks
+        self.schedule = None    # TODO add dataframe which has information for all timesteps
 
         self.output: dict = {
             "timestamp": [],
@@ -99,25 +106,55 @@ class Vehicle:
             simulation_state.update_vehicle(self)
 
     def add_task(self, task: "Task"):
-        # IDEA: create tasks and add them (data format?)
         # next upcoming tasks is a function of vehicle, taking a time step as input and giving the next task
         # observer stores upcoming task list?
-        self.tasks.append(task)
+        # if tasks empty, add new task to list
+        if len(self.tasks) == 0:
+            self.tasks.append(task)
+        # otherwise, add new task to list, ordered by starting time
+        else:
+            task_added = False
+            for count, it in enumerate(self.tasks):
+                if task.departure_time < it.departure_time and not task_added:
+                    self.tasks.insert(count, task)
+                    task_added = True
+            if not task_added:
+                self.tasks.append(task)
 
-    def get_predicted_soc(self, time_horizon: int):
+    def remove_task(self, task: "Task"):
+        if task in self.tasks:
+            self.tasks.remove(task)
+
+    def get_predicted_soc(self, start: int, end: int):
         consumption = 0
         for task in self.tasks:
-            if task.arrival_time < time_horizon and task.task == "driving":
+            if start < task.arrival_time < end and task.task == "driving":
                 # TODO run task through driving simulation, add result to consumption
                 pass
         return self.soc - consumption / self.vehicle_type.battery_capacity
 
-    def get_breaks(self, time_horizon: int):
-        breaks = []  # TODO figure out data format for breaks and tasks
+    def get_breaks(self, start: int, end: int):
+        breaks = []
+        first_task = self.tasks[0]
+        if first_task.departure_time < start:
+            breaks.append(Task(
+                first_task.departure_point,
+                first_task.departure_point,
+                start,
+                first_task.departure_time,
+                "break")
+            )
+        previous_task = first_task
         for task in self.tasks:
-            if task.arrival_time < time_horizon and task.task == "driving":
-                # TODO exclude these time slots from breaks
-                pass
+            if task.arrival_time < end and task.task == "driving":  # TODO are other task types relevant?
+                breaks.append(Task(
+                    previous_task.arrival_point,
+                    task.departure_point,
+                    previous_task.arrival_time,  # TODO maybe +1?
+                    task.departure_time,  # TODO maybe -1?
+                    "break")
+                )
+                previous_task = task
         return breaks
 
     def charge(self, timestamp, start, time, power, new_soc, observer=None):

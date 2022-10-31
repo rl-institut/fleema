@@ -53,7 +53,6 @@ class Simulation:
         for name, info in charging_points["plug_types"].items():
             self.plug_types[name] = PlugType(name, info["capacity"], info["plug"])
         for name, info in charging_points["charging_points"].items():
-            # TODO add chargers to locations based on charging_points
             plug_types = [p for p in self.plug_types.values() if p.name in info["plug_types"]]
             charger = Charger.from_json(name, info["number_charging_points"], plug_types)
             self.locations[name].chargers.append(charger)
