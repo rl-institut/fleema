@@ -1,7 +1,7 @@
 """
 This script starts the simulation.
 
-The imported class Simulation is instantiated by inserting the scenario into the appropriation configuration method.
+The simulation is instantiated by using the scenario name from the command line.
 """
 
 from advantage.simulation import Simulation
