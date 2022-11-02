@@ -1,7 +1,8 @@
-"""
-This script includes the Simulation class.
+"""This script includes the Simulation class.
 
-Class:  Simulation
+Classes
+-------
+Simulation
 """
 
 import configparser as cp
@@ -17,21 +18,51 @@ from advantage.util.conversions import date_string_to_datetime
 
 
 class Simulation:
-    """
-    This class can import a specified config directory and build the scenarios.
+    """This class can import a specified config directory and build a Simulation out of the given scenario.
+
     It also contains the run function, which starts the simulation.
 
-    Args:
-        schedule (Dataframe): A table with information about the specific route of the given vehicle fleet.
-        vehicle_types (dict): A Dictionary with the given types of vehicles and their features that are used
-        in the scenario.
-        charging_points (dict): A Dictionary with the given types of charging points and their features
-        that are used in the scenario.
-        cfg_dict (dict): A Dictionary with configuration details which are used in the Simulation class
-        to influence the outcome.
+    Attributes
+    ----------
+    soc_min: float
+        Lower limit of the battery's charging power (soc - state of charge).
+    rng_seed: int
+        Seed for generating numbers pseudo-randomly.
+    min_charging_power: float
+        Minimum charging power of the vehicles.
+    start_date: datetime.date
+        Start date of the simulation.
+    end_date: datetime.date
+        End date of the simulation.
+    num_threads: int
+        Number of threads to determine the concurrency of the simulation.
+    schedule: pandas.core.frame.DataFrame
+        Pandas Dataframe with information about the specific route of the given vehicle fleet.
+    vehicle_types: dict
+        Dictionary with strings of types of vehicles as keys and instances of the class VehicleType as values.
+    locations: dict
+        Dictionary with strings of locations as keys and instances of the class Location as the values.
+    plug_types_ dict
+        Dictionary with strings of the plug-type and dictionaries comprised of the name, capacity and charging_type
+        as values.
+
     """
 
     def __init__(self, schedule, vehicle_types, charging_points, cfg_dict):
+        """Init Method of the @Simulation class.
+
+        Parameters
+        ----------
+        schedule: pandas.core.frame.DataFrame
+            Pandas Dataframe with information about the specific route of the given vehicle fleet.
+        vehicle_types: dict
+            Dictionary with the given types of vehicles and their features that are used in the scenario.
+        charging_points: dict
+            Dictionary with the given types of charging points and their features that are used in the scenario.
+        cfg_dict: dict
+            Dictionary with configuration details which are used in the Simulation class to influence the outcome.
+
+        """
         self.soc_min = cfg_dict["soc_min"]
         # TODO check if it's enough to have min_charging_power in vehicle, else add to charger
         self.rng_seed = cfg_dict["rng_seed"]
@@ -69,11 +100,21 @@ class Simulation:
 
     @classmethod
     def from_config(cls, scenario_name):
-        """
-        Creates a Simulation object from a specified scenario name. The scenario needs to be located in /scenarios.
+        """Creates a Simulation object from the specified scenario.
 
-        Returns:
+        The scenario needs to be located in the directory /scenarios.
+        A scenario consists of different inputs like charging_points, schedule, vehicle_types
+        and a config file called scenario which are read and processed in order to create a Simulation object.
+
+        Parameters
+        ----------
+        scenario_name : str
+            Name of the scenario and the directory in which the necessary input lies.
+
+        Returns
+        -------
             Simulation object
+
         """
         scenario_path = pathlib.Path("scenarios", scenario_name)
         if not scenario_path.is_dir():
@@ -119,9 +160,5 @@ class Simulation:
                     "end_date": end_date,
                     "num_threads": cfg.getint('sim_params', 'num_threads')
                     }
-
-
-
-        print(cfg_dict)
 
         return Simulation(schedule, vehicle_types, charging_points, cfg_dict)
