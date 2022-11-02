@@ -43,3 +43,43 @@ def test_multi_drive(car, time_series, sim_state: "SimulationState"):
         time_stamp = step_to_timestamp(time_series, start_step)
         car.drive(time_stamp, start_step, 10, "station_1", 0.45, sim_state)
     assert len(sim_state.driving_vehicles) == 1
+
+
+def test_remove_vehicle_from_driving(car, sim_state: "SimulationState"):
+    sim_state.driving_vehicles.append(car)
+    sim_state.remove_vehicle(car)
+    assert car not in sim_state.driving_vehicles
+
+
+def test_remove_vehicle_from_parking(car, sim_state: "SimulationState"):
+    sim_state.parking_vehicles.append(car)
+    sim_state.remove_vehicle(car)
+    assert car not in sim_state.parking_vehicles
+
+
+def test_remove_vehicle_from_charging(car, sim_state: "SimulationState"):
+    sim_state.charging_vehicles.append(car)
+    sim_state.remove_vehicle(car)
+    assert car not in sim_state.charging_vehicles
+
+
+def test_update_vehicle_drive(car, sim_state: "SimulationState"):
+    sim_state.update_vehicle(car)
+    # TODO car is updated into right list
+
+
+def test_update_vehicle_charge(car, sim_state: "SimulationState"):
+    sim_state.update_vehicle(car)
+    # TODO car is updated into right list
+
+
+def test_update_vehicle_park(car, sim_state: "SimulationState"):
+    sim_state.update_vehicle(car)
+    # TODO car is updated into right list
+
+
+'''
+Possible other tests:
+- vehicle is from the wrong data type
+- vehicle should be only in one list
+'''
