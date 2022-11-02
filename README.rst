@@ -26,8 +26,7 @@ As a User
 As a Developer
 ^^^^^^^^^^^^^^
 * Create a new virtual environment and activate it
-* Install the project and its dependencies with ``pip install -e .``
-* Install dev requirements with ``pip install -r dev_requirements.txt``
+* Install the project and its dependencies with ``pip install -e .[dev]``
 * For testing use the following commands
     * ``flake8 src``
     * ``mypy src``
