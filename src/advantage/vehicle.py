@@ -128,9 +128,13 @@ class Vehicle:
     def get_predicted_soc(self, start: int, end: int):
         consumption = 0
         for task in self.tasks:
-            if start < task.arrival_time < end and task.task == "driving":
-                # TODO run task through driving simulation, add result to consumption
-                pass
+            if start < task.arrival_time < end:
+                if task.task == "driving":
+                    # TODO run task through driving simulation, add result to consumption
+                    pass
+                if task.task == "charging":
+                    # TODO check how much this would charge
+                    pass
         return self.soc - consumption / self.vehicle_type.battery_capacity
 
     def get_breaks(self, start: int, end: int):

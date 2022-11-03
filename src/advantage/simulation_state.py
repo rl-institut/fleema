@@ -19,6 +19,8 @@ class SimulationState:
         self.parking_vehicles = []  # is ready for the next job
         self.charging_vehicles = []  # vehicle is charging
 
+        self.events = {}  # TODO dict of timestamp > vehicle, based on task start time
+
         # charging_schedule = pd.DataFrame(columns=["start", "end", "vehicle", "location", "demand"])
 
     def remove_vehicle(self, vehicle: "Vehicle"):

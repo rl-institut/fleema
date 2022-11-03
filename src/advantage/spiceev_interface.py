@@ -33,3 +33,5 @@ def run_spice_ev(spice_ev_dict, strategy) -> "Scenario":
     scenario = Scenario(spice_ev_dict)
     scenario.run(strategy, {})
     return scenario
+
+# TODO add function that takes a task (if task == driving) and runs spiceev with it
