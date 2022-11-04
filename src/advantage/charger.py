@@ -6,7 +6,14 @@ from advantage.util.helpers import deep_update
 
 @dataclass
 class PlugType:
-    """
+    """Class implements any type of plug given the parameters.
+
+    Attributes
+    ----------
+    name : str
+    capacity : float
+    charging_type : list[str], optional
+
     """
     name: str
     capacity: float
@@ -15,12 +22,19 @@ class PlugType:
 
 @dataclass
 class ChargingPoint:
-    """
-    Dataclass containing all information about a single charging point.
-    id: str:            identifier of this charging point
-    plugs: list[str]:   list of available plugs
-    power: list[float]: list of max power per plug
-    type: str:          charging type (conductive, inductive, ...)
+    """Dataclass containing all information about a single charging point.
+
+    Attributes
+    ----------
+    id : str
+        Identifier of this charging point.
+    plugs : list[str]
+        List of available plugs.
+    power : list[float]
+        List of maximum power per plug.
+    type : str
+        Charging type (conductive, inductive, ...).
+
     """
     id: str
     plugs: List["PlugType"]
@@ -38,10 +52,13 @@ class ChargingPoint:
 
 
 class Charger:
-    """
-    Dataclass containing all information about a single charging station.
-    name: str:              Name/ID of the station
-    charging_points:list:   List of ChargingPoints
+    """Dataclass containing all information about a single charging station.
+
+    name : str
+        Name/ID of the station.
+    charging_points : list
+        List of charging points.
+
     """
     def __init__(self, name: str, charging_points: List["ChargingPoint"]) -> None:
         self.name = name
