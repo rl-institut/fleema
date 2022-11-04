@@ -24,7 +24,7 @@ class SimulationState:
     def remove_vehicle(self, vehicle: "Vehicle"):
         lists = [self.driving_vehicles, self.parking_vehicles, self.charging_vehicles]
         for current_list in lists:
-            if vehicle in current_list:
+            while vehicle in current_list:
                 current_list.remove(vehicle)
 
     def update_vehicle(self, vehicle: "Vehicle"):
