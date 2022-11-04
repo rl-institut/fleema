@@ -49,7 +49,7 @@ class Simulation:
     """
 
     def __init__(self, schedule, vehicle_types, charging_points, cfg_dict):
-        """Init Method of the @Simulation class.
+        """Init Method of the Simulation class.
 
         Parameters
         ----------
