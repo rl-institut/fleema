@@ -6,13 +6,22 @@ if TYPE_CHECKING:
 
 
 class Location:
-    """
-    Location object contains name, type and various properties
-    name:               location name
-    location_type:      location type. "depot", "station", ...
-    chargers:           list of chargers at the location
-    grid_info:          dict with grid connection in kW, load and generator time series, ...
-                        example: {"power": 50, "load": load_df, "generator": gen_df}
+    """This class implements a location.
+
+    This class allows type checking.
+
+    Attributes
+    ----------
+    name : str
+    location_type : str
+        Location type can be "depot", "station", etc.
+    chargers : list, optional
+        List of chargers at the given location.
+    grid_info : dict, optional
+        Dictionary with grid connection in kW, load and generator time series.
+        Example: {"power": 50, "load": load_df, "generator": gen_df}
+    output :
+
     """
     def __init__(self,
                  name: str = "",
@@ -58,3 +67,4 @@ class Location:
             info = ch.get_scenario_info(point_id, plug_types)
             deep_update(scenario_dict, info)
         return scenario_dict
+
