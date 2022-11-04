@@ -24,23 +24,23 @@ class Simulation:
 
     Attributes
     ----------
-    soc_min: float
+    soc_min : float
         Lower limit of the battery's charging power (soc - state of charge).
-    rng_seed: int
+    rng_seed : int
         Seed for generating numbers pseudo-randomly.
     min_charging_power: float
         Minimum charging power of the vehicles.
-    start_date: datetime.date
+    start_date : datetime.date
         Start date of the simulation.
-    end_date: datetime.date
+    end_date : datetime.date
         End date of the simulation.
-    num_threads: int
+    num_threads : int
         Number of threads to determine the concurrency of the simulation.
-    schedule: pandas.core.frame.DataFrame
+    schedule : pandas.core.frame.DataFrame
         Pandas Dataframe with information about the specific route of the given vehicle fleet.
-    vehicle_types: dict
+    vehicle_types : dict
         Dictionary with strings of types of vehicles as keys and instances of the class VehicleType as values.
-    locations: dict
+    locations : dict
         Dictionary with strings of locations as keys and instances of the class Location as the values.
     plug_types_ dict
         Dictionary with strings of the plug-type and dictionaries comprised of the name, capacity and charging_type
@@ -53,13 +53,13 @@ class Simulation:
 
         Parameters
         ----------
-        schedule: pandas.core.frame.DataFrame
+        schedule : pandas.core.frame.DataFrame
             Pandas Dataframe with information about the specific route of the given vehicle fleet.
-        vehicle_types: dict
+        vehicle_types : dict
             Dictionary with the given types of vehicles and their features that are used in the scenario.
-        charging_points: dict
+        charging_points : dict
             Dictionary with the given types of charging points and their features that are used in the scenario.
-        cfg_dict: dict
+        cfg_dict : dict
             Dictionary with configuration details which are used in the Simulation class to influence the outcome.
 
         """
