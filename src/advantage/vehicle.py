@@ -5,17 +5,29 @@ from typing import Optional
 
 @dataclass
 class VehicleType:
-    """
-    The VehicleType contains static vehicle data.
-    name:               vehicle type name
-    battery_capacity:   battery capacity in kWh
-    soc_min:            minimum state of charge that should remain in battery after a drive
-    base_consumption:   in kWh/km ?
-    charging_capacity:  dict containing values for each viable plug and their respective power
-    charging_curve:     example: [[0, 50], [0.8, 50], [1, 20]], first number is SoC, second the
-                        possible max power
-    plugs:              list of plugs this vehicle can use, ["Type2", "Schuko"]
-    min_charging_power: least amount of charging power possible, as a share of max power
+    """The VehicleType contains static vehicle data.
+
+    Attributes
+    ----------
+    name : str
+        Vehicle type name.
+    battery_capacity : float
+        Battery capacity in kWh.
+    soc_min : float
+        Minimum state of charge that should remain in battery after a drive.
+    base_consumption : float
+        In kWh/km ?
+    charging_capacity : dict
+        Dictionary containing values for each viable plug and their respective power.
+    charging_curve : list
+        List of list with two numbers. First number is SoC (state of charge) and second the possible max power.
+        Example: [[0, 50], [0.8, 50], [1, 20]].
+    plugs : list
+        List of plugs this vehicle can use. Example: ["Type2", "Schuko"].
+    min_charging_power : float
+        Least amount of charging power possible, as a share of max power.
+    label : str, optional
+
     """
     name: str = "vehicle_name"
     battery_capacity: float = 50.
@@ -31,15 +43,38 @@ class VehicleType:
 # example inherited class as proof of concept, TODO remove later if unused
 @dataclass
 class BusType(VehicleType):
+    """This class implements the basic bus type with the parent class VehicleType.
+
+    Attributes
+    ----------
+    name : str
+        Vehicle type name.
+
+    """
+
     max_passenger_number: int = 0
 
 
 class Vehicle:
-    """
-    The vehicle contains tech parameters as well as tasks.
-    Functions:
-        charge
-        drive
+    """The vehicle contains tech parameters as well as tasks.
+
+    Attributes
+    ----------
+    vehicle_type : VehicleType
+        VehicleType of the Vehicle instance.
+    status : str
+        Describes current state of the Vehicle object. Example: "parking", "driving", "charging"
+    soc : float
+        State of charge: Current charge of the battery.
+    availability : bool
+        Boolean that states if Vehicle is avaiable. Default on True.
+    rotation : str, optional
+    current_location : Location, optional
+        Has current location if Vehicle was already to one assigned.
+    task : None
+    output: dict
+        Comprises all relevant information of the Vehicle object like locations, statuses, etc.
+
     """
 
     def __init__(self,
@@ -72,7 +107,7 @@ class Vehicle:
         }
 
     def _update_activity(self, timestamp, event_start, event_time, charging_power=0):
-        """Records newest energy and activity"""
+        """Records newest energy and activity in the attributes soc and output."""
         self.soc = round(self.soc, 4)
         self.output["timestamp"].append(timestamp)
         self.output["event_start"].append(event_start)
@@ -85,6 +120,7 @@ class Vehicle:
         self.output["consumption"].append(self._get_last_consumption())
 
     def charge(self, timestamp, start, time, power, new_soc):
+        """This method simulates charging and updates therefore the attributes status and soc."""
         # TODO call spiceev charging depending on soc, location, task
         # TODO this requires a SpiceEV scenario object
         if not all(isinstance(i, int) or isinstance(i, float) for i in [start, time, power, new_soc]):
@@ -100,6 +136,7 @@ class Vehicle:
         self._update_activity(timestamp, start, time, charging_power=power)
 
     def drive(self, timestamp, start, time, destination, new_soc):
+        """This method simulates driving and updates therefore the attributes status and soc."""
         # call drive api with task, soc, ...
         if not all(isinstance(i, int) or isinstance(i, float) for i in [start, time, new_soc]):
             raise TypeError("Argument has wrong type.")
@@ -118,6 +155,7 @@ class Vehicle:
         self.status = destination
 
     def park(self, timestamp, start, time):
+        """This method simulates parking and updates therefore the attribute status."""
         if not all(isinstance(i, int) or isinstance(i, float) for i in [start, time]):
             raise TypeError("Argument has wrong type.")
         if not all(i >= 0 for i in [start, time]):
@@ -131,6 +169,7 @@ class Vehicle:
 
     @property
     def scenario_info(self):
+        """Returns Dictionary with general information about the Vehicle instance."""
         scenario_dict = {
             "constants": {
                 "vehicle_types": {
