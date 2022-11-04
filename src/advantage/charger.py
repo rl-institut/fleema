@@ -52,8 +52,10 @@ class ChargingPoint:
 
 
 class Charger:
-    """Dataclass containing all information about a single charging station.
+    """Dataclass that implements charger which can interact with ChargingPoints and their plugs.
 
+    Attributes
+    ----------
     name : str
         Name/ID of the station.
     charging_points : list
@@ -70,6 +72,22 @@ class Charger:
 
     def get_scenario_info(self, point_id: str, plug_types: List[str]) \
             -> Dict[str, Dict[str, Dict[str, Dict[str, object]]]]:
+        """This method checks if Charger and the given charging point ID match.
+
+        Returns
+        -------
+        dict
+            Dictionary with all available charging points.
+
+        Raises
+        ------
+        ValueError
+            If point_id doesn't match any possible ChargingPoints in the Charger instance.
+        ValueError
+             If Charger doesn't have any charging points.
+
+        """
+
         if self.num_points:
             scenario_dict: Dict[str, Dict[str, Dict[str, Dict[str, object]]]] = {
                 "constants": {
@@ -102,6 +120,7 @@ class Charger:
 
     @classmethod
     def from_json(cls, name, number_charging_points: int, plug_types: list):
+        """This classmethod returns an instance of Charger with an initialized charging_points attribute."""
         cp_list = []
         for i in range(number_charging_points):
             cp_list.append(ChargingPoint(f"{name}_{i}", plug_types))
