@@ -13,7 +13,7 @@ import pandas as pd
 def car():
     car_type = vehicle.VehicleType(battery_capacity=30, base_consumption=0.2, charging_capacity={"Type2": 22},
                                    charging_curve=[[0, 11], [0.8, 11], [1, 11]])
-    car = vehicle.Vehicle(vehicle_type=car_type, soc=0.5)
+    car = vehicle.Vehicle("car", vehicle_type=car_type, soc=0.5)
     return car
 
 
@@ -52,4 +52,4 @@ def test_run_spice_ev(car, time_series, spot):
     spice_dict["constants"]["vehicles"]["vehicle_name_0"]["connected_charging_station"] = "point_0"
     scenario = run_spice_ev(spice_dict, "balanced")
     # check if soc is higher than before
-    assert scenario.socs[-1][0] > car.soc
+    assert scenario.socs[-1][0] > car.soc  # type: ignore
