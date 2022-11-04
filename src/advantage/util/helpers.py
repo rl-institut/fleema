@@ -2,9 +2,10 @@ import collections.abc
 
 
 def deep_update(source, overrides):
-    """
-    Update a nested dictionary or similar mapping.
+    """Update a nested dictionary or similar mapping.
+
     Modify ``source`` in place.
+
     """
     for key, value in overrides.items():
         if isinstance(value, collections.abc.Mapping) and value:
