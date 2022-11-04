@@ -49,6 +49,22 @@ class Location:
         return None
 
     def get_scenario_info(self, point_id: str, plug_types: List[str]):
+        """This method matches all the ChargingPoints in the location with the given ChargingPoint ID.
+
+        Parameters
+        ----------
+        point_id : str
+            PointCharging ID that is sought-after in the location.
+        plug_types : list[str]
+            Available Plugs for the ChargingPoint.
+
+        Returns
+        -------
+        dict
+            Dictionary with all matching ChargingPoints in the location.
+
+        """
+
         power = self.grid_info["power"] if self.grid_info else 0
         scenario_dict = {
             "constants": {
