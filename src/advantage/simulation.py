@@ -120,6 +120,12 @@ class Simulation:
         -------
             Simulation object
 
+        Raises
+        ------
+        FileNotFoundError
+            If the scenario is not found in the ./scenarios directory.
+            If the config file scenario.cfg is not found or can't be read..
+
         """
         scenario_path = pathlib.Path("scenarios", scenario_name)
         if not scenario_path.is_dir():
