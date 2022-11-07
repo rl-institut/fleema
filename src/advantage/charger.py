@@ -127,7 +127,7 @@ class Charger:
 
     @classmethod
     def from_json(cls, name, number_charging_points: int, plug_types: List["PlugType"]):
-    """This classmethod returns an instance of Charger with an initialized charging_points attribute."""
+        """This classmethod returns an instance of Charger with an initialized charging_points attribute."""
         cp_list = []
         for i in range(number_charging_points):
             cp_list.append(ChargingPoint(f"{name}_{i}", plug_types))
