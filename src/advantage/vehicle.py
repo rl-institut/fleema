@@ -21,8 +21,8 @@ class VehicleType:
         Dictionary containing values for each viable plug and their respective capacity.
         Example: {"plug_0": 50, "plug_1": 150}
     charging_curve : list
-        List of list with two numbers. First number is SoC (state of charge) and second the possible maximum power in kW.
-        Example: [[0, 50], [0.8, 50], [1, 20]]
+        List of list with two numbers. First number is SoC (state of charge) and
+        second the possible maximum power in kW. Example: [[0, 50], [0.8, 50], [1, 20]]
     min_charging_power : float
         Least amount of charging power possible, as a share of max power. Shown in percentage.
     label : str, optional
