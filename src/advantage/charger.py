@@ -74,10 +74,17 @@ class Charger:
             -> Dict[str, Dict[str, Dict[str, Dict[str, object]]]]:
         """This method checks if Charger and the given charging point ID match.
 
+        Parameters
+        ----------
+        point_id : str
+            Charging Point ID that is matched in this Charger instance.
+        plug_types : list[str]
+            Plug types which point_id supports.
+
         Returns
         -------
         dict
-            Dictionary with all available charging points.
+            Nested dictionary with all available charging points.
 
         Raises
         ------
