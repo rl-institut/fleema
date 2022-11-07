@@ -83,4 +83,3 @@ class Location:
             info = ch.get_scenario_info(point_id, plug_types)
             deep_update(scenario_dict, info)
         return scenario_dict
-
