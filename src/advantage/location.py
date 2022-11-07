@@ -13,6 +13,7 @@ class Location:
     Attributes
     ----------
     name : str
+        Name/ID of the location.
     location_type : str
         Location type can be "depot", "station", etc.
     chargers : list, optional
@@ -29,6 +30,22 @@ class Location:
                  chargers: Optional[List["Charger"]] = None,
                  grid_info: Optional[dict] = None
                  ):
+        """
+        Constructor of the Location class.
+
+        Parameters
+        ----------
+        name : str
+            Name/ID of the location.
+        location_type : str
+            Location type can be "depot", "station", etc.
+        chargers : list, optional
+            List of chargers at the given location.
+        grid_info : dict, optional
+            Dictionary with grid connection in kW, load and generator time series.
+            Example: {"power": 50, "load": load_df, "generator": gen_df}
+
+        """
         self.name = name
         self.location_type = location_type
         self.chargers = chargers if chargers else []
@@ -37,15 +54,32 @@ class Location:
 
     @property
     def num_chargers(self):
+        """This get method returns the number of chargers at the location instance.
+
+        Returns
+        -------
+            int
+                Number of chargers.
+
+        """
         return len(self.chargers)
 
     @property
     def grid_connection(self):
+        """This method checks if the grid power is above zero.
+
+        Returns
+        -------
+            bool
+                Returns True if grid power is over zero and False if not.
+
+        """
         # TODO check if grid power > 0
         return isinstance(self.grid_info, dict)
 
     @property
     def available(self):
+        """This methods checks availability."""
         return None
 
     def get_scenario_info(self, point_id: str, plug_types: List[str]):
