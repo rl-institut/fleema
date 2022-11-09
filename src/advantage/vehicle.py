@@ -137,7 +137,7 @@ class Vehicle:
                     pass
         return self.soc - consumption / self.vehicle_type.battery_capacity
 
-    def get_breaks(self, start: int, end: int):
+    def get_breaks(self, start: int, end: int) -> List["Task"]: 
         breaks = []
         first_task = self.tasks[0]
         if first_task.departure_time < start:

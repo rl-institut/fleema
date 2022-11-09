@@ -78,7 +78,7 @@ class Simulation:
                 raise ValueError(f"Vehicle number {vehicle_id} has multiple vehicle types assigned to it!")
             self.vehicles[vehicle_id] = Vehicle(vehicle_id, self.vehicle_types[vehicle_type[0]])  # type: ignore
 
-    def task_from_schedule(self, row):
+    def task_from_schedule(self, row):  # TODO move function to vehicle?
         vehicle = self.vehicles[row.vehicle_id]
         task = Task(
             self.locations[row.departure_name],
@@ -97,6 +97,18 @@ class Simulation:
         delta = datetime_string_to_datetime(datetime_str) - self.start_date
         diff_in_minutes = delta.total_seconds() / 60
         return diff_in_minutes / self.step_size
+
+    def evaluate_charging_location(self, vehicle_type: "VehicleType", charging_location: "Location", current_location: "Location", next_location: "Location", time_window: int, current_soc: float, necessary_soc: float):
+        # TODO get evaluation criteria from config
+        # TODO calculate total time spent driving, extra distance and consumption
+        driving_time = 0
+        consumption = 0
+        # TODO calculate possible charging amount and end_soc after extra drive
+        charging_time = time_window - driving_time
+        soc = current_soc - consumption / vehicle_type.battery_capacity
+        # TODO evaluate charging point
+        grade = 0
+        return grade
 
     @classmethod
     def from_config(cls, scenario_name):

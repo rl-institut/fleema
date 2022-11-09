@@ -1,5 +1,8 @@
 from importlib import import_module
+from typing import TYPE_CHECKING
 
+if TYPE_CHECKING:
+    from advantage.simulation import Simulation
 
 def class_from_str(strategy_name):
     import_name = strategy_name.lower()
@@ -13,5 +16,5 @@ class SimulationType:
 
     """
 
-    def __init__(self, simulation):
+    def __init__(self, simulation: "Simulation"):
         self.simulation = simulation
