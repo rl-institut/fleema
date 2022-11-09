@@ -49,7 +49,7 @@ class Simulation:
 
     """
 
-    def __init__(self, schedule, vehicle_types, charging_points, cfg_dict, consumption):
+    def __init__(self, schedule, vehicle_types, charging_points, cfg_dict, consumption, trips):
         """Init Method of the Simulation class.
 
         Parameters
@@ -73,7 +73,11 @@ class Simulation:
         self.num_threads = cfg_dict["num_threads"]
 
         self.schedule = schedule
+
+        # driving simulation
         self.consumption = consumption
+        self.trips = trips
+        self.consumption_matrix = None
 
         # use other args to create objects
         self.vehicle_types = {}
@@ -103,6 +107,35 @@ class Simulation:
         # TODO start fleet management (includes loop)
 
         pass
+
+    def create_consumption_matrix(self):
+        # create numpy matrix
+        self.consumption_matrix = []
+
+        # for loop through rows of self.trips
+        for i in range(self.trips.shape[0]):
+
+            # interpolate the inputs
+            consumption_index = self.interpolate_consumption(i)
+
+            # lookup consumption and store in the consumption_matrix
+            consumption_tmp = self.consumption.loc[consumption_index, 'consumption']
+            # elf.consumption_matrix[loc_a, loc_b] = consumption_tmp
+
+    def interpolate_consumption(self, index):
+        consumption_index = 0
+
+        for element in self.trips.iloc(index):
+            print(element, end=", ")
+        # print(index, ": ", self.trips.loc[index, 'incline'])
+
+        # extract possible rows from consumption_df
+
+        # interpolate values single
+
+        # interpolate the single-interpolated values
+
+        return consumption_index
 
     @classmethod
     def from_config(cls, scenario_name):
@@ -177,4 +210,8 @@ class Simulation:
         consumption_table = pathlib.Path(scenario_path, "consumption_table.csv")
         consumption_df = pd.read_csv(consumption_table)
 
-        return Simulation(schedule, vehicle_types, charging_points, cfg_dict, consumption_df)
+        # read trips
+        trips_table = pathlib.Path(scenario_path, "trips.csv")
+        trips_df = pd.read_csv(trips_table)
+
+        return Simulation(schedule, vehicle_types, charging_points, cfg_dict, consumption_df, trips_df)
