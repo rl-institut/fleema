@@ -49,7 +49,7 @@ class Simulation:
 
     """
 
-    def __init__(self, schedule, vehicle_types, charging_points, cfg_dict):
+    def __init__(self, schedule, vehicle_types, charging_points, cfg_dict, consumption):
         """Init Method of the Simulation class.
 
         Parameters
@@ -73,6 +73,7 @@ class Simulation:
         self.num_threads = cfg_dict["num_threads"]
 
         self.schedule = schedule
+        self.consumption = consumption
 
         # use other args to create objects
         self.vehicle_types = {}
@@ -172,4 +173,8 @@ class Simulation:
                     "num_threads": cfg.getint('sim_params', 'num_threads')
                     }
 
-        return Simulation(schedule, vehicle_types, charging_points, cfg_dict)
+        # read consumption_table
+        consumption_table = pathlib.Path(scenario_path, "consumption_table.csv")
+        consumption_df = pd.read_csv(consumption_table)
+
+        return Simulation(schedule, vehicle_types, charging_points, cfg_dict, consumption_df)
