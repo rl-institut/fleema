@@ -38,24 +38,27 @@ class Simulation:
         self.events: List[tuple[int, "Vehicle"]] = []
 
         # use other args to create objects
-        self.vehicle_types = {}
+        self.vehicle_types: Dict[str, "VehicleType"] = {}
         for name, info in vehicle_types.items():
             self.vehicle_types[name] = VehicleType(name, info["capacity"], self.soc_min, 0,
                                                    info["charging_power"], info["charging_curve"],
                                                    self.min_charging_power)
         self.vehicles: Dict[Union[str, int], "Vehicle"] = {}
 
-        self.locations = {}
+        self.locations: Dict[str, "Location"] = {}
         for location_name in self.schedule.departure_name.unique():
             self.locations[location_name] = Location(location_name)
 
-        self.plug_types = {}
+        self.plug_types: Dict[int, "PlugType"] = {}
+        self.charging_locations: List["Location"] = []
         for name, info in charging_points["plug_types"].items():
             self.plug_types[name] = PlugType(name, info["capacity"], info["plug"])
         for name, info in charging_points["charging_points"].items():
             plug_types = [p for p in self.plug_types.values() if p.name in info["plug_types"]]
             charger = Charger.from_json(name, info["number_charging_points"], plug_types)
             self.locations[name].chargers.append(charger)
+            if not self.locations[name] in self.charging_locations:
+                self.charging_locations.append(self.locations[name])
 
         # Instantiation of observer
         self.observer = SimulationState()
