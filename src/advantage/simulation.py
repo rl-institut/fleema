@@ -98,7 +98,9 @@ class Simulation:
         diff_in_minutes = delta.total_seconds() / 60
         return diff_in_minutes / self.step_size
 
-    def evaluate_charging_location(self, vehicle_type: "VehicleType", charging_location: "Location", current_location: "Location", next_location: "Location", time_window: int, current_soc: float, necessary_soc: float):
+    def evaluate_charging_location(self, vehicle_type: "VehicleType", charging_location: "Location",
+                                   current_location: "Location", next_location: "Location", time_window: int,
+                                   current_soc: float, necessary_soc: float):
         # TODO get evaluation criteria from config
         # TODO calculate total time spent driving, extra distance and consumption
         driving_time = 0

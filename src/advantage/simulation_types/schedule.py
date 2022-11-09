@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from advantage.simulation import Simulation
 
+
 class Schedule(SimulationType):
     def __init__(self, simulation: "Simulation"):
         super().__init__(simulation)
@@ -27,7 +28,7 @@ class Schedule(SimulationType):
             end_of_day_soc = veh.get_predicted_soc(start, end)
             break_list = veh.get_breaks(start, end)
             for task in break_list:
-                # for all locations with chargers, evaluate the best option. save break task together with best option and evaluation
+                # for all locations with chargers, evaluate the best option. save task, best location, evaluation
                 # self.simulation.evaluate_charging_location()
                 pass
             if end_of_day_soc < 0.2:
