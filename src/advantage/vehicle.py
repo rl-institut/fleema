@@ -46,21 +46,24 @@ class VehicleType:
 @dataclass
 class Task:
     """
+    Attributes
+    ----------
+    departure_point : Location
+        Starting point of the task.
+    arrival_point : Location
+        End point of the task.
+    departure_time : int
+        Starting time of the task.
+    arrival_time : int
+        End time of the task.
+    task : str
+        Task type: driving, charging, parking, break.
     """
     departure_point: "Location"
     arrival_point: "Location"
     departure_time: int
-    """This class implements the basic bus type with the parent class VehicleType.
-
-    Attributes
-    ----------
-    max_passenger_number : int
-        Maximum passenger capacity for the respective bus type.
-
-    """
-
     arrival_time: int
-    task: str
+    task: str  # TODO enum
 
     @property
     def data_dict(self):
