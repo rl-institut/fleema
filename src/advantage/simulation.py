@@ -110,6 +110,18 @@ class Simulation:
         self.observer = SimulationState()
 
     def get_end_of_day_timestep(self, step):
+        """Returns the last time step of the day of the given step.
+
+        Parameters
+        ----------
+        step : int
+            Reference time step.
+
+        Returns
+        -------
+        int
+            End of day time step
+        """
         if self.end_of_day_steps is None:
             steps_per_day = 1440 / self.step_size
             days = int(self.time_steps / steps_per_day)
@@ -120,6 +132,9 @@ class Simulation:
         raise ValueError(f"Step {step} higher than end of day time steps: {self.end_of_day_steps}")
 
     def vehicles_from_schedule(self):
+        """Creates vehicle objects from the schedule.
+
+        """
         vehicle_ids = self.schedule.groupby(by="vehicle_id")
         for vehicle_id, index in vehicle_ids.groups.items():
             vehicle_type = self.schedule.loc[index, "vehicle_type"].unique()  # type: ignore
@@ -128,6 +143,14 @@ class Simulation:
             self.vehicles[vehicle_id] = Vehicle(vehicle_id, self.vehicle_types[vehicle_type[0]])  # type: ignore
 
     def task_from_schedule(self, row):  # TODO move function to vehicle?
+        """Creates Task from a specificed schedule row and adds it to the vehicle.
+
+        Parameters
+        ----------
+        row : pd.Series
+            Row of schedule DataFrame
+
+        """
         vehicle = self.vehicles[row.vehicle_id]
         task = Task(
             self.locations[row.departure_name],
@@ -139,21 +162,62 @@ class Simulation:
         vehicle.add_task(task)
 
     def run(self):
+        """Creates SimulationType object depending on self.simulation_type and runs it.
+
+        """
         sim = class_from_str(self.simulation_type)(self)
         sim.run()
 
     def datetime_to_timesteps(self, datetime_str):
+        """Converts a given datetime string into a time step.
+
+        Parameters
+        ----------
+        datetime_str : str
+            Datetime string of the format YYYY-mm-dd HH:MM:SS
+
+        Returns
+        -------
+        int
+            Corresponding time step
+
+        """
         delta = datetime_string_to_datetime(datetime_str) - self.start_date
         diff_in_minutes = delta.total_seconds() / 60
-        return diff_in_minutes / self.step_size
+        return int(diff_in_minutes / self.step_size)
 
     def evaluate_charging_location(self, vehicle_type: "VehicleType", charging_location: "Location",
                                    current_location: "Location", next_location: "Location", time_window: int,
-                                   current_soc: float, necessary_soc: float):
+                                   current_soc: float, desired_soc: float):
+        """Gives a grade to a charging location.
+
+        Parameters
+        ----------
+        vehicle_type : VehicleType
+            Vehicle type of the vehicle that wants to charge
+        charging_location : Location
+            Location of the charger
+        current_location : Location
+            Location of the vehicle
+        next_location : Location
+            Starting location of the vehicles next task
+        time_window : int
+            Time between tasks in time steps
+        current_soc : float
+            SoC of vehicle before charging
+        desired_soc : float
+            SoC needed to complete upcoming task(s) until next break
+
+        Returns
+        -------
+        int
+            Rating of the charging point
+
+        """
         # TODO get evaluation criteria from config
         # TODO calculate total time spent driving, extra distance and consumption
         # criteria:
-        # 0. available? 
+        # 0. available?
         # 1. extra consumption and driving time
         # 2. charging time, end_soc, charging energy
         # 3. costs
@@ -182,6 +246,7 @@ class Simulation:
 
         Returns
         -------
+        Simulation
             Simulation object
 
         Raises
