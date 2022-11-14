@@ -6,17 +6,28 @@ from typing import Optional, List
 
 @dataclass
 class VehicleType:
-    """
-    The VehicleType contains static vehicle data.
-    name:               vehicle type name
-    battery_capacity:   battery capacity in kWh
-    soc_min:            minimum state of charge that should remain in battery after a drive
-    base_consumption:   in kWh/km ?
-    charging_capacity:  dict containing values for each viable plug and their respective power
-    charging_curve:     example: [[0, 50], [0.8, 50], [1, 20]], first number is SoC, second the
-                        possible max power
-    plugs:              list of plugs this vehicle can use, ["Type2", "Schuko"]
-    min_charging_power: least amount of charging power possible, as a share of max power
+    """The VehicleType contains static vehicle data.
+
+    Attributes
+    ----------
+    name : str
+        Name/ID for the vehicle type.
+    battery_capacity : float
+        Battery capacity in kWh.
+    soc_min : float
+        Minimum state of charge that should remain in battery after a drive. Shown in percentage.
+    base_consumption : float
+        Base/average consumption of the vehicle type in kWh/km.
+    charging_capacity : dict
+        Dictionary containing values for each viable plug and their respective capacity.
+        Example: {"plug_0": 50, "plug_1": 150}
+    charging_curve : list
+        List of list with two numbers. First number is SoC (state of charge) and
+        second the possible maximum power in kW. Example: [[0, 50], [0.8, 50], [1, 20]]
+    min_charging_power : float
+        Least amount of charging power possible, as a share of max power. Shown in percentage.
+    label : str, optional
+
     """
     name: str = "vehicle_name"
     battery_capacity: float = 50.
@@ -39,6 +50,15 @@ class Task:
     departure_point: "Location"
     arrival_point: "Location"
     departure_time: int
+    """This class implements the basic bus type with the parent class VehicleType.
+
+    Attributes
+    ----------
+    max_passenger_number : int
+        Maximum passenger capacity for the respective bus type.
+
+    """
+
     arrival_time: int
     task: str
 
@@ -52,11 +72,28 @@ class Task:
 
 
 class Vehicle:
-    """
-    The vehicle contains tech parameters as well as tasks.
-    Functions:
-        charge
-        drive
+    """The vehicle contains tech parameters as well as tasks.
+
+    Attributes
+    ----------
+    id : str
+        ID of the vehicle.
+    vehicle_type : VehicleType
+        VehicleType of the Vehicle instance.
+    status : str
+        Describes current state of the Vehicle object. Example: "parking", "driving", "charging"
+    soc : float
+        State of charge: Current charge of the battery. Shown in percentage.
+    availability : bool
+        Boolean that states if Vehicle is available. Default on True.
+    rotation : str, optional
+    current_location : Location, optional
+        Has current location if Vehicle was already to one assigned.
+    task : None
+    output: dict
+        Comprises all relevant information of the Vehicle object like locations, statuses, etc.
+        It gets updated by the private method _update_activity.
+
     """
 
     def __init__(self,
@@ -68,6 +105,25 @@ class Vehicle:
                  rotation: Optional[str] = None,
                  current_location: Optional["Location"] = None
                  ):
+        """Constructor of the Vehicle class.
+
+        Parameters
+        ----------
+        id : str
+            ID of the vehicle.
+        vehicle_type : VehicleType
+            VehicleType of the Vehicle instance. Default instantiates a VehicleType object.
+        status : str
+            Describes current state of the Vehicle object. Example: "parking", "driving", "charging"
+        soc : float
+            State of charge: Current charge of the battery. Shown in percentage.
+        availability : bool
+            Boolean that states if Vehicle is available. Default on True.
+        rotation : str, optional
+        current_location : Location, optional
+            Current location of the Vehicle instance.
+
+        """
         self.id = vehicle_id
         self.vehicle_type = vehicle_type
         self.status = status
@@ -92,7 +148,25 @@ class Vehicle:
         }
 
     def _update_activity(self, timestamp, event_start, event_time, simulation_state, charging_power=0):
-        """Records newest energy and activity"""
+        """Records newest energy and activity in the attributes soc and output.
+
+        It is used when an event takes place. A event is one of the vehicle methods charge, drive or park.
+
+        Parameters
+        ----------
+        timestamp : timestamp format --> YYYY-MM-DD hh:mm:ss, pandas._libs.tslibs.timestamps.Timestamp
+            Timestamp that marks the time period of the event that is used.
+        event_start : int
+            Start of the event.
+        event_time: int
+            Time steps of the whole event.
+        simulation_state : SimulationState
+            Current state of the simulation.
+        charging_power : float
+            Charging power of the vehicle's battery in percentage. Default is zero.
+
+
+        """
         self.soc = round(self.soc, 4)
         self.output["timestamp"].append(timestamp)
         self.output["event_start"].append(event_start)
@@ -162,6 +236,7 @@ class Vehicle:
         return breaks
 
     def charge(self, timestamp, start, time, power, new_soc, observer=None):
+        """This method simulates charging and updates therefore the attributes status and soc."""
         # TODO call spiceev charging depending on soc, location, task
         # TODO this requires a SpiceEV scenario object
         if not all(isinstance(i, int) or isinstance(i, float) for i in [start, time, power, new_soc]):
@@ -177,6 +252,7 @@ class Vehicle:
         self._update_activity(timestamp, start, time, observer, charging_power=power)
 
     def drive(self, timestamp, start, time, destination, new_soc, observer=None):
+        """This method simulates driving and updates therefore the attributes status and soc."""
         # call drive api with task, soc, ...
         if not all(isinstance(i, int) or isinstance(i, float) for i in [start, time, new_soc]):
             raise TypeError("Argument has wrong type.")
@@ -195,6 +271,7 @@ class Vehicle:
         self.status = destination
 
     def park(self, timestamp, start, time, observer=None):
+        """This method simulates parking and updates therefore the attribute status."""
         if not all(isinstance(i, int) or isinstance(i, float) for i in [start, time]):
             raise TypeError("Argument has wrong type.")
         if not all(i >= 0 for i in [start, time]):
@@ -204,10 +281,26 @@ class Vehicle:
 
     @property
     def usable_soc(self):
+        """This get method returns the SoC that is still usable until the vehicle reaches the minimum SoC.
+
+        Returns
+        -------
+        float
+            Usable SoC in percentage until the minimum SoC is reached.
+
+        """
         return self.soc - self.vehicle_type.soc_min
 
     @property
     def scenario_info(self):
+        """Returns Dictionary with general information about the Vehicle instance.
+
+        Returns
+        -------
+            dict
+                Nested dictionary with general information about the Vehicle instance.
+
+        """
         scenario_dict = {
             "constants": {
                 "vehicle_types": {
@@ -234,6 +327,7 @@ class Vehicle:
         return scenario_dict
 
     def _get_last_charging_demand(self):
+        """This private method is used by the method _update_activity and updates the charging demand."""
         if len(self.output["soc"]) > 1:
             charging_demand = (self.output["soc"][-1] - self.output["soc"][-2])
             charging_demand *= self.vehicle_type.battery_capacity
@@ -242,6 +336,7 @@ class Vehicle:
             return 0
 
     def _get_last_consumption(self):
+        """This private method is used by the method _update_activity and updates the last consumption."""
         if len(self.output["soc"]) > 1:
             last_consumption = self.output["soc"][-1] - self.output["soc"][-2]
             last_consumption *= self.vehicle_type.battery_capacity

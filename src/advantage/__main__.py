@@ -1,3 +1,9 @@
+"""
+This script starts the simulation.
+
+The simulation is instantiated by using the scenario name from the command line.
+"""
+
 from advantage.simulation import Simulation
 import argparse
 
