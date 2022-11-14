@@ -71,7 +71,7 @@ class Task:
 
     @property
     def dataframe(self):
-        return pd.DataFrame.from_dict(self.data_dict)
+        return pd.DataFrame.from_dict(self.data_dict)  # TODO test
 
 
 class Vehicle:
@@ -227,14 +227,16 @@ class Vehicle:
             )
         previous_task = first_task
         for task in self.tasks:
-            if task.arrival_time < end and task.task == "driving":  # TODO are other task types relevant?
-                breaks.append(Task(
-                    previous_task.arrival_point,
-                    task.departure_point,
-                    previous_task.arrival_time,  # TODO maybe +1?
-                    task.departure_time,  # TODO maybe -1?
-                    "break")
-                )
+            if task.arrival_time < end and task.task == "driving":
+                # TODO are other task types relevant?
+                if task.departure_time > previous_task.arrival_time:
+                    breaks.append(Task(
+                        previous_task.arrival_point,
+                        task.departure_point,
+                        previous_task.arrival_time,  # TODO maybe +1?
+                        task.departure_time,  # TODO maybe -1?
+                        "break")
+                    )
                 previous_task = task
         return breaks
 

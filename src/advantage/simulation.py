@@ -152,6 +152,12 @@ class Simulation:
                                    current_soc: float, necessary_soc: float):
         # TODO get evaluation criteria from config
         # TODO calculate total time spent driving, extra distance and consumption
+        # criteria:
+        # 0. available? 
+        # 1. extra consumption and driving time
+        # 2. charging time, end_soc, charging energy
+        # 3. costs
+        # 4. renewable energy?, grid friendly charging
         driving_time = 0
         consumption = 0
         # TODO calculate possible charging amount and end_soc after extra drive

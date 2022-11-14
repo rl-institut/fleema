@@ -14,7 +14,8 @@ class Schedule(SimulationType):
         # creates self.events: List of timesteps where an event happens
         # TODO check similar functions in ebus toolbox
         self.simulation.vehicles_from_schedule()
-        self.simulation.schedule.apply(self.simulation.task_from_schedule, axis=1)
+        # get tasks for every row of the schedule
+        self.simulation.schedule.apply(self.simulation.task_from_schedule, axis=1)  # type: ignore
 
     def _distribute_charging_slots(self, start, end):
         # go through all vehicles, check SoC after all tasks (end of day). continues if <20%
