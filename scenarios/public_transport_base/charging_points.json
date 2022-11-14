@@ -19,12 +19,12 @@
   "charging_points": {
     "Marktplatz": {
       "plug_types": ["inductive_50"],
-      "EE": null,
+      "generator": ["pv", "south"],
       "number_charging_points": 3
     },
     "Bahnhof": {
       "plug_types": ["inductive_50"],
-      "EE": null,
+      "generator": null,
       "number_charging_points": 1
     }
   }
