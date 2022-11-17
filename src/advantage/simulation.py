@@ -187,8 +187,8 @@ class Simulation:
         return int(diff_in_minutes / self.step_size)
 
     def evaluate_charging_location(self, vehicle_type: "VehicleType", charging_location: "Location",
-                                   current_location: "Location", next_location: "Location", time_window: int,
-                                   current_soc: float, desired_soc: float):
+                                   current_location: "Location", next_location: "Location", start_time: int,
+                                   end_time: int, current_soc: float, desired_soc: float):
         """Gives a grade to a charging location.
 
         Parameters
@@ -201,8 +201,10 @@ class Simulation:
             Location of the vehicle
         next_location : Location
             Starting location of the vehicles next task
-        time_window : int
-            Time between tasks in time steps
+        start_time : int
+            Starting time step of the time window
+        end_time : int
+            Ending time step of the time window
         current_soc : float
             SoC of vehicle before charging
         desired_soc : float
@@ -222,6 +224,7 @@ class Simulation:
         # 2. charging time, end_soc, charging energy
         # 3. costs
         # 4. renewable energy?, grid friendly charging
+        time_window = end_time - start_time
         driving_time = 0
         consumption = 0
         # TODO calculate possible charging amount and end_soc after extra drive
