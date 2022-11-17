@@ -1,4 +1,4 @@
-bus_type,level_of_loading,incline,sp_type,t_amb,consumption
+vehicle_type,level_of_loading,incline,sp_type,t_amb,consumption
 bus_18m,0.0,-0.04,2.626,-10,49.706
 bus_18m,0.0,-0.04,2.626,-15,62.502
 bus_18m,0.0,-0.04,2.626,-5,38.267

@@ -1,22 +1,44 @@
 import pandas as pd
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from advantage.vehicle import VehicleType
+
+
 class RideCalc:
     def __init__(self, consumption_table: pd.DataFrame, distances, inclines) -> None:
         self.consumption_table = consumption_table
         self.distances = distances
         self.inclines = inclines
 
-        self.uniques = {col:sorted(self.consumption_table[col].unique()) for col in self.consumption_table.iloc[:,:-1]}
+        self.uniques = {
+            col: sorted(self.consumption_table[col].unique()) for col in self.consumption_table.iloc[:, :-1]
+            }
 
-    def find_rows(self, bus_type, incline, temperature, sp_type, load_level):
-        """"""
+    # TODO 6. write interpolation, based on find_rows and its input values
+    # TODO 2. write wrapper which includes distance, to calculate consumption
+    # TODO 3. add Distance/Incline Matrices to scenario
+    # TODO 4. write wrapper which takes Location A/B, vehicle type and temp, returns consumption
+    # TODO 5. create RideCalc in Simulation and use it in decisionmaking / point evaluation / ...
 
-        filtered = self.consumption_table.loc[self.consumption_table["bus_type"] == bus_type]    
+    def calculate_consumption(self, vehicle_type: "VehicleType", incline, temperature, sp_type, load_level, distance):
+        """Calculates the reduction in SoC of a vehicle type when driving the specified route."""
+        consumption_factor = self.get_consumption(vehicle_type.name, incline, temperature, sp_type, load_level)
+        consumption = consumption_factor * distance
+
+        return consumption * vehicle_type.battery_capacity / 100
+
+    def get_consumption(self, vehicle_type_name: str, incline, temperature, sp_type, load_level):
+        """
+        """
+
+        filtered = self.consumption_table.loc[self.consumption_table["vehicle_type"] == vehicle_type_name]
 
         # TODO maybe solve via **kwargs and a loop?
         incline_lower, incline_upper = self.get_nearest_uniques(incline, "incline")
         filtered = filtered.loc[filtered["incline"].between(incline_lower, incline_upper)]
-        
+
         temp_lower, temp_upper = self.get_nearest_uniques(temperature, "t_amb")
         filtered = filtered.loc[filtered["t_amb"].between(temp_lower, temp_upper)]
 
@@ -26,11 +48,13 @@ class RideCalc:
         load_lower, load_upper = self.get_nearest_uniques(load_level, "level_of_loading")
         filtered = filtered.loc[filtered["level_of_loading"].between(load_lower, load_upper)]
 
-        return filtered
+        consumption_value = filtered.iloc[-1, -1]
 
-    def get_nearest_uniques(self, value:float, column):
+        return consumption_value
+
+    def get_nearest_uniques(self, value: float, column):
         """Returns the nearest upper and lower consumption input for a specified value and a column name.
-        
+
         Parameters
         ----------
         value : float
@@ -61,64 +85,12 @@ class RideCalc:
 
         return lower, upper
 
+
+# TODO remove  / convert to test script
 if __name__ == "__main__":
     import pathlib
     cons_path = pathlib.Path("scenarios", "public_transport_base", "consumption.csv")
     cons = pd.read_csv(cons_path)
     rc = RideCalc(cons, None, None)
     print(rc.uniques)
-    print(rc.find_rows("bus_18m", 0.01, 1., 8.65, 0.))
-
-# def interpolate_consumption(self, incline, temperature, distance, sp_type=8.65, level_of_loading=0.):
-#         # extract possible rows from consumption_df
-#         # find the 2 points to interpolate
-
-#         rows = self.consumption['incline']
-
-#         # reductions
-#         rows = self._nearest_rows(rows, incline)
-#         rows = self._nearest_rows(rows, temperature)
-#         rows = self._nearest_rows(rows, distance)
-#         rows = self._nearest_rows(rows, sp_type)
-#         rows = self._nearest_rows(rows, level_of_loading)
-
-#         # real interpolation between the rows which remain
-#         consumption_index = 0
-
-#         return self.consumption['consumption'][consumption_index]
-
-# def _nearest_rows(self, rows, param):
-#     from decimal import Decimal
-#     return_rows = None
-#     rows_values = rows.tolist()
-#     # if param has an exact value like in the consumption table
-#     if param in rows_values:
-#         return rows.loc[lambda x: x == param]
-
-#     #smallest_gap_minus = math.inf
-#     #smallest_gap_plus = math.inf
-#     for i in range(len(rows_values)):
-#         if rows_values[i] < param:
-#             gap_minus = param - rows_values[i]
-#             if gap_minus < smallest_gap_minus:
-#                 smallest_gap_minus = round(gap_minus, 2)
-#         if rows_values[i] > param:
-#             gap_plus = float(rows_values[i] - param)
-#             if gap_plus < smallest_gap_plus:
-#                 smallest_gap_plus = round(gap_plus, 2)
-
-#     minus_value = round(param + smallest_gap_minus*.1, 2)
-#     plus_value = round(param + smallest_gap_plus, 2)
-#     row_minus = rows.loc[lambda x: x == minus_value]
-#     row_plus = rows.loc[lambda x: x == plus_value]
-
-#     print(minus_value)
-#     print(plus_value)
-#     print()
-#     print(row_minus)
-#     print(row_plus)
-
-#     print(rows.to_string())
-
-
-#     return return_rows
+    print(rc.get_consumption("bus_18m", 0.01, 1., 8.65, 0.))
