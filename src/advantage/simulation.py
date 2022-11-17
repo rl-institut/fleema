@@ -108,60 +108,6 @@ class Simulation:
 
         pass
 
-    def interpolate_consumption(self, incline, temperature, distance, sp_type=8.65, level_of_loading=0.):
-        # extract possible rows from consumption_df
-        # find the 2 points to interpolate
-
-        rows = self.consumption['incline']
-
-        # reductions
-        rows = self._nearest_rows(rows, incline)
-        rows = self._nearest_rows(rows, temperature)
-        rows = self._nearest_rows(rows, distance)
-        rows = self._nearest_rows(rows, sp_type)
-        rows = self._nearest_rows(rows, level_of_loading)
-
-        # real interpolation between the rows which remain
-        consumption_index = 0
-
-        return self.consumption['consumption'][consumption_index]
-
-    def _nearest_rows(self, rows, param):
-        from decimal import Decimal
-        return_rows = None
-        rows_values = rows.tolist()
-        # if param has an exact value like in the consumption table
-        if param in rows_values:
-            return rows.loc[lambda x: x == param]
-
-        smallest_gap_minus = math.inf
-        smallest_gap_plus = math.inf
-        for i in range(len(rows_values)):
-            if rows_values[i] < param:
-                gap_minus = param - rows_values[i]
-                if gap_minus < smallest_gap_minus:
-                    smallest_gap_minus = round(gap_minus, 2)
-            if rows_values[i] > param:
-                gap_plus = float(rows_values[i] - param)
-                if gap_plus < smallest_gap_plus:
-                    smallest_gap_plus = round(gap_plus, 2)
-
-        minus_value = round(param + smallest_gap_minus*.1, 2)
-        plus_value = round(param + smallest_gap_plus, 2)
-        row_minus = rows.loc[lambda x: x == minus_value]
-        row_plus = rows.loc[lambda x: x == plus_value]
-
-        print(minus_value)
-        print(plus_value)
-        print()
-        print(row_minus)
-        print(row_plus)
-
-        print(rows.to_string())
-
-
-        return return_rows
-
 
     @classmethod
     def from_config(cls, scenario_name):
