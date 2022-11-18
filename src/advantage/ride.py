@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from advantage.vehicle import VehicleType
+    from advantage.location import Location
 
 
 class RideCalc:
@@ -17,19 +18,24 @@ class RideCalc:
             }
 
     # TODO 6. write interpolation, based on find_rows and its input values
-    # TODO 2. write wrapper which includes distance, to calculate consumption
-    # TODO 3. add Distance/Incline Matrices to scenario
-    # TODO 4. write wrapper which takes Location A/B, vehicle type and temp, returns consumption
     # TODO 5. create RideCalc in Simulation and use it in decisionmaking / point evaluation / ...
 
-    def calculate_consumption(self, vehicle_type: "VehicleType", incline, temperature, sp_type, load_level, distance):
+    def calculate_trip(self, origin: "Location", destination: "Location", vehicle_type: "VehicleType", temperature):
+        # TODO add speed as scenario input, load level somewhere?
+        speed = 8.65
+        load_level = 0
+        distance, incline = self.get_location_values(origin, destination)
+
+        return self.calculate_consumption(vehicle_type, incline, temperature, speed, load_level, distance)
+
+    def calculate_consumption(self, vehicle_type: "VehicleType", incline, temperature, speed, load_level, distance):
         """Calculates the reduction in SoC of a vehicle type when driving the specified route."""
-        consumption_factor = self.get_consumption(vehicle_type.name, incline, temperature, sp_type, load_level)
+        consumption_factor = self.get_consumption(vehicle_type.name, incline, temperature, speed, load_level)
         consumption = consumption_factor * distance
 
         return consumption * vehicle_type.battery_capacity / 100
 
-    def get_consumption(self, vehicle_type_name: str, incline, temperature, sp_type, load_level):
+    def get_consumption(self, vehicle_type_name: str, incline, temperature, speed, load_level):
         """
         """
 
@@ -42,13 +48,14 @@ class RideCalc:
         temp_lower, temp_upper = self.get_nearest_uniques(temperature, "t_amb")
         filtered = filtered.loc[filtered["t_amb"].between(temp_lower, temp_upper)]
 
-        sp_lower, sp_upper = self.get_nearest_uniques(sp_type, "sp_type")
+        sp_lower, sp_upper = self.get_nearest_uniques(speed, "sp_type")
         filtered = filtered.loc[filtered["sp_type"].between(sp_lower, sp_upper)]
 
         load_lower, load_upper = self.get_nearest_uniques(load_level, "level_of_loading")
         filtered = filtered.loc[filtered["level_of_loading"].between(load_lower, load_upper)]
 
-        consumption_value = filtered.iloc[-1, -1]
+        # TODO add interpolation here to get correct value
+        consumption_value = filtered["consumption"].mean()
 
         return consumption_value
 
@@ -84,6 +91,13 @@ class RideCalc:
                     break
 
         return lower, upper
+
+    def get_location_values(self, origin: "Location", destination: "Location"):
+        """Takes two locations as input and returns distance and incline between them."""
+        distance = self.distances.loc[origin.name, destination.name]
+        incline = self.inclines.loc[origin.name, destination.name]
+
+        return distance, incline
 
 
 # TODO remove  / convert to test script
