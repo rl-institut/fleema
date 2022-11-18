@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 
 
 class RideCalc:
-    def __init__(self, consumption_table: pd.DataFrame, distances, inclines) -> None:
+    def __init__(self, consumption_table: pd.DataFrame, distances: pd.DataFrame, inclines: pd.DataFrame) -> None:
         self.consumption_table = consumption_table
         self.distances = distances
         self.inclines = inclines
@@ -94,8 +94,8 @@ class RideCalc:
 
     def get_location_values(self, origin: "Location", destination: "Location"):
         """Takes two locations as input and returns distance and incline between them."""
-        distance = self.distances.loc[origin.name, destination.name]
-        incline = self.inclines.loc[origin.name, destination.name]
+        distance = self.distances.at[origin.name, destination.name]
+        incline = self.inclines.at[origin.name, destination.name]
 
         return distance, incline
 
@@ -105,6 +105,6 @@ if __name__ == "__main__":
     import pathlib
     cons_path = pathlib.Path("scenarios", "public_transport_base", "consumption.csv")
     cons = pd.read_csv(cons_path)
-    rc = RideCalc(cons, None, None)
+    rc = RideCalc(cons, cons, cons)
     print(rc.uniques)
     print(rc.get_consumption("bus_18m", 0.01, 1., 8.65, 0.))
