@@ -6,7 +6,7 @@ import pytest
 
 def test_get_consumption():
     import pathlib
-    cons_path = pathlib.Path("..", "scenarios", "public_transport_base", "consumption.csv")
+    cons_path = pathlib.Path("scenarios", "public_transport_base", "consumption.csv")
     cons = pd.read_csv(cons_path)
     rc = RideCalc(cons, cons, cons)
 
