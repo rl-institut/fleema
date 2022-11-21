@@ -39,7 +39,7 @@ class RideCalc:
         """
         """
 
-        filtered = self.consumption_table.loc[self.consumption_table["vehicle_type"] == vehicle_type_name]
+        """filtered = self.consumption_table.loc[self.consumption_table["vehicle_type"] == vehicle_type_name]
 
         # TODO maybe solve via **kwargs and a loop?
         incline_lower, incline_upper = self.get_nearest_uniques(incline, "incline")
@@ -52,12 +52,89 @@ class RideCalc:
         filtered = filtered.loc[filtered["sp_type"].between(sp_lower, sp_upper)]
 
         load_lower, load_upper = self.get_nearest_uniques(load_level, "level_of_loading")
-        filtered = filtered.loc[filtered["level_of_loading"].between(load_lower, load_upper)]
+        filtered = filtered.loc[filtered["level_of_loading"].between(load_lower, load_upper)]"""
 
         # TODO add interpolation here to get correct value
-        consumption_value = filtered["consumption"].mean()
+        # consumption_value = filtered["consumption"].mean()
+
+        df = self.consumption_table[self.consumption_table["vehicle_type"] == vehicle_type_name]
+
+        inc_col = df["incline"]
+        tmp_col = df["t_amb"]
+        lol_col = df["level_of_loading"]
+        speed_col = df["sp_type"]
+        cons_col = df["consumption"]
+        data_table = list(zip(inc_col, tmp_col, lol_col, speed_col, cons_col))
+
+        consumption_value = self.nd_interp((incline, temperature, load_level, speed), data_table)
 
         return consumption_value
+
+    def nd_interp(self, input_values, lookup_table):
+        # find all unique values in table per column
+        dim_sets = [set() for _ in input_values]
+        for row in lookup_table:
+            for i, v in enumerate(row[:-1]):
+                dim_sets[i].add(v)
+        dim_values = [sorted(s) for s in dim_sets]
+        # find nearest value(s) per column
+        # go through sorted column values until last less / first greater
+        lower = [None] * len(input_values)
+        upper = [None] * len(input_values)
+        for i, v in enumerate(input_values):
+            # initialize for out of bound values -> Constant value since lower and upper will both
+            # be the same boundary value. Still allows for interpolation in other dimensions
+            # forcing lower<upper could be implemented for extrapolation beyond the bounds.
+            lower[i] = dim_values[i][0]
+            upper[i] = dim_values[i][-1]
+            for c in dim_values[i]:
+                if v >= c:
+                    lower[i] = c
+                if v <= c:
+                    upper[i] = c
+                    break
+        # find rows in table made up of only lower or upper values
+        points = []
+        for row in lookup_table:
+            for i, v in enumerate(row[:-1]):
+                if lower[i] != v and upper[i] != v:
+                    break
+            else:
+                points.append(row)
+
+        # interpolate between points that differ only in current dimension
+        for i, x in enumerate(input_values):
+            new_points = []
+            # find points that differ in just that dimension
+            for j, p1 in enumerate(points):
+                for p2 in points[j + 1:]:
+                    for k in range(len(input_values)):
+                        if p1[k] != p2[k] and i != k:
+                            break
+                    else:
+                        # differing row found
+                        x1 = p1[i]
+                        y1 = p1[-1]
+                        x2 = p2[i]
+                        y2 = p2[-1]
+                        dx = x2 - x1
+                        dy = y2 - y1
+                        m = dy / dx
+                        n = y1 - m * x1
+                        y = m * x + n
+                        # generate new point at interpolation
+                        p = [v for v in p1]
+                        p[i] = x
+                        p[-1] = y
+                        new_points.append(p)
+                        # only couple
+                        break
+                else:
+                    # no matching row (singleton dimension?)
+                    new_points.append(p1)
+            points = new_points
+
+        return points[0][-1]
 
     def get_nearest_uniques(self, value: float, column):
         """Returns the nearest upper and lower consumption input for a specified value and a column name.
@@ -77,7 +154,7 @@ class RideCalc:
         """
         # give upper and lower default maximum values, in case no upper bound gets found
         upper = self.uniques[column][-1]
-        lower = self.uniques[column][-1]
+        lower = self.uniques[column][0]
         # check if the value is exactly one of the uniques
         if value in self.uniques[column]:
             upper = value
