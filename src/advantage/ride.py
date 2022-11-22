@@ -19,6 +19,25 @@ class RideCalc:
     # TODO 5. create RideCalc in Simulation and use it in decisionmaking / point evaluation / ...
 
     def calculate_trip(self, origin: "Location", destination: "Location", vehicle_type: "VehicleType", temperature):
+        """Calculate consumption as a part of total SoC.
+
+        Parameters
+        ----------
+        origin : Location
+            Starting location of trip
+        destination : Location
+            Ending location of trip
+        vehicle_type : VehicleType
+            Vehicle type to look up in consumption and for calculation of SoC
+        temperature : float
+            Ambient temperature
+
+        Returns
+        -------
+        float
+            Returns SoC delta resulting from this trip
+
+        """
         # TODO add speed as scenario input, load level somewhere?
         speed = 8.65
         load_level = 0
@@ -27,7 +46,29 @@ class RideCalc:
         return self.calculate_consumption(vehicle_type, incline, temperature, speed, load_level, distance)
 
     def calculate_consumption(self, vehicle_type: "VehicleType", incline, temperature, speed, load_level, distance):
-        """Calculates the reduction in SoC of a vehicle type when driving the specified route."""
+        """Calculates the reduction in SoC of a vehicle type when driving the specified route.
+
+        Parameters
+        ----------
+        vehicle_type : VehicleType
+            Vehicle type to look up in consumption and for calculation of SoC
+        incline : float
+            Average incline of trip
+        temperature : float
+            Ambient temperature
+        speed : float
+            Average speed during trip
+        load_level : float
+            Level of load from 0 - 1, 1 being the maximum load of the vehicle
+        distance : float
+            Distance of trip in km
+
+        Returns
+        -------
+        float
+            Returns SoC delta resulting from this trip
+
+        """
         consumption_factor = self.get_consumption(vehicle_type.name, incline, temperature, speed, load_level)
         consumption = consumption_factor * distance
 
@@ -35,6 +76,25 @@ class RideCalc:
 
     def get_consumption(self, vehicle_type_name: str, incline, temperature, speed, load_level):
         """Get consumption in kWh/km for a specified vehicle type and route.
+
+        Parameters
+        ----------
+        vehicle_type_name : str
+            Vehicle type name to look up in consumption table
+        incline : float
+            Average incline of trip
+        temperature : float
+            Ambient temperature
+        speed : float
+            Average speed during trip
+        load_level : float
+            Level of load from 0 - 1, 1 being the maximum load of the vehicle
+
+        Returns
+        -------
+        float
+            Returns SoC delta resulting from this trip
+
         """
 
         df = self.consumption_table[self.consumption_table["vehicle_type"] == vehicle_type_name]
@@ -51,6 +111,21 @@ class RideCalc:
         return consumption_value
 
     def nd_interp(self, input_values, lookup_table):
+        """Interpolate value from multiple input values and a lookup table
+
+        Parameters
+        ----------
+        input_values : tuple
+            Tuple of one value for each but the last column of the lookup table, in order
+        lookup_table : list
+            Lookup table as a matrix
+
+        Returns
+        -------
+        float
+            Return interpolated value from last column
+
+        """
         # find nearest value(s) per column
         lower = [None] * len(input_values)
         upper = [None] * len(input_values)
@@ -136,7 +211,21 @@ class RideCalc:
         return lower, upper
 
     def get_location_values(self, origin: "Location", destination: "Location"):
-        """Takes two locations as input and returns distance and incline between them."""
+        """Get distance and incline between two locations, on the trip from origin to destination.
+
+        Parameters
+        ----------
+        origin : Location
+            Starting location of trip
+        destination : Location
+            Ending location of trip
+
+        Returns
+        -------
+        float, float
+            Returns distance and incline between the locations
+
+        """
         distance = self.distances.at[origin.name, destination.name]
         incline = self.inclines.at[origin.name, destination.name]
 
