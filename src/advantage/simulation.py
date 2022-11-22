@@ -14,6 +14,7 @@ from advantage.location import Location
 import advantage.vehicle as vehicle
 from advantage.charger import Charger, PlugType
 from advantage.simulation_state import SimulationState
+from advantage.ride import RideCalc
 
 from advantage.util.conversions import date_string_to_datetime
 
@@ -49,7 +50,7 @@ class Simulation:
 
     """
 
-    def __init__(self, schedule, vehicle_types, charging_points, cfg_dict):
+    def __init__(self, schedule, vehicle_types, charging_points, cfg_dict, consumption_dict):
         """Init Method of the Simulation class.
 
         Parameters
@@ -73,6 +74,13 @@ class Simulation:
         self.num_threads = cfg_dict["num_threads"]
 
         self.schedule = schedule
+
+        # driving simulation
+        consumption = consumption_dict["consumption"]
+        distances = consumption_dict["distance"]
+        inclines = consumption_dict["incline"]
+
+        self.driving_sim = RideCalc(consumption, distances, inclines)
 
         # use other args to create objects
         self.vehicle_types = {}
@@ -172,4 +180,22 @@ class Simulation:
                     "num_threads": cfg.getint('sim_params', 'num_threads')
                     }
 
-        return Simulation(schedule, vehicle_types, charging_points, cfg_dict)
+        # read consumption_table
+        consumption_path = pathlib.Path(scenario_path, "consumption.csv")
+        consumption_df = pd.read_csv(consumption_path)
+
+        # read distance table
+        distance_table = pathlib.Path(scenario_path, "distance.csv")
+        distance_df = pd.read_csv(distance_table, index_col=0)
+
+        # read incline table
+        incline_table = pathlib.Path(scenario_path, "incline.csv")
+        incline_df = pd.read_csv(incline_table, index_col=0)
+
+        consumption_dict = {
+            "consumption": consumption_df,
+            "distance": distance_df,
+            "incline": incline_df
+        }
+
+        return Simulation(schedule, vehicle_types, charging_points, cfg_dict, consumption_dict)
