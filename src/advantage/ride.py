@@ -13,9 +13,7 @@ class RideCalc:
         self.distances = distances
         self.inclines = inclines
 
-        self.uniques = {
-            col: sorted(self.consumption_table[col].unique()) for col in self.consumption_table.iloc[:, :-1]
-            }
+        self.uniques = [sorted(self.consumption_table[col].unique()) for col in self.consumption_table.iloc[:, :-1]]
 
     # TODO 6. write interpolation, based on find_rows and its input values
     # TODO 5. create RideCalc in Simulation and use it in decisionmaking / point evaluation / ...
@@ -36,26 +34,8 @@ class RideCalc:
         return consumption * vehicle_type.battery_capacity / 100
 
     def get_consumption(self, vehicle_type_name: str, incline, temperature, speed, load_level):
+        """Get consumption in kWh/km for a specified vehicle type and route.
         """
-        """
-
-        """filtered = self.consumption_table.loc[self.consumption_table["vehicle_type"] == vehicle_type_name]
-
-        # TODO maybe solve via **kwargs and a loop?
-        incline_lower, incline_upper = self.get_nearest_uniques(incline, "incline")
-        filtered = filtered.loc[filtered["incline"].between(incline_lower, incline_upper)]
-
-        temp_lower, temp_upper = self.get_nearest_uniques(temperature, "t_amb")
-        filtered = filtered.loc[filtered["t_amb"].between(temp_lower, temp_upper)]
-
-        sp_lower, sp_upper = self.get_nearest_uniques(speed, "sp_type")
-        filtered = filtered.loc[filtered["sp_type"].between(sp_lower, sp_upper)]
-
-        load_lower, load_upper = self.get_nearest_uniques(load_level, "level_of_loading")
-        filtered = filtered.loc[filtered["level_of_loading"].between(load_lower, load_upper)]"""
-
-        # TODO add interpolation here to get correct value
-        # consumption_value = filtered["consumption"].mean()
 
         df = self.consumption_table[self.consumption_table["vehicle_type"] == vehicle_type_name]
 
@@ -64,35 +44,21 @@ class RideCalc:
         lol_col = df["level_of_loading"]
         speed_col = df["sp_type"]
         cons_col = df["consumption"]
-        data_table = list(zip(inc_col, tmp_col, lol_col, speed_col, cons_col))
+        data_table = list(zip(lol_col, inc_col, speed_col, tmp_col, cons_col))
 
-        consumption_value = self.nd_interp((incline, temperature, load_level, speed), data_table)
+        consumption_value = self.nd_interp((load_level, incline, speed, temperature), data_table)
 
         return consumption_value
 
     def nd_interp(self, input_values, lookup_table):
-        # find all unique values in table per column
-        dim_sets = [set() for _ in input_values]
-        for row in lookup_table:
-            for i, v in enumerate(row[:-1]):
-                dim_sets[i].add(v)
-        dim_values = [sorted(s) for s in dim_sets]
         # find nearest value(s) per column
-        # go through sorted column values until last less / first greater
         lower = [None] * len(input_values)
         upper = [None] * len(input_values)
         for i, v in enumerate(input_values):
             # initialize for out of bound values -> Constant value since lower and upper will both
             # be the same boundary value. Still allows for interpolation in other dimensions
             # forcing lower<upper could be implemented for extrapolation beyond the bounds.
-            lower[i] = dim_values[i][0]
-            upper[i] = dim_values[i][-1]
-            for c in dim_values[i]:
-                if v >= c:
-                    lower[i] = c
-                if v <= c:
-                    upper[i] = c
-                    break
+            lower[i], upper[i] = self.get_nearest_uniques(v, i + 1)  # type: ignore
         # find rows in table made up of only lower or upper values
         points = []
         for row in lookup_table:
@@ -143,8 +109,8 @@ class RideCalc:
         ----------
         value : float
             Value of the parameter matching with the column
-        column : ?
-            Name of the column in self.consumption
+        column : int
+            Number of the column in self.consumption
 
         Returns
         -------
@@ -175,13 +141,3 @@ class RideCalc:
         incline = self.inclines.at[origin.name, destination.name]
 
         return distance, incline
-
-
-# TODO remove  / convert to test script
-if __name__ == "__main__":
-    import pathlib
-    cons_path = pathlib.Path("scenarios", "public_transport_base", "consumption.csv")
-    cons = pd.read_csv(cons_path)
-    rc = RideCalc(cons, cons, cons)
-    print(rc.uniques)
-    print(rc.get_consumption("bus_18m", 0.01, 1., 8.65, 0.))
