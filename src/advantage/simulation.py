@@ -17,6 +17,7 @@ from advantage.vehicle import Vehicle, VehicleType, Task
 from advantage.charger import Charger, PlugType
 from advantage.simulation_state import SimulationState
 from advantage.simulation_type import class_from_str
+from advantage.ride import RideCalc
 
 from advantage.util.conversions import date_string_to_datetime, datetime_string_to_datetime
 
@@ -52,7 +53,7 @@ class Simulation:
 
     """
 
-    def __init__(self, schedule: pd.DataFrame, vehicle_types, charging_points, cfg_dict):
+    def __init__(self, schedule: pd.DataFrame, vehicle_types, charging_points, cfg_dict, consumption_dict):
         """Init Method of the Simulation class.
 
         Parameters
@@ -82,6 +83,13 @@ class Simulation:
 
         self.schedule = schedule
         self.events: List[tuple[int, "Vehicle"]] = []
+
+        # driving simulation
+        consumption = consumption_dict["consumption"]
+        distances = consumption_dict["distance"]
+        inclines = consumption_dict["incline"]
+
+        self.driving_sim = RideCalc(consumption, distances, inclines)
 
         # use other args to create objects
         self.vehicle_types: Dict[str, "VehicleType"] = {}
@@ -187,8 +195,8 @@ class Simulation:
         return int(diff_in_minutes / self.step_size)
 
     def evaluate_charging_location(self, vehicle_type: "VehicleType", charging_location: "Location",
-                                   current_location: "Location", next_location: "Location", time_window: int,
-                                   current_soc: float, desired_soc: float):
+                                   current_location: "Location", next_location: "Location", start_time: int,
+                                   end_time: int, current_soc: float, desired_soc: float):
         """Gives a grade to a charging location.
 
         Parameters
@@ -201,8 +209,10 @@ class Simulation:
             Location of the vehicle
         next_location : Location
             Starting location of the vehicles next task
-        time_window : int
-            Time between tasks in time steps
+        start_time : int
+            Starting time step of the time window
+        end_time : int
+            Ending time step of the time window
         current_soc : float
             SoC of vehicle before charging
         desired_soc : float
@@ -222,6 +232,7 @@ class Simulation:
         # 2. charging time, end_soc, charging energy
         # 3. costs
         # 4. renewable energy?, grid friendly charging
+        time_window = end_time - start_time
         driving_time = 0
         consumption = 0
         # TODO calculate possible charging amount and end_soc after extra drive
@@ -302,4 +313,22 @@ class Simulation:
                     "step_size": cfg.getint("basic", "step_size")
                     }
 
-        return Simulation(schedule, vehicle_types, charging_points, cfg_dict)
+        # read consumption_table
+        consumption_path = pathlib.Path(scenario_path, "consumption.csv")
+        consumption_df = pd.read_csv(consumption_path)
+
+        # read distance table
+        distance_table = pathlib.Path(scenario_path, "distance.csv")
+        distance_df = pd.read_csv(distance_table, index_col=0)
+
+        # read incline table
+        incline_table = pathlib.Path(scenario_path, "incline.csv")
+        incline_df = pd.read_csv(incline_table, index_col=0)
+
+        consumption_dict = {
+            "consumption": consumption_df,
+            "distance": distance_df,
+            "incline": incline_df
+        }
+
+        return Simulation(schedule, vehicle_types, charging_points, cfg_dict, consumption_dict)
