@@ -8,16 +8,9 @@
     },
     "SH_oppb-0": {
         "name": "shuttle bus - opportunity charging",
-        "capacity": 20,
+        "capacity": 32,
         "charging_curve": [[0, 150], [0.8, 150], [1, 150]],
-        "charging_power": {"CCS": 50, "Type2": 22, "Schuko": 3.7}
-    },
-    "SH_oppb-1": {
-        "name": "shuttle bus - opportunity charging",
-        "capacity": 20,
-        "charging_curve": [[0, 250], [0.8, 250], [1, 250]],
-        "charging_power": {"CCS": 50, "Type2": 22, "Schuko": 3.7},
-        "hc": "winter"
+        "charging_power": {"CCS": 50, "Type2": 22, "Schuko": 3.7, "inductive": 11}
     }
   }
 }
