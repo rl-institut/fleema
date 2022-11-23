@@ -209,6 +209,16 @@ class Vehicle:
         if task in self.tasks:
             self.tasks.remove(task)
 
+    @property
+    def has_valid_task_list(self):
+        previous_task = None
+        for task in self.tasks:
+            if previous_task is not None:
+                if not (previous_task.arrival_point == task.departure_point and previous_task.arrival_time <= task.departure_time):
+                    return False
+            previous_task = task
+        return True
+
     def get_breaks(self, start: int, end: int) -> List["Task"]:
         breaks = []
         first_task = self.tasks[0]

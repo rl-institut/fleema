@@ -1,4 +1,5 @@
 import advantage.vehicle as vehicle
+from advantage.location import Location
 from advantage.util.conversions import step_to_timestamp
 
 import pytest
@@ -7,7 +8,7 @@ import pandas as pd
 
 
 @pytest.fixture()
-def car():
+def car() -> vehicle.Vehicle:
     car_type = vehicle.VehicleType(battery_capacity=30, base_consumption=0.2)
     car = vehicle.Vehicle("car", vehicle_type=car_type, soc=0.5, status="driving")
     return car
@@ -111,3 +112,27 @@ def test_park_input_checks(car, time_series):
 
 def test_scenario_info(car):
     assert car.scenario_info["constants"]["vehicles"]["vehicle_name_0"]["soc"] == 0.5
+
+
+def test_task_list_sanity(car):
+    location_1 = Location("location_1")
+    location_2 = Location("location_2")
+    task_1 = vehicle.Task(location_1, location_2, 0, 1, "driving")
+    task_2 = vehicle.Task(location_2, location_2, 2, 4, "charging")
+    task_3 = vehicle.Task(location_2, location_1, 5, 6, "driving")
+    for task in [task_1, task_2, task_3]:
+        car.add_task(task)
+    
+    assert car.has_valid_task_list
+
+
+def test_incorrect_task_list(car):
+    location_1 = Location("location_1")
+    location_2 = Location("location_2")
+    task_1 = vehicle.Task(location_1, location_1, 0, 1, "driving")
+    task_2 = vehicle.Task(location_2, location_2, 2, 4, "charging")
+    task_3 = vehicle.Task(location_2, location_1, 5, 6, "driving")
+    for task in [task_1, task_2, task_3]:
+        car.add_task(task)
+    
+    assert not car.has_valid_task_list
