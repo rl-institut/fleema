@@ -95,7 +95,7 @@ class RideCalc:
         )
         consumption = consumption_factor * distance
 
-        return consumption, consumption * vehicle_type.battery_capacity / 100
+        return consumption, consumption / vehicle_type.battery_capacity
 
     def get_consumption(
         self, vehicle_type_name: str, incline, temperature, speed, load_level
@@ -129,7 +129,7 @@ class RideCalc:
         inc_col = df["incline"]
         tmp_col = df["t_amb"]
         lol_col = df["level_of_loading"]
-        speed_col = df["sp_type"]
+        speed_col = df["mean_speed"]
         cons_col = df["consumption"]
         data_table = list(zip(lol_col, inc_col, speed_col, tmp_col, cons_col))
 

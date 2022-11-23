@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from advantage.simulation import Simulation
-    from advantage.simulation import Vehicle
+    from advantage.vehicle import Vehicle
 
 
 def class_from_str(strategy_name):
@@ -25,13 +25,14 @@ class SimulationType:
             if start < task.arrival_time < end:
                 if task.task == "driving":
                     # TODO run task through driving simulation, add result to consumption
-                    self.simulation.driving_sim.calculate_trip(
+                    con = self.simulation.driving_sim.calculate_trip(
                         task.departure_point,
                         task.arrival_point,
                         vehicle.vehicle_type,
                         0.0,
                     )
+                    consumption += con[1]
                 if task.task == "charging":
                     # TODO check how much this would charge
                     pass
-        return vehicle.soc - consumption / vehicle.vehicle_type.battery_capacity
+        return vehicle.soc - consumption

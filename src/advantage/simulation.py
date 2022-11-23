@@ -350,15 +350,15 @@ class Simulation:
         }
 
         # read consumption_table
-        consumption_path = pathlib.Path(scenario_path, "consumption.csv")
+        consumption_path = pathlib.Path(scenario_path, cfg["files"]["consumption"])
         consumption_df = pd.read_csv(consumption_path)
 
         # read distance table
-        distance_table = pathlib.Path(scenario_path, "distance.csv")
+        distance_table = pathlib.Path(scenario_path, cfg["files"]["distance"])
         distance_df = pd.read_csv(distance_table, index_col=0)
 
         # read incline table
-        incline_table = pathlib.Path(scenario_path, "incline.csv")
+        incline_table = pathlib.Path(scenario_path, cfg["files"]["incline"])
         incline_df = pd.read_csv(incline_table, index_col=0)
 
         consumption_dict = {

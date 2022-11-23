@@ -6,7 +6,7 @@
         "charging_curve": [[0, 150], [0.8, 150], [1, 150]],
         "charging_power": {"CCS": 50, "Type2": 22, "Schuko": 3.7}
     },
-    "SH_oppb-0": {
+    "EZ10": {
         "name": "shuttle bus - opportunity charging",
         "capacity": 32,
         "charging_curve": [[0, 150], [0.8, 150], [1, 150]],
