@@ -32,6 +32,8 @@ As a Developer
     * ``mypy src``
     * ``pytest``
     * ``tox``
+* For autoformatting your code:
+    * ``black src``
 
 | Note: PyCharm might tell you that it can't find the advantage module.
 | In that case you have to right click the folder "src" and select

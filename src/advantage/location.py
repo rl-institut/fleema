@@ -24,12 +24,14 @@ class Location:
     output :
 
     """
-    def __init__(self,
-                 name: str = "",
-                 location_type: str = "",
-                 chargers: Optional[List["Charger"]] = None,
-                 grid_info: Optional[dict] = None
-                 ):
+
+    def __init__(
+        self,
+        name: str = "",
+        location_type: str = "",
+        chargers: Optional[List["Charger"]] = None,
+        grid_info: Optional[dict] = None,
+    ):
         """
         Constructor of the Location class.
 
@@ -103,13 +105,7 @@ class Location:
         scenario_dict = {
             "constants": {
                 "grid_connectors": {
-                    "GC1": {
-                        "max_power": power,
-                        "cost": {
-                            "type": "fixed",
-                            "value": 0.3
-                        }
-                    }
+                    "GC1": {"max_power": power, "cost": {"type": "fixed", "value": 0.3}}
                 }
             }
         }

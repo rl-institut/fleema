@@ -29,13 +29,14 @@ class VehicleType:
     label : str, optional
 
     """
+
     name: str = "vehicle_name"
-    battery_capacity: float = 50.
-    soc_min: float = 0.
-    base_consumption: float = 0.  # TODO decide if this is necessary
+    battery_capacity: float = 50.0
+    soc_min: float = 0.0
+    base_consumption: float = 0.0  # TODO decide if this is necessary
     charging_capacity: dict = field(default_factory=dict)
     charging_curve: list = field(default_factory=list)
-    min_charging_power: float = 0.
+    min_charging_power: float = 0.0
     label: Optional[str] = None
 
     @property
@@ -59,6 +60,7 @@ class Task:
     task : str
         Task type: driving, charging, parking, break.
     """
+
     departure_point: "Location"
     arrival_point: "Location"
     departure_time: int
@@ -99,15 +101,16 @@ class Vehicle:
 
     """
 
-    def __init__(self,
-                 vehicle_id: str,
-                 vehicle_type: "VehicleType" = VehicleType(),
-                 status: str = "parking",
-                 soc: float = 1,
-                 availability: bool = True,     # TODO Warum availability, wenn es schon einen Status gibt?
-                 rotation: Optional[str] = None,
-                 current_location: Optional["Location"] = None
-                 ):
+    def __init__(
+        self,
+        vehicle_id: str,
+        vehicle_type: "VehicleType" = VehicleType(),
+        status: str = "parking",
+        soc: float = 1,
+        availability: bool = True,  # TODO Warum availability, wenn es schon einen Status gibt?
+        rotation: Optional[str] = None,
+        current_location: Optional["Location"] = None,
+    ):
         """Constructor of the Vehicle class.
 
         Parameters
@@ -135,7 +138,9 @@ class Vehicle:
         self.rotation = rotation
         self.current_location = current_location
         self.tasks: List["Task"] = []
-        self.schedule = None    # TODO add dataframe which has information for all timesteps
+        self.schedule = (
+            None  # TODO add dataframe which has information for all timesteps
+        )
 
         self.output: dict = {
             "timestamp": [],
@@ -147,10 +152,12 @@ class Vehicle:
             "charging_demand": [],
             "nominal_charging_capacity": [],
             "charging_power": [],
-            "consumption": []
+            "consumption": [],
         }
 
-    def _update_activity(self, timestamp, event_start, event_time, simulation_state, charging_power=0):
+    def _update_activity(
+        self, timestamp, event_start, event_time, simulation_state, charging_power=0
+    ):
         """Records newest energy and activity in the attributes soc and output.
 
         It is used when an event takes place. A event is one of the vehicle methods charge, drive or park.
@@ -206,24 +213,28 @@ class Vehicle:
         breaks = []
         first_task = self.tasks[0]
         if first_task.departure_time < start:
-            breaks.append(Task(
-                first_task.departure_point,
-                first_task.departure_point,
-                start,
-                first_task.departure_time,
-                "break")
+            breaks.append(
+                Task(
+                    first_task.departure_point,
+                    first_task.departure_point,
+                    start,
+                    first_task.departure_time,
+                    "break",
+                )
             )
         previous_task = first_task
         for task in self.tasks:
             if task.arrival_time < end and task.task == "driving":
                 # TODO are other task types relevant?
                 if task.departure_time > previous_task.arrival_time:
-                    breaks.append(Task(
-                        previous_task.arrival_point,
-                        task.departure_point,
-                        previous_task.arrival_time,  # TODO maybe +1?
-                        task.departure_time,  # TODO maybe -1?
-                        "break")
+                    breaks.append(
+                        Task(
+                            previous_task.arrival_point,
+                            task.departure_point,
+                            previous_task.arrival_time,  # TODO maybe +1?
+                            task.departure_time,  # TODO maybe -1?
+                            "break",
+                        )
                     )
                 previous_task = task
         return breaks
@@ -232,22 +243,29 @@ class Vehicle:
         """This method simulates charging and updates therefore the attributes status and soc."""
         # TODO call spiceev charging depending on soc, location, task
         # TODO this requires a SpiceEV scenario object
-        if not all(isinstance(i, int) or isinstance(i, float) for i in [start, time, power, new_soc]):
+        if not all(
+            isinstance(i, int) or isinstance(i, float)
+            for i in [start, time, power, new_soc]
+        ):
             raise TypeError("Argument has wrong type.")
         if not all(i >= 0 for i in [start, time, power, new_soc]):
             raise ValueError("Arguments can't be negative.")
         if new_soc < self.soc:
             raise ValueError("SoC of vehicle can't be lower after charging.")
         if new_soc - self.soc > time * power / 60 / self.vehicle_type.battery_capacity:
-            raise ValueError("SoC can't be reached in specified time window with given power.")
-        self.status = 'charging'
+            raise ValueError(
+                "SoC can't be reached in specified time window with given power."
+            )
+        self.status = "charging"
         self.soc = new_soc
         self._update_activity(timestamp, start, time, observer, charging_power=power)
 
     def drive(self, timestamp, start, time, destination, new_soc, observer=None):
         """This method simulates driving and updates therefore the attributes status and soc."""
         # call drive api with task, soc, ...
-        if not all(isinstance(i, int) or isinstance(i, float) for i in [start, time, new_soc]):
+        if not all(
+            isinstance(i, int) or isinstance(i, float) for i in [start, time, new_soc]
+        ):
             raise TypeError("Argument has wrong type.")
         if not isinstance(destination, str):
             raise TypeError("Argument has wrong type.")
@@ -255,10 +273,16 @@ class Vehicle:
             raise ValueError("Arguments can't be negative.")
         if new_soc > self.soc:
             raise ValueError("SoC of vehicle can't be higher after driving.")
-        if (self.soc - new_soc >
-                self.vehicle_type.base_consumption * time / 60 * 100 / self.vehicle_type.battery_capacity):
+        if (
+            self.soc - new_soc
+            > self.vehicle_type.base_consumption
+            * time
+            / 60
+            * 100
+            / self.vehicle_type.battery_capacity
+        ):
             raise ValueError("Consumption too high.")
-        self.status = 'driving'
+        self.status = "driving"
         self.soc = new_soc
         self._update_activity(timestamp, start, time, observer)
         self.status = destination
@@ -304,7 +328,7 @@ class Vehicle:
                         "charging_curve": self.vehicle_type.charging_curve,
                         "min_charging_power": self.vehicle_type.min_charging_power,
                         "v2g": False,
-                        "v2g_power_factor": 0.5
+                        "v2g_power_factor": 0.5,
                     }
                 },
                 "vehicles": {
@@ -312,9 +336,9 @@ class Vehicle:
                         # "connected_charging_station": self.current_location.location_id,
                         "desired_soc": 1,
                         "soc": self.soc,
-                        "vehicle_type": self.vehicle_type.name
+                        "vehicle_type": self.vehicle_type.name,
                     }
-                }
+                },
             }
         }
         return scenario_dict
@@ -322,7 +346,7 @@ class Vehicle:
     def _get_last_charging_demand(self):
         """This private method is used by the method _update_activity and updates the charging demand."""
         if len(self.output["soc"]) > 1:
-            charging_demand = (self.output["soc"][-1] - self.output["soc"][-2])
+            charging_demand = self.output["soc"][-1] - self.output["soc"][-2]
             charging_demand *= self.vehicle_type.battery_capacity
             return max(round(charging_demand, 4), 0)
         else:

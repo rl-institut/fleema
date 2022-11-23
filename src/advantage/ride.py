@@ -8,14 +8,28 @@ if TYPE_CHECKING:
 
 
 class RideCalc:
-    def __init__(self, consumption_table: pd.DataFrame, distances: pd.DataFrame, inclines: pd.DataFrame) -> None:
+    def __init__(
+        self,
+        consumption_table: pd.DataFrame,
+        distances: pd.DataFrame,
+        inclines: pd.DataFrame,
+    ) -> None:
         self.consumption_table = consumption_table
         self.distances = distances
         self.inclines = inclines
 
-        self.uniques = [sorted(self.consumption_table[col].unique()) for col in self.consumption_table.iloc[:, :-1]]
+        self.uniques = [
+            sorted(self.consumption_table[col].unique())
+            for col in self.consumption_table.iloc[:, :-1]
+        ]
 
-    def calculate_trip(self, origin: "Location", destination: "Location", vehicle_type: "VehicleType", temperature: float):
+    def calculate_trip(
+        self,
+        origin: "Location",
+        destination: "Location",
+        vehicle_type: "VehicleType",
+        temperature: float,
+    ):
         """Calculate consumption as a part of total SoC.
 
         Parameters
@@ -40,9 +54,19 @@ class RideCalc:
         load_level = 0
         distance, incline = self.get_location_values(origin, destination)
 
-        return self.calculate_consumption(vehicle_type, incline, temperature, speed, load_level, distance)
+        return self.calculate_consumption(
+            vehicle_type, incline, temperature, speed, load_level, distance
+        )
 
-    def calculate_consumption(self, vehicle_type: "VehicleType", incline, temperature, speed, load_level, distance):
+    def calculate_consumption(
+        self,
+        vehicle_type: "VehicleType",
+        incline,
+        temperature,
+        speed,
+        load_level,
+        distance,
+    ):
         """Calculates the reduction in SoC of a vehicle type when driving the specified route.
 
         Parameters
@@ -66,12 +90,16 @@ class RideCalc:
             Returns conusmption in kWh and the SoC delta resulting from this trip
 
         """
-        consumption_factor = self.get_consumption(vehicle_type.name, incline, temperature, speed, load_level)
+        consumption_factor = self.get_consumption(
+            vehicle_type.name, incline, temperature, speed, load_level
+        )
         consumption = consumption_factor * distance
 
         return consumption, consumption * vehicle_type.battery_capacity / 100
 
-    def get_consumption(self, vehicle_type_name: str, incline, temperature, speed, load_level):
+    def get_consumption(
+        self, vehicle_type_name: str, incline, temperature, speed, load_level
+    ):
         """Get consumption in kWh/km for a specified vehicle type and route.
 
         Parameters
@@ -94,7 +122,9 @@ class RideCalc:
 
         """
 
-        df = self.consumption_table[self.consumption_table["vehicle_type"] == vehicle_type_name]
+        df = self.consumption_table[
+            self.consumption_table["vehicle_type"] == vehicle_type_name
+        ]
 
         inc_col = df["incline"]
         tmp_col = df["t_amb"]
@@ -103,7 +133,9 @@ class RideCalc:
         cons_col = df["consumption"]
         data_table = list(zip(lol_col, inc_col, speed_col, tmp_col, cons_col))
 
-        consumption_value = self.nd_interp((load_level, incline, speed, temperature), data_table)
+        consumption_value = self.nd_interp(
+            (load_level, incline, speed, temperature), data_table
+        )
 
         return consumption_value
 
@@ -145,7 +177,7 @@ class RideCalc:
             new_points = []
             # find points that differ in just that dimension
             for j, p1 in enumerate(points):
-                for p2 in points[j + 1:]:
+                for p2 in points[j + 1 :]:
                     for k in range(len(input_values)):
                         if p1[k] != p2[k] and i != k:
                             break
@@ -202,7 +234,7 @@ class RideCalc:
             for count, bound in enumerate(self.uniques[column]):
                 if bound > value:
                     upper = bound
-                    lower = self.uniques[column][count-1] if count > 0 else bound
+                    lower = self.uniques[column][count - 1] if count > 0 else bound
                     break
 
         return lower, upper

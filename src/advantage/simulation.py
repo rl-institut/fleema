@@ -19,7 +19,10 @@ from advantage.simulation_state import SimulationState
 from advantage.simulation_type import class_from_str
 from advantage.ride import RideCalc
 
-from advantage.util.conversions import date_string_to_datetime, datetime_string_to_datetime
+from advantage.util.conversions import (
+    date_string_to_datetime,
+    datetime_string_to_datetime,
+)
 
 
 class Simulation:
@@ -53,7 +56,14 @@ class Simulation:
 
     """
 
-    def __init__(self, schedule: pd.DataFrame, vehicle_types, charging_points, cfg_dict, consumption_dict):
+    def __init__(
+        self,
+        schedule: pd.DataFrame,
+        vehicle_types,
+        charging_points,
+        cfg_dict,
+        consumption_dict,
+    ):
         """Init Method of the Simulation class.
 
         Parameters
@@ -75,11 +85,15 @@ class Simulation:
         self.start_date = cfg_dict["start_date"]
         self.end_date = cfg_dict["end_date"]
         self.step_size = cfg_dict["step_size"]
-        time_steps: datetime.timedelta = self.end_date - self.start_date + datetime.timedelta(days=1)
+        time_steps: datetime.timedelta = (
+            self.end_date - self.start_date + datetime.timedelta(days=1)
+        )
         self.time_steps = int(time_steps.total_seconds() / 60 / self.step_size)
         self.end_of_day_steps = None
         self.num_threads = cfg_dict["num_threads"]
-        self.simulation_type = "schedule"  # TODO implement in config (schedule vs ondemand)
+        self.simulation_type = (
+            "schedule"  # TODO implement in config (schedule vs ondemand)
+        )
 
         self.schedule = schedule
         self.events: List[tuple[int, "Vehicle"]] = []
@@ -94,9 +108,15 @@ class Simulation:
         # use other args to create objects
         self.vehicle_types: Dict[str, "VehicleType"] = {}
         for name, info in vehicle_types.items():
-            self.vehicle_types[name] = VehicleType(name, info["capacity"], self.soc_min, 0,
-                                                   info["charging_power"], info["charging_curve"],
-                                                   self.min_charging_power)
+            self.vehicle_types[name] = VehicleType(
+                name,
+                info["capacity"],
+                self.soc_min,
+                0,
+                info["charging_power"],
+                info["charging_curve"],
+                self.min_charging_power,
+            )
         self.vehicles: Dict[Union[str, int], "Vehicle"] = {}
 
         self.locations: Dict[str, "Location"] = {}
@@ -108,8 +128,12 @@ class Simulation:
         for name, info in charging_points["plug_types"].items():
             self.plug_types[name] = PlugType(name, info["capacity"], info["plug"])
         for name, info in charging_points["charging_points"].items():
-            plug_types = [p for p in self.plug_types.values() if p.name in info["plug_types"]]
-            charger = Charger.from_json(name, info["number_charging_points"], plug_types)
+            plug_types = [
+                p for p in self.plug_types.values() if p.name in info["plug_types"]
+            ]
+            charger = Charger.from_json(
+                name, info["number_charging_points"], plug_types
+            )
             self.locations[name].chargers.append(charger)
             if not self.locations[name] in self.charging_locations:
                 self.charging_locations.append(self.locations[name])
@@ -137,17 +161,19 @@ class Simulation:
         for i in self.end_of_day_steps:
             if step < i:
                 return step
-        raise ValueError(f"Step {step} higher than end of day time steps: {self.end_of_day_steps}")
+        raise ValueError(
+            f"Step {step} higher than end of day time steps: {self.end_of_day_steps}"
+        )
 
     def vehicles_from_schedule(self):
-        """Creates vehicle objects from the schedule.
-
-        """
+        """Creates vehicle objects from the schedule."""
         vehicle_ids = self.schedule.groupby(by="vehicle_id")
         for vehicle_id, index in vehicle_ids.groups.items():
             vehicle_type = self.schedule.loc[index, "vehicle_type"].unique()  # type: ignore
             if len(vehicle_type) != 1:
-                raise ValueError(f"Vehicle number {vehicle_id} has multiple vehicle types assigned to it!")
+                raise ValueError(
+                    f"Vehicle number {vehicle_id} has multiple vehicle types assigned to it!"
+                )
             self.vehicles[vehicle_id] = Vehicle(vehicle_id, self.vehicle_types[vehicle_type[0]])  # type: ignore
 
     def task_from_schedule(self, row):  # TODO move function to vehicle?
@@ -165,14 +191,12 @@ class Simulation:
             self.locations[row.arrival_name],
             self.datetime_to_timesteps(row.departure_time),
             self.datetime_to_timesteps(row.arrival_time),
-            "driving"
+            "driving",
         )
         vehicle.add_task(task)
 
     def run(self):
-        """Creates SimulationType object depending on self.simulation_type and runs it.
-
-        """
+        """Creates SimulationType object depending on self.simulation_type and runs it."""
         sim = class_from_str(self.simulation_type)(self)
         sim.run()
 
@@ -194,9 +218,17 @@ class Simulation:
         diff_in_minutes = delta.total_seconds() / 60
         return int(diff_in_minutes / self.step_size)
 
-    def evaluate_charging_location(self, vehicle_type: "VehicleType", charging_location: "Location",
-                                   current_location: "Location", next_location: "Location", start_time: int,
-                                   end_time: int, current_soc: float, desired_soc: float):
+    def evaluate_charging_location(
+        self,
+        vehicle_type: "VehicleType",
+        charging_location: "Location",
+        current_location: "Location",
+        next_location: "Location",
+        start_time: int,
+        end_time: int,
+        current_soc: float,
+        desired_soc: float,
+    ):
         """Gives a grade to a charging location.
 
         Parameters
@@ -269,7 +301,9 @@ class Simulation:
         """
         scenario_path = pathlib.Path("scenarios", scenario_name)
         if not scenario_path.is_dir():
-            raise FileNotFoundError(f'Scenario {scenario_name} not found in ./scenarios.')
+            raise FileNotFoundError(
+                f"Scenario {scenario_name} not found in ./scenarios."
+            )
 
         # read config file
         cfg = cp.ConfigParser()
@@ -281,10 +315,12 @@ class Simulation:
         except Exception:
             raise FileNotFoundError(f"Cannot read config file {cfg_file} - malformed?")
 
-        schedule = pd.read_csv(pathlib.Path(scenario_path, cfg["files"]["schedule"]), sep=',')
+        schedule = pd.read_csv(
+            pathlib.Path(scenario_path, cfg["files"]["schedule"]), sep=","
+        )
 
         vehicle_types_file = cfg["files"]["vehicle_types"]
-        ext = vehicle_types_file.split('.')[-1]
+        ext = vehicle_types_file.split(".")[-1]
         if ext != "json":
             print("File extension mismatch: vehicle type file should be .json")
         with open(pathlib.Path(scenario_path, cfg["files"]["vehicle_types"])) as f:
@@ -292,7 +328,7 @@ class Simulation:
         vehicle_types = vehicle_types["vehicle_types"]
 
         charging_points_file = cfg["files"]["charging_points"]
-        ext = charging_points_file.split('.')[-1]
+        ext = charging_points_file.split(".")[-1]
         if ext != "json":
             print("File extension mismatch: charging_point file should be .json")
         with open(pathlib.Path(scenario_path, cfg["files"]["charging_points"])) as f:
@@ -304,14 +340,14 @@ class Simulation:
         end_date = date_string_to_datetime(end_date)
 
         cfg_dict = {
-                    "soc_min": cfg.getfloat("charging", "soc_min"),
-                    "min_charging_power": cfg.getfloat("charging", "min_charging_power"),
-                    "rng_seed": cfg["sim_params"].getint("seed", None),
-                    "start_date": start_date,
-                    "end_date": end_date,
-                    "num_threads": cfg.getint("sim_params", "num_threads"),
-                    "step_size": cfg.getint("basic", "step_size")
-                    }
+            "soc_min": cfg.getfloat("charging", "soc_min"),
+            "min_charging_power": cfg.getfloat("charging", "min_charging_power"),
+            "rng_seed": cfg["sim_params"].getint("seed", None),
+            "start_date": start_date,
+            "end_date": end_date,
+            "num_threads": cfg.getint("sim_params", "num_threads"),
+            "step_size": cfg.getint("basic", "step_size"),
+        }
 
         # read consumption_table
         consumption_path = pathlib.Path(scenario_path, "consumption.csv")
@@ -328,7 +364,9 @@ class Simulation:
         consumption_dict = {
             "consumption": consumption_df,
             "distance": distance_df,
-            "incline": incline_df
+            "incline": incline_df,
         }
 
-        return Simulation(schedule, vehicle_types, charging_points, cfg_dict, consumption_dict)
+        return Simulation(
+            schedule, vehicle_types, charging_points, cfg_dict, consumption_dict
+        )
