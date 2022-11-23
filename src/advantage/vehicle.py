@@ -214,7 +214,10 @@ class Vehicle:
         previous_task = None
         for task in self.tasks:
             if previous_task is not None:
-                if not (previous_task.arrival_point == task.departure_point and previous_task.arrival_time <= task.departure_time):
+                if not (
+                    previous_task.arrival_point == task.departure_point
+                    and previous_task.arrival_time <= task.departure_time
+                ):
                     return False
             previous_task = task
         return True
