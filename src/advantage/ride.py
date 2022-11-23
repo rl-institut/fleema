@@ -15,10 +15,7 @@ class RideCalc:
 
         self.uniques = [sorted(self.consumption_table[col].unique()) for col in self.consumption_table.iloc[:, :-1]]
 
-    # TODO 6. write interpolation, based on find_rows and its input values
-    # TODO 5. create RideCalc in Simulation and use it in decisionmaking / point evaluation / ...
-
-    def calculate_trip(self, origin: "Location", destination: "Location", vehicle_type: "VehicleType", temperature):
+    def calculate_trip(self, origin: "Location", destination: "Location", vehicle_type: "VehicleType", temperature: float):
         """Calculate consumption as a part of total SoC.
 
         Parameters
@@ -34,8 +31,8 @@ class RideCalc:
 
         Returns
         -------
-        float
-            Returns SoC delta resulting from this trip
+        tuple[float, float]
+            Returns conusmption in kWh and the SoC delta resulting from this trip
 
         """
         # TODO add speed as scenario input, load level somewhere?
@@ -65,14 +62,14 @@ class RideCalc:
 
         Returns
         -------
-        float
-            Returns SoC delta resulting from this trip
+        tuple[float, float]
+            Returns conusmption in kWh and the SoC delta resulting from this trip
 
         """
         consumption_factor = self.get_consumption(vehicle_type.name, incline, temperature, speed, load_level)
         consumption = consumption_factor * distance
 
-        return consumption * vehicle_type.battery_capacity / 100
+        return consumption, consumption * vehicle_type.battery_capacity / 100
 
     def get_consumption(self, vehicle_type_name: str, incline, temperature, speed, load_level):
         """Get consumption in kWh/km for a specified vehicle type and route.
@@ -93,7 +90,7 @@ class RideCalc:
         Returns
         -------
         float
-            Returns SoC delta resulting from this trip
+            Returns consumption faktor in kWh/km
 
         """
 
@@ -189,7 +186,7 @@ class RideCalc:
 
         Returns
         -------
-        float, float
+        tuple[float, float]
             Returns lower and upper unqiue boundary surrounding the input value (may be the same number twice)
 
         """
@@ -222,7 +219,7 @@ class RideCalc:
 
         Returns
         -------
-        float, float
+        tuple[float, float]
             Returns distance and incline between the locations
 
         """

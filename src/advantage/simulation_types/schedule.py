@@ -26,7 +26,7 @@ class Schedule(SimulationType):
         # distribute slots by highest total score (?)
         # for conflicts, check amount of charging spots at location and total possible power
         for veh in self.simulation.vehicles.values():
-            end_of_day_soc = veh.get_predicted_soc(start, end)
+            end_of_day_soc = self.get_predicted_soc(veh, start, end)
             break_list = veh.get_breaks(start, end)
             for task in break_list:
                 # for all locations with chargers, evaluate the best option. save task, best location, evaluation
