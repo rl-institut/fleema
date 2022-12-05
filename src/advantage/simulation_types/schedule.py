@@ -31,7 +31,18 @@ class Schedule(SimulationType):
             for task in break_list:
                 # for all locations with chargers, evaluate the best option. save task, best location, evaluation
                 # self.simulation.evaluate_charging_location()
-                pass
+                for loc in self.simulation.charging_locations:
+                    # TODO figure out how to calculate current_soc & desired_soc
+                    self.simulation.evaluate_charging_location(
+                        veh.vehicle_type,
+                        loc,
+                        task.departure_point,
+                        task.arrival_point,
+                        task.departure_time,
+                        task.arrival_time,
+                        0.0,
+                        0.0,
+                    )
             if end_of_day_soc < 0.2:
                 pass
             else:
