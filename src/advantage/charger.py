@@ -96,14 +96,14 @@ class Charger:
     def get_scenario_info(
         self, point_id: str, plug_types: List[str]
     ) -> Dict[str, Dict[str, Dict[str, Dict[str, object]]]]:
-        """This method checks if Charger and the given charging point ID match.
+        """Create the spiceev scenario dict for the charger.
 
         Parameters
         ----------
         point_id : str
-            Charging Point ID that is matched in this Charger instance.
+            Chosen charging point
         plug_types : list[str]
-            Plug types which point_id supports.
+            Plug types of the connected vehicle
 
         Returns
         -------

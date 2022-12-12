@@ -19,9 +19,6 @@ class Schedule(SimulationType):
 
     def _distribute_charging_slots(self, start, end):
         # go through all vehicles, check SoC after all tasks (end of day). continues if <20%
-        # TODO write vehicle function end_of_day_soc()
-        # get possible charging slots
-        # TODO write vehicle function get_breaks(Optional param time_horizon, default end of day)
         # evaluate charging slots
         # distribute slots by highest total score (?)
         # for conflicts, check amount of charging spots at location and total possible power
@@ -41,15 +38,18 @@ class Schedule(SimulationType):
                         task.departure_time,
                         task.arrival_time,
                         0.0,
-                        0.0,
                     )
+                    # TODO compare evaluation to necessary charging energy
+                    # TODO save expected SoC at different points (maybe in breaks), use to calc necessary recharge
             if end_of_day_soc < 0.2:
                 pass
             else:
                 pass
 
     def run(self):
+        # create tasks for all vehicles from input schedule
         self._create_initial_schedule()
+        # create charging tasks based on rating
         self._distribute_charging_slots(0, self.simulation.time_steps)
         # TODO start fleet management (includes loop)
         for step in range(self.simulation.time_steps):

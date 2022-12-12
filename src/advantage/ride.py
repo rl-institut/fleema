@@ -28,7 +28,7 @@ class RideCalc:
         origin: "Location",
         destination: "Location",
         vehicle_type: "VehicleType",
-        temperature: float,
+        temperature: float = 20.0,
     ):
         """Calculate consumption as a part of total SoC.
 
@@ -45,7 +45,7 @@ class RideCalc:
 
         Returns
         -------
-        tuple[float, float]
+        dict[float, float, float]
             Returns conusmption in kWh and the SoC delta resulting from this trip
 
         """
@@ -53,10 +53,16 @@ class RideCalc:
         speed = 8.65
         load_level = 0
         distance, incline = self.get_location_values(origin, destination)
-
-        return self.calculate_consumption(
+        trip_time = distance / speed * 60
+        consumption, soc_delta = self.calculate_consumption(
             vehicle_type, incline, temperature, speed, load_level, distance
         )
+
+        return {
+            "consumption": consumption,
+            "soc_delta": soc_delta,
+            "trip_time": trip_time,
+        }
 
     def calculate_consumption(
         self,

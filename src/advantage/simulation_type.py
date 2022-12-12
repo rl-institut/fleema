@@ -25,13 +25,14 @@ class SimulationType:
             if start < task.arrival_time < end:
                 if task.task == "driving":
                     # TODO run task through driving simulation, add result to consumption
-                    con = self.simulation.driving_sim.calculate_trip(
+                    trip = self.simulation.driving_sim.calculate_trip(
                         task.departure_point,
                         task.arrival_point,
                         vehicle.vehicle_type,
-                        0.0,
+                        20.0,
                     )
-                    consumption += con[1]
+                    print(consumption)
+                    consumption += trip["soc_delta"]
                 if task.task == "charging":
                     # TODO check how much this would charge
                     pass

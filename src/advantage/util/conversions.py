@@ -17,7 +17,7 @@ def step_to_timestamp(time_series, time_step):
         Timestamp that is looked up in the time series.
 
     """
-    return time_series[time_step]
+    return time_series[int(time_step)]
 
 
 def date_string_to_datetime(date_str):

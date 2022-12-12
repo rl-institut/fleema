@@ -345,7 +345,7 @@ class Vehicle:
                     }
                 },
                 "vehicles": {
-                    f"{self.vehicle_type.name}_0": {
+                    self.id: {
                         # "connected_charging_station": self.current_location.location_id,
                         "desired_soc": 1,
                         "soc": self.soc,

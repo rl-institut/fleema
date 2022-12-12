@@ -84,15 +84,15 @@ class Location:
         """This methods checks availability."""
         return None
 
-    def get_scenario_info(self, point_id: str, plug_types: List[str]):
-        """This method matches all the ChargingPoints in the location with the given ChargingPoint ID.
+    def get_scenario_info(self, plug_types: List[str], point_id: Optional[str] = None):
+        """Create SpiceEV scenario dict for this Location.
 
         Parameters
         ----------
-        point_id : str
-            PointCharging ID that is sought-after in the location.
         plug_types : list[str]
-            Available Plugs for the ChargingPoint.
+            Plug types that the charging vehicle is compatible with
+        point_id : str, optional
+            ID of a specific charging point
 
         Returns
         -------
@@ -110,6 +110,16 @@ class Location:
             }
         }
         for ch in self.chargers:
+            # create scenario dict for chosen point id or the point with the highest power
+            if point_id is None:
+                point_id = ""
+                highest_power = 0
+                for cp in ch.charging_points:
+                    power = cp.get_power(plug_types)
+                    if power > highest_power:
+                        highest_power = power
+                        point_id = cp.id
             info = ch.get_scenario_info(point_id, plug_types)
             deep_update(scenario_dict, info)
+
         return scenario_dict
