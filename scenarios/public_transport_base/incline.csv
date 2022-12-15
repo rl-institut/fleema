@@ -1,6 +1,6 @@
 ,Marktplatz,Artrium,Therme,Gries,Bahnhof
-Marktplatz,0,0.01,0.01,0.01,0.01
-Artrium,-0.01,0,0.01,0.01,0.01
-Therme,-0.01,-0.01,0,0.01,0.01
-Gries,-0.01,-0.01,-0.01,0,0.01
-Bahnhof,-0.01,-0.01,-0.01,-0.01,0
+Marktplatz,0,0,0,0,0
+Artrium,0,0,0,0,0
+Therme,0,0,0,0,0
+Gries,0,0,0,0,0
+Bahnhof,0,0,0,0,0

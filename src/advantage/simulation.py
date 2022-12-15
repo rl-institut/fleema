@@ -18,10 +18,12 @@ from advantage.charger import Charger, PlugType
 from advantage.simulation_state import SimulationState
 from advantage.simulation_type import class_from_str
 from advantage.ride import RideCalc
+from advantage.spiceev_interface import get_spice_ev_scenario_dict, run_spice_ev
 
 from advantage.util.conversions import (
     date_string_to_datetime,
     datetime_string_to_datetime,
+    step_to_timestamp,
 )
 
 
@@ -89,6 +91,12 @@ class Simulation:
             self.end_date - self.start_date + datetime.timedelta(days=1)
         )
         self.time_steps = int(time_steps.total_seconds() / 60 / self.step_size)
+        self.time_series = pd.date_range(
+            self.start_date,
+            self.end_date,
+            freq=f"{self.step_size}min",
+            inclusive="left",
+        )
         self.end_of_day_steps = None
         self.num_threads = cfg_dict["num_threads"]
         self.simulation_type = (
@@ -135,6 +143,11 @@ class Simulation:
                 name, info["number_charging_points"], plug_types
             )
             self.locations[name].chargers.append(charger)
+            if "grid_connection" in info:
+                self.locations[name].set_power(float(info["grid_connection"]))
+            else:
+                self.locations[name].set_power(50.0)
+            # TODO add grid info to location here?
             if not self.locations[name] in self.charging_locations:
                 self.charging_locations.append(self.locations[name])
 
@@ -218,6 +231,25 @@ class Simulation:
         diff_in_minutes = delta.total_seconds() / 60
         return int(diff_in_minutes / self.step_size)
 
+    def call_spiceev(
+        self,
+        location: "Location",
+        start_time: int,
+        end_time: int,
+        vehicle: "Vehicle",
+        point_id=None,
+    ):
+        time_stamp = step_to_timestamp(self.time_series, start_time)
+        charging_time = int(end_time - start_time)
+        spice_dict = get_spice_ev_scenario_dict(
+            vehicle, location, point_id, time_stamp, charging_time
+        )
+        spice_dict["constants"]["vehicles"][vehicle.id][
+            "connected_charging_station"
+        ] = list(spice_dict["constants"]["charging_stations"].keys())[0]
+        scenario = run_spice_ev(spice_dict, "balanced")
+        return scenario
+
     def evaluate_charging_location(
         self,
         vehicle_type: "VehicleType",
@@ -227,7 +259,6 @@ class Simulation:
         start_time: int,
         end_time: int,
         current_soc: float,
-        desired_soc: float,
     ):
         """Gives a grade to a charging location.
 
@@ -257,7 +288,6 @@ class Simulation:
 
         """
         # TODO get evaluation criteria from config
-        # TODO calculate total time spent driving, extra distance and consumption
         # criteria:
         # 0. available?
         # 1. extra consumption and driving time
@@ -265,14 +295,37 @@ class Simulation:
         # 3. costs
         # 4. renewable energy?, grid friendly charging
         time_window = end_time - start_time
-        driving_time = 0
-        consumption = 0
+        trip_to = self.driving_sim.calculate_trip(
+            current_location, charging_location, vehicle_type
+        )
+        trip_from = self.driving_sim.calculate_trip(
+            charging_location, next_location, vehicle_type
+        )
+        driving_time = int(trip_to["trip_time"] + trip_from["trip_time"])
+        consumption = trip_to["consumption"] + trip_from["consumption"]
         # TODO calculate possible charging amount and end_soc after extra drive
+        time_score = 1 - (driving_time / time_window)
+        if time_score <= 0:
+            return 0
+        charging_start = start_time + trip_to["trip_time"]
         charging_time = time_window - driving_time
-        soc = current_soc - consumption / vehicle_type.battery_capacity
+        mock_vehicle = Vehicle("vehicle", vehicle_type, soc=current_soc)
+        spiceev_scenario = self.call_spiceev(
+            charging_location,
+            charging_start,
+            charging_start + charging_time,
+            mock_vehicle,
+        )
+        charged_energy = spiceev_scenario.socs[-1][0] - current_soc  # type: ignore
+        charge_score = 1 - (consumption / charged_energy)
+        if charge_score <= 0:
+            return 0
         # TODO evaluate charging point
-        grade = 0
-        return grade
+
+        cost_score = 0  # TODO get €/kWh from inputs
+        local_ee_score = 0  # TODO energy_from_ee / charged_energy
+        score = time_score + charge_score + cost_score + local_ee_score
+        return {"score": score, "consumption": consumption, "energy": charged_energy}
 
     @classmethod
     def from_config(cls, scenario_name):
@@ -337,7 +390,7 @@ class Simulation:
         start_date = cfg.get("basic", "start_date")
         start_date = date_string_to_datetime(start_date)
         end_date = cfg.get("basic", "end_date")
-        end_date = date_string_to_datetime(end_date)
+        end_date = date_string_to_datetime(end_date) + datetime.timedelta(1)
 
         cfg_dict = {
             "soc_min": cfg.getfloat("charging", "soc_min"),

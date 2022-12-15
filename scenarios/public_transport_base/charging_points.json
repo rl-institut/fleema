@@ -25,12 +25,14 @@
     "Marktplatz": {
       "plug_types": ["inductive_ifak"],
       "generator": ["pv", "south"],
-      "number_charging_points": 3
+      "number_charging_points": 3,
+      "grid_connection": 50
     },
     "Bahnhof": {
       "plug_types": ["inductive_ifak"],
       "generator": null,
-      "number_charging_points": 1
+      "number_charging_points": 1,
+      "grid_connection": 11
     }
   }
 }

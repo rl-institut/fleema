@@ -111,7 +111,7 @@ def test_park_input_checks(car, time_series):
 
 
 def test_scenario_info(car):
-    assert car.scenario_info["constants"]["vehicles"]["vehicle_name_0"]["soc"] == 0.5
+    assert car.scenario_info["constants"]["vehicles"]["car"]["soc"] == 0.5
 
 
 def test_task_list_sanity(car):
@@ -122,7 +122,7 @@ def test_task_list_sanity(car):
     task_3 = vehicle.Task(location_2, location_1, 5, 6, "driving")
     for task in [task_1, task_2, task_3]:
         car.add_task(task)
-    
+
     assert car.has_valid_task_list
 
 
@@ -134,5 +134,5 @@ def test_incorrect_task_list(car):
     task_3 = vehicle.Task(location_2, location_1, 5, 6, "driving")
     for task in [task_1, task_2, task_3]:
         car.add_task(task)
-    
+
     assert not car.has_valid_task_list
