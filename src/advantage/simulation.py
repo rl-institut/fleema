@@ -143,6 +143,10 @@ class Simulation:
                 name, info["number_charging_points"], plug_types
             )
             self.locations[name].chargers.append(charger)
+            if "grid_connection" in info:
+                self.locations[name].set_power(float(info["grid_connection"]))
+            else:
+                self.locations[name].set_power(50.0)
             # TODO add grid info to location here?
             if not self.locations[name] in self.charging_locations:
                 self.charging_locations.append(self.locations[name])
@@ -312,7 +316,7 @@ class Simulation:
             charging_start + charging_time,
             mock_vehicle,
         )
-        charged_energy = 0  # TODO call spiceev with charging location
+        charged_energy = spiceev_scenario.socs[-1][0] - current_soc  # type: ignore
         charge_score = 1 - (consumption / charged_energy)
         if charge_score <= 0:
             return 0

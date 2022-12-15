@@ -84,6 +84,11 @@ class Location:
         """This methods checks availability."""
         return None
 
+    def set_power(self, power: float):
+        if self.grid_info is None:
+            self.grid_info = {}
+        self.grid_info["power"] = power
+
     def get_scenario_info(self, plug_types: List[str], point_id: Optional[str] = None):
         """Create SpiceEV scenario dict for this Location.
 

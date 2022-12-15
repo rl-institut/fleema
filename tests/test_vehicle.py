@@ -111,7 +111,7 @@ def test_park_input_checks(car, time_series):
 
 
 def test_scenario_info(car):
-    assert car.scenario_info["constants"]["vehicles"]["vehicle_name_0"]["soc"] == 0.5
+    assert car.scenario_info["constants"]["vehicles"]["car"]["soc"] == 0.5
 
 
 def test_task_list_sanity(car):
