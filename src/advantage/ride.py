@@ -46,7 +46,7 @@ class RideCalc:
         Returns
         -------
         dict[float, float, float]
-            Returns conusmption in kWh and the SoC delta resulting from this trip
+            Returns dict with the keys "consumption", "soc_delta", "trip_time"
 
         """
         # TODO add speed as scenario input, load level somewhere?

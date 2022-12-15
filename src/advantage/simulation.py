@@ -283,8 +283,8 @@ class Simulation:
 
         Returns
         -------
-        int
-            Rating of the charging point
+        dict[float, float, float] or None
+            Keys: "score", "consumption" (soc delta), "charge" (soc delta)
 
         """
         # TODO get evaluation criteria from config
@@ -302,11 +302,11 @@ class Simulation:
             charging_location, next_location, vehicle_type
         )
         driving_time = int(trip_to["trip_time"] + trip_from["trip_time"])
-        consumption = trip_to["consumption"] + trip_from["consumption"]
+        drive_soc = trip_to["soc_delta"] + trip_from["soc_delta"]
         # TODO calculate possible charging amount and end_soc after extra drive
         time_score = 1 - (driving_time / time_window)
         if time_score <= 0:
-            return 0
+            return None
         charging_start = start_time + trip_to["trip_time"]
         charging_time = time_window - driving_time
         mock_vehicle = Vehicle("vehicle", vehicle_type, soc=current_soc)
@@ -316,16 +316,16 @@ class Simulation:
             charging_start + charging_time,
             mock_vehicle,
         )
-        charged_energy = spiceev_scenario.socs[-1][0] - current_soc  # type: ignore
-        charge_score = 1 - (consumption / charged_energy)
+        charged_soc = spiceev_scenario.socs[-1][0] - current_soc  # type: ignore
+        charge_score = 1 - (drive_soc / charged_soc)
         if charge_score <= 0:
-            return 0
+            return None
         # TODO evaluate charging point
 
         cost_score = 0  # TODO get €/kWh from inputs
         local_ee_score = 0  # TODO energy_from_ee / charged_energy
         score = time_score + charge_score + cost_score + local_ee_score
-        return {"score": score, "consumption": consumption, "energy": charged_energy}
+        return {"score": score, "consumption": drive_soc, "charge": charged_soc}
 
     @classmethod
     def from_config(cls, scenario_name):

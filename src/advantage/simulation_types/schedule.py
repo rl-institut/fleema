@@ -25,22 +25,25 @@ class Schedule(SimulationType):
         for veh in self.simulation.vehicles.values():
             end_of_day_soc = self.get_predicted_soc(veh, start, end)
             break_list = veh.get_breaks(start, end)
+            charging_list = []
             for task in break_list:
                 # for all locations with chargers, evaluate the best option. save task, best location, evaluation
                 # self.simulation.evaluate_charging_location()
                 for loc in self.simulation.charging_locations:
-                    # TODO figure out how to calculate current_soc & desired_soc
-                    self.simulation.evaluate_charging_location(
-                        veh.vehicle_type,
-                        loc,
-                        task.departure_point,
-                        task.arrival_point,
-                        task.departure_time,
-                        task.arrival_time,
-                        0.0,
+                    charging_list.append(
+                        self.simulation.evaluate_charging_location(
+                            veh.vehicle_type,
+                            loc,
+                            task.departure_point,
+                            task.arrival_point,
+                            task.departure_time,
+                            task.arrival_time,
+                            0.0,
+                        )
                     )
                     # TODO compare evaluation to necessary charging energy
                     # TODO save expected SoC at different points (maybe in breaks), use to calc necessary recharge
+            print(charging_list)  # TODO remove
             if end_of_day_soc < 0.2:
                 pass
             else:
