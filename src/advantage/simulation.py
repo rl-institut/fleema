@@ -52,9 +52,11 @@ class Simulation:
         Dictionary with strings of types of vehicles as keys and instances of the class VehicleType as values.
     locations : dict
         Dictionary with strings of locations as keys and instances of the class Location as the values.
-    plug_types_ dict
+    plug_types : dict
         Dictionary with strings of the plug-type and dictionaries comprised of the name, capacity and charging_type
         as values.
+    weights : dict
+        Dictionary with weight factors for all criteria of the charging point evaluation function.
 
     """
 
@@ -102,9 +104,10 @@ class Simulation:
         self.simulation_type = (
             "schedule"  # TODO implement in config (schedule vs ondemand)
         )
+        self.weights = cfg_dict["weights"]
 
         self.schedule = schedule
-        self.events: List[tuple[int, "Vehicle"]] = []
+        self.events: List[tuple[int, "Vehicle"]] = []  # TODO remove?
 
         # driving simulation
         consumption = consumption_dict["consumption"]
@@ -287,7 +290,6 @@ class Simulation:
             Keys: "score", "consumption" (soc delta), "charge" (soc delta)
 
         """
-        # TODO get evaluation criteria from config
         # run pre calculations
         time_window = end_time - start_time
         trip_to = self.driving_sim.calculate_trip(
@@ -320,7 +322,12 @@ class Simulation:
         # calculate remaining scores which don't have cutoff criteria
         cost_score = 0  # TODO get €/kWh from inputs
         local_ee_score = 0  # TODO energy_from_ee / charged_energy
-        score = time_score + charge_score + cost_score + local_ee_score
+        score = (
+            time_score * self.weights["time_factor"]
+            + charge_score * self.weights["energy_factor"]
+            + cost_score * self.weights["cost_factor"]
+            + local_ee_score * self.weights["local_renewables_factor"]
+        )
         return {"score": score, "consumption": drive_soc, "charge": charged_soc}
 
     @classmethod
@@ -388,6 +395,16 @@ class Simulation:
         end_date = cfg.get("basic", "end_date")
         end_date = date_string_to_datetime(end_date) + datetime.timedelta(1)
 
+        # parse weights
+        weights_dict = {
+            "time_factor": cfg.getfloat("weights", "time_factor"),
+            "energy_factor": cfg.getfloat("weights", "energy_factor"),
+            "cost_factor": cfg.getfloat("weights", "cost_factor"),
+            "local_renewables_factor": cfg.getfloat(
+                "weights", "local_renewables_factor"
+            ),
+        }
+
         cfg_dict = {
             "soc_min": cfg.getfloat("charging", "soc_min"),
             "min_charging_power": cfg.getfloat("charging", "min_charging_power"),
@@ -396,6 +413,7 @@ class Simulation:
             "end_date": end_date,
             "num_threads": cfg.getint("sim_params", "num_threads"),
             "step_size": cfg.getint("basic", "step_size"),
+            "weights": weights_dict,
         }
 
         # read consumption_table
