@@ -23,7 +23,7 @@ class Schedule(SimulationType):
         # distribute slots by highest total score (?)
         # for conflicts, check amount of charging spots at location and total possible power
         for veh in self.simulation.vehicles.values():
-            end_of_day_soc = self.get_predicted_soc(veh, start, end)
+            soc_df = self.get_predicted_soc(veh, start, end)
             break_list = veh.get_breaks(start, end)
             charging_list = []
             for task in break_list:
@@ -42,9 +42,8 @@ class Schedule(SimulationType):
                         )
                     )
                     # TODO compare evaluation to necessary charging energy
-                    # TODO save expected SoC at different points (maybe in breaks), use to calc necessary recharge
             print(charging_list)  # TODO remove
-            if end_of_day_soc < 0.2:
+            if soc_df.iat[-1, 1] < self.simulation.soc_min:
                 pass
             else:
                 pass

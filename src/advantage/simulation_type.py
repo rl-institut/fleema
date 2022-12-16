@@ -1,5 +1,6 @@
 from importlib import import_module
 from typing import TYPE_CHECKING
+import pandas as pd
 
 if TYPE_CHECKING:
     from advantage.simulation import Simulation
@@ -20,7 +21,24 @@ class SimulationType:
         self.simulation = simulation
 
     def get_predicted_soc(self, vehicle: "Vehicle", start: int, end: int):
+        """Calculates predicted SoC of given vehicle after the given timespan by running all tasks.
+
+        Parameters
+        ----------
+        vehicle : Vehicle
+            Vehicle object to predict SoC for
+        start : int
+            Starting time step of the relevant time window
+        end : int
+            Ending time step of the relevant time window
+
+        Returns
+        -------
+        pandas.DataFrame
+            DataFrame with columns "timestep" and "soc", containing predicted soc at specified times
+        """
         consumption = 0
+        consumption_list = []
         for task in vehicle.tasks:
             if start < task.arrival_time < end:
                 if task.task == "driving":
@@ -32,7 +50,8 @@ class SimulationType:
                     )
                     print(consumption)  # TODO remove
                     consumption += trip["soc_delta"]
+                    consumption_list.append((task.arrival_time, vehicle.soc - consumption))
                 if task.task == "charging":
                     # TODO check how much this would charge
                     pass
-        return vehicle.soc - consumption
+        return pd.DataFrame(consumption_list, columns =["timestep", "soc"])
