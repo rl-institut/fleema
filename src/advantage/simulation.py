@@ -288,12 +288,7 @@ class Simulation:
 
         """
         # TODO get evaluation criteria from config
-        # criteria:
-        # 0. available?
-        # 1. extra consumption and driving time
-        # 2. charging time, end_soc, charging energy
-        # 3. costs
-        # 4. renewable energy?, grid friendly charging
+        # run pre calculations
         time_window = end_time - start_time
         trip_to = self.driving_sim.calculate_trip(
             current_location, charging_location, vehicle_type
@@ -303,10 +298,11 @@ class Simulation:
         )
         driving_time = int(trip_to["trip_time"] + trip_from["trip_time"])
         drive_soc = trip_to["soc_delta"] + trip_from["soc_delta"]
-        # TODO calculate possible charging amount and end_soc after extra drive
+        # score the time spent charging and driving
         time_score = 1 - (driving_time / time_window)
         if time_score <= 0:
             return None
+        # call spiceev to calculate charging
         charging_start = start_time + trip_to["trip_time"]
         charging_time = time_window - driving_time
         mock_vehicle = Vehicle("vehicle", vehicle_type, soc=current_soc)
@@ -320,8 +316,8 @@ class Simulation:
         charge_score = 1 - (drive_soc / charged_soc)
         if charge_score <= 0:
             return None
-        # TODO evaluate charging point
 
+        # calculate remaining scores which don't have cutoff criteria
         cost_score = 0  # TODO get €/kWh from inputs
         local_ee_score = 0  # TODO energy_from_ee / charged_energy
         score = time_score + charge_score + cost_score + local_ee_score
