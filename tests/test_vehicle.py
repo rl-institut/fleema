@@ -66,11 +66,11 @@ def test_drive_bad_soc(car, time_series):
         car.drive(time_stamp, start_step, time=60, destination="station_1", new_soc=0.7)
 
 
-def test_drive_sanity(car, time_series):
-    start_step = 5
-    time_stamp = step_to_timestamp(time_series, start_step)
-    with pytest.raises(ValueError, match="Consumption too high."):
-        car.drive(time_stamp, start_step, time=2, destination="station_1", new_soc=0.1)
+# def test_drive_sanity(car, time_series):
+#     start_step = 5
+#     time_stamp = step_to_timestamp(time_series, start_step)
+#     with pytest.raises(ValueError, match="Consumption too high."):
+#        car.drive(time_stamp, start_step, time=2, destination="station_1", new_soc=0.1)
 
 
 def test_drive_input_checks(car, time_series):

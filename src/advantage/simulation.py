@@ -108,6 +108,12 @@ class Simulation:
         )
         self.weights = cfg_dict["weights"]
 
+        # TODO use scenario name in save_directory once scenario files have been reorganized
+        save_directory_name = "{}_{}".format(
+            self.simulation_type, datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")
+        )
+        self.save_directory = pathlib.Path("results", save_directory_name)
+
         self.schedule = schedule
 
         # driving simulation
@@ -191,7 +197,9 @@ class Simulation:
                 raise ValueError(
                     f"Vehicle number {vehicle_id} has multiple vehicle types assigned to it!"
                 )
-            self.vehicles[vehicle_id] = Vehicle(vehicle_id, self.vehicle_types[vehicle_type[0]])  # type: ignore
+            self.vehicles[vehicle_id] = Vehicle(
+                vehicle_id, self.vehicle_types[vehicle_type[0]], soc_min=self.soc_min
+            )
 
     def task_from_schedule(self, row):  # TODO move function to vehicle?
         """Creates Task from a specificed schedule row and adds it to the vehicle.

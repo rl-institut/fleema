@@ -2,6 +2,8 @@ from dataclasses import dataclass, field
 from advantage.location import Location
 from advantage.event import Task
 from typing import Optional, List, Dict
+import pandas as pd
+import pathlib
 
 
 @dataclass
@@ -74,7 +76,8 @@ class Vehicle:
         vehicle_id: str,
         vehicle_type: "VehicleType" = VehicleType(),
         status: str = "parking",
-        soc: float = 1,
+        soc: float = 1.0,
+        soc_min: float = 0.2,
         availability: bool = True,  # TODO Warum availability, wenn es schon einen Status gibt?
         rotation: Optional[str] = None,
         current_location: Optional["Location"] = None,
@@ -101,7 +104,9 @@ class Vehicle:
         self.id = vehicle_id
         self.vehicle_type = vehicle_type
         self.status = status
+        self.soc_start = soc
         self.soc = soc
+        self.soc_min = soc_min
         self.availability = availability
         self.rotation = rotation
         self.current_location = current_location
@@ -116,15 +121,21 @@ class Vehicle:
             "event_time": [],
             "location": [],
             "status": [],
-            "soc": [],
-            "charging_demand": [],
-            "nominal_charging_capacity": [],
-            "charging_power": [],
-            "consumption": [],
+            "soc_start": [],
+            "soc_end": [],
+            "energy": [],
+            "station_charging_capacity": [],
+            "average_charging_power": [],
         }
 
     def _update_activity(
-        self, timestamp, event_start, event_time, simulation_state, charging_power=0
+        self,
+        timestamp,
+        event_start,
+        event_time,
+        simulation_state=None,
+        charging_power=0,
+        nominal_charging_capacity=0,
     ):
         """Records newest energy and activity in the attributes soc and output.
 
@@ -149,11 +160,22 @@ class Vehicle:
         self.output["timestamp"].append(timestamp)
         self.output["event_start"].append(event_start)
         self.output["event_time"].append(event_time)
-        self.output["location"].append(self.status)
-        self.output["soc"].append(self.soc)
-        self.output["charging_demand"].append(self._get_last_charging_demand())
-        self.output["charging_power"].append(charging_power)
-        self.output["consumption"].append(self._get_last_consumption())
+        self.output["status"].append(self.status)
+        self.output["soc_start"].append(
+            self.output["soc_end"][-1]
+            if len(self.output["soc_end"]) > 0
+            else self.soc_start
+        )
+        self.output["soc_end"].append(self.soc)
+        charging_demand = self._get_last_charging_demand()
+        consumption = self._get_last_consumption()
+        self.output["energy"].append(charging_demand + consumption)
+        self.output["station_charging_capacity"].append(nominal_charging_capacity)
+        self.output["average_charging_power"].append(round(charging_power, 4))
+        if self.current_location is not None:
+            self.output["location"].append(self.current_location.name)
+        else:
+            self.output["location"].append("")
         if simulation_state is not None:
             simulation_state.update_vehicle(self)
 
@@ -250,7 +272,15 @@ class Vehicle:
         self.soc = new_soc
         self._update_activity(timestamp, start, time, observer, charging_power=power)
 
-    def drive(self, timestamp, start, time, destination, new_soc, observer=None):
+    def drive(
+        self,
+        timestamp,
+        start: int,
+        time: int,
+        destination: str,
+        new_soc: float,
+        observer=None,
+    ):
         """This method simulates driving and updates the attributes status and soc."""
         # call drive api with task, soc, ...
         if not all(
@@ -263,15 +293,19 @@ class Vehicle:
             raise ValueError("Arguments can't be negative.")
         if new_soc > self.soc:
             raise ValueError("SoC of vehicle can't be higher after driving.")
-        if (
-            self.soc - new_soc
-            > self.vehicle_type.base_consumption
-            * time
-            / 60
-            * 100
-            / self.vehicle_type.battery_capacity
-        ):
-            raise ValueError("Consumption too high.")
+        # if (
+        #     self.soc - new_soc
+        #     > self.vehicle_type.base_consumption
+        #     * time
+        #     / 60
+        #     * 100
+        #     / self.vehicle_type.battery_capacity
+        # ):
+        #     raise ValueError("Consumption too high.")
+        # if new_soc < self.soc_min:
+        #     raise ValueError(
+        #         f"SoC of vehicle {self.id} became smaller than the minimum SoC at {timestamp}."
+        #     )
         self.status = "driving"
         self.soc = new_soc
         self._update_activity(timestamp, start, time, observer)
@@ -285,6 +319,21 @@ class Vehicle:
             raise ValueError("Arguments can't be negative.")
         self.status = "parking"
         self._update_activity(timestamp, start, time, observer)
+
+    def export(self, directory):
+        """
+        Exports the output values collected in vehicle object to a csv file.
+
+        Parameters
+        ----------
+        directory : :obj:`pathlib.Path`
+            Save directory
+
+        """
+        activity = pd.DataFrame(self.output)
+
+        activity = activity.reset_index(drop=True)
+        activity.to_csv(pathlib.Path(directory, f"{self.id}_events.csv"))
 
     @property
     def usable_soc(self):
@@ -334,19 +383,17 @@ class Vehicle:
         return scenario_dict
 
     def _get_last_charging_demand(self):
-        """This private method is used by the method _update_activity and updates the charging demand."""
-        if len(self.output["soc"]) > 1:
-            charging_demand = self.output["soc"][-1] - self.output["soc"][-2]
+        if len(self.output["soc_start"]):
+            charging_demand = self.output["soc_end"][-1] - self.output["soc_start"][-1]
             charging_demand *= self.vehicle_type.battery_capacity
             return max(round(charging_demand, 4), 0)
         else:
             return 0
 
     def _get_last_consumption(self):
-        """This private method is used by the method _update_activity and updates the last consumption."""
-        if len(self.output["soc"]) > 1:
-            last_consumption = self.output["soc"][-1] - self.output["soc"][-2]
+        if len(self.output["soc_start"]):
+            last_consumption = self.output["soc_end"][-1] - self.output["soc_start"][-1]
             last_consumption *= self.vehicle_type.battery_capacity
-            return abs(min(round(last_consumption, 4), 0))
+            return min(round(last_consumption, 4), 0)
         else:
             return 0

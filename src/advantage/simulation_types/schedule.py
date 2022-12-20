@@ -1,4 +1,5 @@
 from advantage.simulation_type import SimulationType
+from advantage.util.conversions import step_to_timestamp
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -43,7 +44,6 @@ class Schedule(SimulationType):
                     )
                     # TODO compare evaluation to necessary charging energy
                     # TODO make charging list, create vehicle function to parse list into tasks
-            print(charging_list)  # TODO remove
             # check if end of day soc is below minimum soc
             if soc_df.iat[-1, 1] < self.simulation.soc_min:
                 pass
@@ -55,6 +55,8 @@ class Schedule(SimulationType):
         self._create_initial_schedule()
         # create charging tasks based on rating
         self._distribute_charging_slots(0, self.simulation.time_steps)
+        # create save directory
+        self.simulation.save_directory.mkdir(parents=True, exist_ok=True)
 
         # simulate fleet step by step
         for step in range(self.simulation.time_steps):
@@ -65,7 +67,20 @@ class Schedule(SimulationType):
                     continue
                 else:
                     if task.task == "driving":
-                        # self.simulation.driving_sim.calculate_trip(self.)
-                        # TODO maybe precalc all driving tasks to figure out actual arrival time,
-                        # then directly save consumption and just output it here
-                        pass
+                        if not task.is_calculated:
+                            trip = self.simulation.driving_sim.calculate_trip(
+                                task.start_point,
+                                task.end_point,
+                                veh.vehicle_type,
+                            )
+                            task.delta_soc = trip["soc_delta"]
+                            task.float_time = trip["trip_time"]
+                        veh.drive(
+                            step_to_timestamp(self.simulation.time_series, step),
+                            task.start_time,
+                            task.end_time - task.start_time,
+                            task.end_point.name,
+                            veh.soc + task.delta_soc,
+                            self.simulation.observer,
+                        )
+                veh.export(self.simulation.save_directory)
