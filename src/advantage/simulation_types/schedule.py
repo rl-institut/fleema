@@ -34,15 +34,17 @@ class Schedule(SimulationType):
                         self.simulation.evaluate_charging_location(
                             veh.vehicle_type,
                             loc,
-                            task.departure_point,
-                            task.arrival_point,
-                            task.departure_time,
-                            task.arrival_time,
+                            task.start_point,
+                            task.end_point,
+                            task.start_time,
+                            task.end_time,
                             0.0,
                         )
                     )
                     # TODO compare evaluation to necessary charging energy
+                    # TODO make charging list, create vehicle function to parse list into tasks
             print(charging_list)  # TODO remove
+            # check if end of day soc is below minimum soc
             if soc_df.iat[-1, 1] < self.simulation.soc_min:
                 pass
             else:
@@ -53,9 +55,16 @@ class Schedule(SimulationType):
         self._create_initial_schedule()
         # create charging tasks based on rating
         self._distribute_charging_slots(0, self.simulation.time_steps)
-        # TODO start fleet management (includes loop)
+
+        # simulate fleet step by step
         for step in range(self.simulation.time_steps):
-            if len(self.simulation.events) and not self.simulation.events[0] == step:
-                continue
-            # start all current tasks (charge, drive)
-            pass
+            # check all vehicles for tasks
+            for veh in self.simulation.vehicles.values():
+                task = veh.get_task(step)
+                if task is None:
+                    continue
+                else:
+                    if task.task == "driving":
+                        # self.simulation.driving_sim.calculate_trip(self.)
+                        # TODO maybe precalc all driving tasks to figure out actual arrival time, then directly save consumption and just output it here
+                        pass

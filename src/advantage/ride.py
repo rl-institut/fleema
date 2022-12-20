@@ -143,7 +143,7 @@ class RideCalc:
             (load_level, incline, speed, temperature), data_table
         )
 
-        return consumption_value
+        return consumption_value * (-1)
 
     def nd_interp(self, input_values, lookup_table):
         """Interpolate value from multiple input values and a lookup table

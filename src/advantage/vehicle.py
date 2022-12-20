@@ -1,7 +1,8 @@
 import pandas as pd
 from dataclasses import dataclass, field, asdict
 from advantage.location import Location
-from typing import Optional, List
+from advantage.event import Task
+from typing import Optional, List, Dict
 
 
 @dataclass
@@ -42,38 +43,6 @@ class VehicleType:
     @property
     def plugs(self):
         return list(self.charging_capacity.keys())
-
-
-@dataclass
-class Task:
-    """
-    Attributes
-    ----------
-    departure_point : Location
-        Starting point of the task.
-    arrival_point : Location
-        End point of the task.
-    departure_time : int
-        Starting time of the task.
-    arrival_time : int
-        End time of the task.
-    task : str
-        Task type: driving, charging, parking, break.
-    """
-
-    departure_point: "Location"
-    arrival_point: "Location"
-    departure_time: int
-    arrival_time: int
-    task: str  # TODO enum
-
-    @property
-    def data_dict(self):
-        return asdict(self)
-
-    @property
-    def dataframe(self):
-        return pd.DataFrame.from_dict(self.data_dict)  # TODO test
 
 
 class Vehicle:
@@ -137,7 +106,7 @@ class Vehicle:
         self.availability = availability
         self.rotation = rotation
         self.current_location = current_location
-        self.tasks: List["Task"] = []
+        self.tasks: Dict[int, "Task"] = {}
         self.schedule = (
             None  # TODO add dataframe which has information for all timesteps
         )
@@ -190,62 +159,67 @@ class Vehicle:
             simulation_state.update_vehicle(self)
 
     def add_task(self, task: "Task"):
-        # next upcoming tasks is a function of vehicle, taking a time step as input and giving the next task
-        # observer stores upcoming task list?
-        # if tasks empty, add new task to list
-        if len(self.tasks) == 0:
-            self.tasks.append(task)
+        if task.start_time in self.tasks:
+            raise KeyError(f"Key {task.start_time} already exists in tasks of vehicle {self.id}")
         # otherwise, add new task to list, ordered by starting time
-        else:
-            task_added = False
-            for count, it in enumerate(self.tasks):
-                if task.departure_time < it.departure_time and not task_added:
-                    self.tasks.insert(count, task)
-                    task_added = True
-            if not task_added:
-                self.tasks.append(task)
+        self.tasks[task.start_time] = task
 
     def remove_task(self, task: "Task"):
-        if task in self.tasks:
-            self.tasks.remove(task)
+        if self.tasks[task.start_time] == task:
+            del self.tasks[task.start_time]
+        else:
+            raise ValueError(f"Task {task.__str__} is not in task list of vehicle {self.id} or has the wrong index")
+
+    def get_task(self, time_step: int):
+        try:
+            return self.tasks[time_step]
+        except KeyError:
+            return None
 
     @property
     def has_valid_task_list(self):
+        # TODO rewrite based on dict
         previous_task = None
-        for task in self.tasks:
+        for timestep, task in sorted(self.tasks.items()):
             if previous_task is not None:
                 if not (
-                    previous_task.arrival_point == task.departure_point
-                    and previous_task.arrival_time <= task.departure_time
+                    previous_task.end_point == task.start_point
+                    and previous_task.end_time <= task.start_time
                 ):
+                    print(f"Warning: Error found in task list at timestep {timestep}.")
                     return False
             previous_task = task
         return True
 
     def get_breaks(self, start: int, end: int) -> List["Task"]:
+        # TODO rewrite based on dict
+        if not self.has_valid_task_list:
+            print(f"Task list of vehicle {self.id} is not valid.")
+            # Error disabled for testing purposes until schedule is fixed
+            # raise AttributeError(f"Task list of vehicle {self.id} is not valid.")
         breaks = []
-        first_task = self.tasks[0]
-        if first_task.departure_time < start:
+        _, first_task = sorted(self.tasks.items())[0]
+        if first_task.start_time > start:
             breaks.append(
                 Task(
-                    first_task.departure_point,
-                    first_task.departure_point,
                     start,
-                    first_task.departure_time,
+                    first_task.start_time,
+                    first_task.start_point,
+                    first_task.start_point,
                     "break",
                 )
             )
         previous_task = first_task
-        for task in self.tasks:
-            if task.arrival_time < end and task.task == "driving":
+        for _, task in sorted(self.tasks.items()):
+            if task.end_time < end and task.task == "driving":
                 # TODO are other task types relevant?
-                if task.departure_time > previous_task.arrival_time:
+                if task.start_time > previous_task.end_time:
                     breaks.append(
-                        Task(
-                            previous_task.arrival_point,
-                            task.departure_point,
-                            previous_task.arrival_time,  # TODO maybe +1?
-                            task.departure_time,  # TODO maybe -1?
+                        Task(                            
+                            previous_task.end_time,  # TODO maybe +1?
+                            task.start_time,  # TODO maybe -1?
+                            previous_task.end_point,
+                            task.start_point,
                             "break",
                         )
                     )
@@ -253,7 +227,7 @@ class Vehicle:
         return breaks
 
     def charge(self, timestamp, start, time, power, new_soc, observer=None):
-        """This method simulates charging and updates therefore the attributes status and soc."""
+        """This method simulates charging and updates the attributes status and soc."""
         # TODO call spiceev charging depending on soc, location, task
         # TODO this requires a SpiceEV scenario object
         if not all(
@@ -274,7 +248,7 @@ class Vehicle:
         self._update_activity(timestamp, start, time, observer, charging_power=power)
 
     def drive(self, timestamp, start, time, destination, new_soc, observer=None):
-        """This method simulates driving and updates therefore the attributes status and soc."""
+        """This method simulates driving and updates the attributes status and soc."""
         # call drive api with task, soc, ...
         if not all(
             isinstance(i, int) or isinstance(i, float) for i in [start, time, new_soc]
@@ -301,7 +275,7 @@ class Vehicle:
         self.status = destination
 
     def park(self, timestamp, start, time, observer=None):
-        """This method simulates parking and updates therefore the attribute status."""
+        """This method simulates parking and updates the attribute status."""
         if not all(isinstance(i, int) or isinstance(i, float) for i in [start, time]):
             raise TypeError("Argument has wrong type.")
         if not all(i >= 0 for i in [start, time]):

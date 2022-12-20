@@ -39,19 +39,16 @@ class SimulationType:
         """
         consumption = 0
         consumption_list = []
-        for task in vehicle.tasks:
-            if start < task.arrival_time < end:
-                if task.task == "driving":
-                    trip = self.simulation.driving_sim.calculate_trip(
-                        task.departure_point,
-                        task.arrival_point,
-                        vehicle.vehicle_type,
-                        20.0,
-                    )
+        consumption_list.append((start, vehicle.soc))
+        for _, task in sorted(vehicle.tasks.items()):
+            if start < task.end_time < end:
+                if task.task == "driving":  # TODO rewrite function
                     print(consumption)  # TODO remove
-                    consumption += trip["soc_delta"]
-                    consumption_list.append((task.arrival_time, vehicle.soc - consumption))
+                    consumption += task.delta_soc
+                    consumption_list.append(
+                        (task.end_time, vehicle.soc + consumption)
+                    )
                 if task.task == "charging":
                     # TODO check how much this would charge
                     pass
-        return pd.DataFrame(consumption_list, columns =["timestep", "soc"])
+        return pd.DataFrame(consumption_list, columns=["timestep", "soc"])

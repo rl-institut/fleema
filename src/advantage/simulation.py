@@ -10,10 +10,12 @@ import pathlib
 import pandas as pd
 import json
 import datetime
+import warnings
 from typing import List, Dict, Union
 
 from advantage.location import Location
-from advantage.vehicle import Vehicle, VehicleType, Task
+from advantage.vehicle import Vehicle, VehicleType
+from advantage.event import Task
 from advantage.charger import Charger, PlugType
 from advantage.simulation_state import SimulationState
 from advantage.simulation_type import class_from_str
@@ -107,7 +109,6 @@ class Simulation:
         self.weights = cfg_dict["weights"]
 
         self.schedule = schedule
-        self.events: List[tuple[int, "Vehicle"]] = []  # TODO remove?
 
         # driving simulation
         consumption = consumption_dict["consumption"]
@@ -202,12 +203,22 @@ class Simulation:
 
         """
         vehicle = self.vehicles[row.vehicle_id]
+        trip = self.driving_sim.calculate_trip(
+            self.locations[row.departure_name], self.locations[row.arrival_name], vehicle.vehicle_type
+        )
+        dep_time = self.datetime_to_timesteps(row.departure_time)
+        arr_time = self.datetime_to_timesteps(row.arrival_time)
+        calc_time = dep_time + int(round(trip["trip_time"], 0))
+        if calc_time > arr_time:
+            warnings.warn(f"Calculated time for trip {row.departure_name} to {row.arrival_name} is higher than in schedule. (Calculated: {calc_time}, schedule: {arr_time - dep_time})")
         task = Task(
+            dep_time,
+            arr_time,  # TODO maybe use calc_time here, currently leads to errors
             self.locations[row.departure_name],
-            self.locations[row.arrival_name],
-            self.datetime_to_timesteps(row.departure_time),
-            self.datetime_to_timesteps(row.arrival_time),
+            self.locations[row.arrival_name],            
             "driving",
+            trip["trip_time"],
+            trip["soc_delta"],
         )
         vehicle.add_task(task)
 
@@ -216,7 +227,7 @@ class Simulation:
         sim = class_from_str(self.simulation_type)(self)
         sim.run()
 
-    def datetime_to_timesteps(self, datetime_str):
+    def datetime_to_timesteps(self, datetime_str):  # TODO move to conversions
         """Converts a given datetime string into a time step.
 
         Parameters
@@ -315,7 +326,7 @@ class Simulation:
             mock_vehicle,
         )
         charged_soc = spiceev_scenario.socs[-1][0] - current_soc  # type: ignore
-        charge_score = 1 - (drive_soc / charged_soc)
+        charge_score = 1 - ((-drive_soc) / charged_soc)
         if charge_score <= 0:
             return None
 
