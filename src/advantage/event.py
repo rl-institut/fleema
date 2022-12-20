@@ -1,6 +1,6 @@
 import pandas as pd
 from typing import TYPE_CHECKING
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, asdict
 
 if TYPE_CHECKING:
     from advantage.location import Location

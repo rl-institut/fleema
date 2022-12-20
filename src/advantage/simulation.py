@@ -213,7 +213,8 @@ class Simulation:
         calc_time = dep_time + int(round(trip["trip_time"], 0))
         if calc_time > arr_time:
             warnings.warn(
-                f"Calculated time for trip {row.departure_name} to {row.arrival_name} is higher than in schedule. (Calculated: {calc_time}, schedule: {arr_time - dep_time})\n"
+                f"""Calculated time for trip {row.departure_name} to {row.arrival_name} is higher than in schedule.
+                (Calculated: {calc_time - dep_time}, schedule: {arr_time - dep_time})\n"""
             )
         task = Task(
             dep_time,

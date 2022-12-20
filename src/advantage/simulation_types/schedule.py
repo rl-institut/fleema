@@ -66,5 +66,6 @@ class Schedule(SimulationType):
                 else:
                     if task.task == "driving":
                         # self.simulation.driving_sim.calculate_trip(self.)
-                        # TODO maybe precalc all driving tasks to figure out actual arrival time, then directly save consumption and just output it here
+                        # TODO maybe precalc all driving tasks to figure out actual arrival time,
+                        # then directly save consumption and just output it here
                         pass
