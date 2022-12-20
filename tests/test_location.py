@@ -6,7 +6,9 @@ import pytest
 @pytest.fixture()
 def parking_spot():
     # TODO input actual values for Charger
-    parking_spot = location.Location(grid_info={}, chargers=[charger.Charger("charger_1", [])])
+    parking_spot = location.Location(
+        grid_info={}, chargers=[charger.Charger("charger_1", [])]
+    )
     return parking_spot
 
 
@@ -35,6 +37,8 @@ def test_charger(parking_spot):
 
 def test_available_charger():
     pass
+
+
 #
 # def test_power(grid, charging_point):
 #

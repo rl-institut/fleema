@@ -10,7 +10,9 @@ def test_from_config():
 
 def test_bad_config_name():
     scenario_name = "bad_name"
-    with pytest.raises(FileNotFoundError, match="Scenario bad_name not found in ./scenarios."):
+    with pytest.raises(
+        FileNotFoundError, match="Scenario bad_name not found in ./scenarios."
+    ):
         Simulation.from_config(scenario_name)
 
 

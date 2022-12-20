@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 class Event:
     """
     Attributes
-    ----------    
+    ----------
     start_time : int
         Starting time step of the event.
     end_time : int
@@ -19,7 +19,7 @@ class Event:
 
     start_time: int
     end_time: int
-    
+
     @property
     def data_dict(self):
         return asdict(self)
@@ -51,16 +51,16 @@ class Task(Event):
     start_point: "Location"
     end_point: "Location"
     task: str  # TODO enum
-    float_time: float = 0.
-    delta_soc: float = 0.
+    float_time: float = 0.0
+    delta_soc: float = 0.0
 
     @property
     def is_calculated(self):
         """
         Checks, if float_time and delta_soc have been set.
-        
+
         Returns
         -------
         bool
         """
-        return self.float_time != 0. and self.delta_soc != 0.
+        return self.float_time != 0.0 and self.delta_soc != 0.0

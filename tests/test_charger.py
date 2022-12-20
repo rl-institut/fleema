@@ -17,7 +17,7 @@ def test_constructor(wallbox):
     if wallbox.name != "home_1":
         error_list.append(f"Charger name is {wallbox.name}, should be home_1")
     # TODO check for charging point properties
-    assert not error_list,  "errors occured:\n{}".format("\n".join(error_list))
+    assert not error_list, "errors occured:\n{}".format("\n".join(error_list))
 
 
 def test_num_charger(wallbox):
@@ -30,11 +30,16 @@ def test_scenario_info(wallbox):
 
 
 def test_scenario_info_wrong_id(wallbox):
-    with pytest.raises(ValueError, match="Point ID home doesn't match any Points in charger home_1"):
+    with pytest.raises(
+        ValueError, match="Point ID home doesn't match any Points in charger home_1"
+    ):
         wallbox.get_scenario_info("home", ["Type2", "Schuko", "ChaDeMo"])
 
 
 def test_scenario_info_no_charging_points():
     ch = charger.Charger("charger", [])
-    with pytest.raises(ValueError, match="Scenario dictionary requested of charger charger with no charging points"):
+    with pytest.raises(
+        ValueError,
+        match="Scenario dictionary requested of charger charger with no charging points",
+    ):
         ch.get_scenario_info("0", ["Schuko"])

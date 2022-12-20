@@ -204,18 +204,22 @@ class Simulation:
         """
         vehicle = self.vehicles[row.vehicle_id]
         trip = self.driving_sim.calculate_trip(
-            self.locations[row.departure_name], self.locations[row.arrival_name], vehicle.vehicle_type
+            self.locations[row.departure_name],
+            self.locations[row.arrival_name],
+            vehicle.vehicle_type,
         )
         dep_time = self.datetime_to_timesteps(row.departure_time)
         arr_time = self.datetime_to_timesteps(row.arrival_time)
         calc_time = dep_time + int(round(trip["trip_time"], 0))
         if calc_time > arr_time:
-            warnings.warn(f"Calculated time for trip {row.departure_name} to {row.arrival_name} is higher than in schedule. (Calculated: {calc_time}, schedule: {arr_time - dep_time})")
+            warnings.warn(
+                f"Calculated time for trip {row.departure_name} to {row.arrival_name} is higher than in schedule. (Calculated: {calc_time}, schedule: {arr_time - dep_time})\n"
+            )
         task = Task(
             dep_time,
             arr_time,  # TODO maybe use calc_time here, currently leads to errors
             self.locations[row.departure_name],
-            self.locations[row.arrival_name],            
+            self.locations[row.arrival_name],
             "driving",
             trip["trip_time"],
             trip["soc_delta"],

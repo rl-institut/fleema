@@ -45,9 +45,7 @@ class SimulationType:
                 if task.task == "driving":  # TODO rewrite function
                     print(consumption)  # TODO remove
                     consumption += task.delta_soc
-                    consumption_list.append(
-                        (task.end_time, vehicle.soc + consumption)
-                    )
+                    consumption_list.append((task.end_time, vehicle.soc + consumption))
                 if task.task == "charging":
                     # TODO check how much this would charge
                     pass

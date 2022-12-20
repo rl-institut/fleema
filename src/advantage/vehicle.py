@@ -160,7 +160,9 @@ class Vehicle:
 
     def add_task(self, task: "Task"):
         if task.start_time in self.tasks:
-            raise KeyError(f"Key {task.start_time} already exists in tasks of vehicle {self.id}")
+            raise KeyError(
+                f"Key {task.start_time} already exists in tasks of vehicle {self.id}"
+            )
         # otherwise, add new task to list, ordered by starting time
         self.tasks[task.start_time] = task
 
@@ -168,7 +170,9 @@ class Vehicle:
         if self.tasks[task.start_time] == task:
             del self.tasks[task.start_time]
         else:
-            raise ValueError(f"Task {task.__str__} is not in task list of vehicle {self.id} or has the wrong index")
+            raise ValueError(
+                f"Task {task.__str__} is not in task list of vehicle {self.id} or has the wrong index"
+            )
 
     def get_task(self, time_step: int):
         try:
@@ -215,7 +219,7 @@ class Vehicle:
                 # TODO are other task types relevant?
                 if task.start_time > previous_task.end_time:
                     breaks.append(
-                        Task(                            
+                        Task(
                             previous_task.end_time,  # TODO maybe +1?
                             task.start_time,  # TODO maybe -1?
                             previous_task.end_point,

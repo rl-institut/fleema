@@ -16,8 +16,12 @@ def car():
 
 @pytest.fixture()
 def time_series():
-    time_series = pd.date_range(datetime.datetime(2022, 1, 1), datetime.datetime(2022, 1, 3), freq='min',
-                                inclusive='left')
+    time_series = pd.date_range(
+        datetime.datetime(2022, 1, 1),
+        datetime.datetime(2022, 1, 3),
+        freq="min",
+        inclusive="left",
+    )
     return time_series
 
 
@@ -86,8 +90,8 @@ def test_update_vehicle_park(car, sim_state):
     assert car in sim_state.parking_vehicles
 
 
-'''
+"""
 Possible other tests:
 - vehicle is from the wrong data type
 - vehicle should be only in one list
-'''
+"""
