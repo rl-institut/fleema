@@ -119,7 +119,7 @@ class Vehicle:
             "timestamp": [],
             "event_start": [],
             "event_time": [],
-            "location": [],
+            "end_location": [],
             "status": [],
             "soc_start": [],
             "soc_end": [],
@@ -173,9 +173,9 @@ class Vehicle:
         self.output["station_charging_capacity"].append(nominal_charging_capacity)
         self.output["average_charging_power"].append(round(charging_power, 4))
         if self.current_location is not None:
-            self.output["location"].append(self.current_location.name)
+            self.output["end_location"].append(self.current_location.name)
         else:
-            self.output["location"].append("")
+            self.output["end_location"].append("")
         if simulation_state is not None:
             simulation_state.update_vehicle(self)
 
@@ -277,7 +277,7 @@ class Vehicle:
         timestamp,
         start: int,
         time: int,
-        destination: str,
+        destination: "Location",
         new_soc: float,
         observer=None,
     ):
@@ -287,7 +287,7 @@ class Vehicle:
             isinstance(i, int) or isinstance(i, float) for i in [start, time, new_soc]
         ):
             raise TypeError("Argument has wrong type.")
-        if not isinstance(destination, str):
+        if not isinstance(destination, Location):
             raise TypeError("Argument has wrong type.")
         if not all(i >= 0 for i in [start, time, new_soc]):
             raise ValueError("Arguments can't be negative.")
@@ -308,8 +308,8 @@ class Vehicle:
         #     )
         self.status = "driving"
         self.soc = new_soc
+        self.current_location = destination
         self._update_activity(timestamp, start, time, observer)
-        self.status = destination
 
     def park(self, timestamp, start, time, observer=None):
         """This method simulates parking and updates the attribute status."""

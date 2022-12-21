@@ -53,7 +53,7 @@ def test_constructor(car):
 def test_drive_result(car, time_series):
     start_step = 5
     time_stamp = step_to_timestamp(time_series, start_step)
-    car.drive(time_stamp, start_step, time=10, destination="station_1", new_soc=0.45)
+    car.drive(time_stamp, start_step, time=10, destination=Location(), new_soc=0.45)
     assert car.soc == 0.45
 
 
@@ -63,7 +63,7 @@ def test_drive_bad_soc(car, time_series):
     with pytest.raises(
         ValueError, match="SoC of vehicle can't be higher after driving."
     ):
-        car.drive(time_stamp, start_step, time=60, destination="station_1", new_soc=0.7)
+        car.drive(time_stamp, start_step, time=60, destination=Location(), new_soc=0.7)
 
 
 # def test_drive_sanity(car, time_series):
@@ -77,7 +77,7 @@ def test_drive_input_checks(car, time_series):
     start_step = 5
     time_stamp = step_to_timestamp(time_series, start_step)
     with pytest.raises(TypeError, match="Argument has wrong type."):
-        car.charge(time_stamp, start_step, time="-1", power=11, new_soc=0.8)
+        car.drive(time_stamp, start_step, time="60", destination=Location(), new_soc=0.7)
 
 
 def test_charge_result(car, time_series):

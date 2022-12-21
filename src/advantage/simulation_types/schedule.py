@@ -79,7 +79,7 @@ class Schedule(SimulationType):
                             step_to_timestamp(self.simulation.time_series, step),
                             task.start_time,
                             task.end_time - task.start_time,
-                            task.end_point.name,
+                            task.end_point,
                             veh.soc + task.delta_soc,
                             self.simulation.observer,
                         )
