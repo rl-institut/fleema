@@ -249,9 +249,21 @@ class Vehicle:
                         )
                     )
                 previous_task = task
+        if previous_task.end_time < end:
+            breaks.append(
+                Task(
+                    previous_task.end_time,  # TODO maybe +1?
+                    end,  # TODO maybe -1?
+                    previous_task.end_point,
+                    previous_task.end_point,
+                    "break",
+                )
+            )
         return breaks
 
-    def charge(self, timestamp, start, time, power, new_soc, observer=None):
+    def charge(
+        self, timestamp, start, time, power, new_soc, charging_capacity, observer=None
+    ):
         """This method simulates charging and updates the attributes status and soc."""
         # TODO call spiceev charging depending on soc, location, task
         # TODO this requires a SpiceEV scenario object
@@ -270,7 +282,14 @@ class Vehicle:
             )
         self.status = "charging"
         self.soc = new_soc
-        self._update_activity(timestamp, start, time, observer, charging_power=power)
+        self._update_activity(
+            timestamp,
+            start,
+            time,
+            observer,
+            charging_power=power,
+            nominal_charging_capacity=charging_capacity,
+        )
 
     def drive(
         self,

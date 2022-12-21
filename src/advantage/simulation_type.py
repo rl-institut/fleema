@@ -1,10 +1,14 @@
 from importlib import import_module
 from typing import TYPE_CHECKING
 import pandas as pd
+from statistics import mean
+
+from advantage.util.conversions import step_to_timestamp
 
 if TYPE_CHECKING:
     from advantage.simulation import Simulation
     from advantage.vehicle import Vehicle
+    from advantage.event import Task
 
 
 def class_from_str(strategy_name):
@@ -19,6 +23,47 @@ class SimulationType:
 
     def __init__(self, simulation: "Simulation"):
         self.simulation = simulation
+
+    def execute_task(self, vehicle: "Vehicle", task: "Task", step: int):
+        # TODO maybe put this in extra function execute_task(self, vehicle, task)
+        if task.task == "driving":
+            if not task.is_calculated:
+                trip = self.simulation.driving_sim.calculate_trip(
+                    task.start_point,
+                    task.end_point,
+                    vehicle.vehicle_type,
+                )
+                task.delta_soc = trip["soc_delta"]
+                task.float_time = trip["trip_time"]
+            vehicle.drive(
+                step_to_timestamp(self.simulation.time_series, step),
+                task.start_time,
+                task.end_time - task.start_time,
+                task.end_point,
+                vehicle.soc + task.delta_soc,
+                self.simulation.observer,
+            )
+        elif task.task == "charging":
+            # call spiceev to calculate charging
+            spiceev_scenario = self.simulation.call_spiceev(
+                task.start_point,
+                task.start_time,
+                task.end_time,
+                vehicle,
+            )
+            nominal_charging_power = list(
+                spiceev_scenario.constants.charging_stations.values()
+            )[0].max_power
+            # execute charging event
+            vehicle.charge(
+                step_to_timestamp(self.simulation.time_series, step),
+                task.start_time,
+                task.end_time - task.start_time,
+                mean(spiceev_scenario.totalLoad["GC1"]),
+                vehicle.soc + task.delta_soc,
+                nominal_charging_power,
+                self.simulation.observer,
+            )
 
     def get_predicted_soc(self, vehicle: "Vehicle", start: int, end: int):
         """Calculates predicted SoC of given vehicle after the given timespan by running all tasks.

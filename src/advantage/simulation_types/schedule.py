@@ -1,5 +1,4 @@
 from advantage.simulation_type import SimulationType
-from advantage.util.conversions import step_to_timestamp
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -66,21 +65,6 @@ class Schedule(SimulationType):
                 if task is None:
                     continue
                 else:
-                    if task.task == "driving":
-                        if not task.is_calculated:
-                            trip = self.simulation.driving_sim.calculate_trip(
-                                task.start_point,
-                                task.end_point,
-                                veh.vehicle_type,
-                            )
-                            task.delta_soc = trip["soc_delta"]
-                            task.float_time = trip["trip_time"]
-                        veh.drive(
-                            step_to_timestamp(self.simulation.time_series, step),
-                            task.start_time,
-                            task.end_time - task.start_time,
-                            task.end_point,
-                            veh.soc + task.delta_soc,
-                            self.simulation.observer,
-                        )
+                    self.execute_task(veh, task, step)
+
                 veh.export(self.simulation.save_directory)

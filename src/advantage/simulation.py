@@ -329,7 +329,7 @@ class Simulation:
         if time_score <= 0:
             return None
         # call spiceev to calculate charging
-        charging_start = start_time + trip_to["trip_time"]
+        charging_start = int(start_time + round(trip_to["trip_time"], 0))
         charging_time = time_window - driving_time
         mock_vehicle = Vehicle("vehicle", vehicle_type, soc=current_soc)
         spiceev_scenario = self.call_spiceev(
@@ -352,7 +352,46 @@ class Simulation:
             + cost_score * self.weights["cost_factor"]
             + local_ee_score * self.weights["local_renewables_factor"]
         )
-        return {"score": score, "consumption": drive_soc, "charge": charged_soc}
+        if score <= 0:
+            return None
+
+        charge_event = Task(
+            charging_start,
+            charging_start + charging_time,
+            charging_location,
+            charging_location,
+            "charging",
+        )
+        result_dict = {
+            "score": score,
+            "consumption": drive_soc,
+            "charge": charged_soc,
+            "charge_event": charge_event,
+        }
+        if current_location is not charging_location:
+            # TODO create drive to and drive from tasks
+            task_to = Task(
+                start_time,
+                charging_start,
+                current_location,
+                charging_location,
+                "driving",
+                trip_to["trip_time"],
+                trip_to["soc_delta"],
+            )
+            result_dict["task_to"] = task_to
+        if charging_location is not next_location:
+            task_from = Task(
+                charging_start + charging_time,
+                end_time,
+                charging_location,
+                next_location,
+                "driving",
+                trip_to["trip_time"],
+                trip_to["soc_delta"],
+            )
+            result_dict["task_from"] = task_from
+        return result_dict
 
     @classmethod
     def from_config(cls, scenario_name):
