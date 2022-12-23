@@ -60,7 +60,7 @@ class SimulationType:
                 task.start_time,
                 task.end_time - task.start_time,
                 mean(spiceev_scenario.totalLoad["GC1"]),
-                vehicle.soc + task.delta_soc,
+                spiceev_scenario.socs[-1][0],
                 nominal_charging_power,
                 self.simulation.observer,
             )
@@ -87,8 +87,7 @@ class SimulationType:
         consumption_list.append((start, vehicle.soc))
         for _, task in sorted(vehicle.tasks.items()):
             if start < task.end_time < end:
-                if task.task == "driving":  # TODO rewrite function
-                    print(consumption)  # TODO remove
+                if task.task == "driving":
                     consumption += task.delta_soc
                     consumption_list.append((task.end_time, vehicle.soc + consumption))
                 if task.task == "charging":

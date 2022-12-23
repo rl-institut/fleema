@@ -47,8 +47,6 @@ class Schedule(SimulationType):
                             lowest_current_soc,
                         )
                     )
-                    # TODO compare evaluation to necessary charging energy
-                    # TODO make charging list, create vehicle function to parse list into tasks
                 # compare locations and choose the best one
                 # TODO change sorting depending on config? score is always most important,
                 # after could come cost, charge, consumption...
@@ -86,6 +84,12 @@ class Schedule(SimulationType):
                         min_soc_bool = soc_df_slice["necessary_charging"] <= 0
                         min_soc_satisfied = min_soc_bool.all()
                         total_charge += charge_option["delta_soc"]
+                        veh.add_task(charge_option["charge_event"])
+                        if "task_to" in charge_option:
+                            veh.add_task(charge_option["task_to"])
+                        if "task_from" in charge_option:
+                            veh.add_task(charge_option["task_from"])
+
                         chosen_events.append(charge_option)
                         # TODO implement not choosing events if max charge is satisfied
                         # and they don't contribute to min_soc
@@ -99,8 +103,6 @@ class Schedule(SimulationType):
                         raise ValueError(
                             f"Not enough charging possible for vehicle {veh.id}!"
                         )
-        # TODO run through all chosen events and add them as tasks to the vehicle
-        pass
 
     def run(self):
         # create tasks for all vehicles from input schedule
