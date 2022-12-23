@@ -1,5 +1,6 @@
 from advantage.simulation_type import SimulationType
 from typing import TYPE_CHECKING
+from operator import itemgetter
 
 if TYPE_CHECKING:
     from advantage.simulation import Simulation
@@ -25,12 +26,17 @@ class Schedule(SimulationType):
         for veh in self.simulation.vehicles.values():
             soc_df = self.get_predicted_soc(veh, start, end)
             break_list = veh.get_breaks(start, end)
-            charging_list = []
-            for task in break_list:
+            # initialize variables
+            charging_list = [{}] * len(break_list)
+            lowest_current_soc = veh.soc_start
+            for counter, task in enumerate(break_list):
                 # for all locations with chargers, evaluate the best option. save task, best location, evaluation
-                # self.simulation.evaluate_charging_location()
+                charging_list_temp = []
                 for loc in self.simulation.charging_locations:
-                    charging_list.append(
+                    soc_df_slice = soc_df.loc[soc_df["timestep"] >= task.start_time]
+                    if len(soc_df_slice.index):
+                        lowest_current_soc = soc_df_slice.iat[0, 1]
+                    charging_list_temp.append(
                         self.simulation.evaluate_charging_location(
                             veh.vehicle_type,
                             loc,
@@ -38,16 +44,63 @@ class Schedule(SimulationType):
                             task.end_point,
                             task.start_time,
                             task.end_time,
-                            0.0,
+                            lowest_current_soc,
                         )
                     )
                     # TODO compare evaluation to necessary charging energy
                     # TODO make charging list, create vehicle function to parse list into tasks
-            # check if end of day soc is below minimum soc
-            if soc_df.iat[-1, 1] < self.simulation.soc_min:
-                pass
-            else:
-                pass
+                # compare locations and choose the best one
+                # TODO change sorting depending on config? score is always most important,
+                # after could come cost, charge, consumption...
+                charging_list_temp.sort(key=itemgetter("consumption"))
+                charging_list_temp.sort(
+                    key=itemgetter("score", "delta_soc", "charge"), reverse=True
+                )
+                charging_list[counter] = charging_list_temp[0]
+
+            charging_list.sort(key=itemgetter("score"), reverse=True)
+            chosen_events = []
+            total_charge = 0
+            min_soc_satisfied = False
+            max_charge = 1 - soc_df.iat[-1, 1]
+            # check if vehicle falls under minimum soc
+            min_charge = max(self.simulation.soc_min - soc_df.iat[-1, 1], 0)
+            if min_charge:
+                soc_df_slice = soc_df.loc[
+                    soc_df["soc"] <= self.simulation.soc_min
+                ].copy()
+                soc_df_slice["necessary_charging"] = (
+                    self.simulation.soc_min - soc_df_slice["soc"]
+                )
+
+                for charge_option in charging_list:
+                    if charge_option["score"] > 0:
+                        # if not min_soc_satisfied:
+                        charge_index = soc_df_slice.loc[
+                            soc_df_slice["timestep"]
+                            >= charge_option["charge_event"].start_time
+                        ].index
+                        soc_df_slice.loc[
+                            charge_index, "necessary_charging"
+                        ] -= charge_option["delta_soc"]
+                        min_soc_bool = soc_df_slice["necessary_charging"] <= 0
+                        min_soc_satisfied = min_soc_bool.all()
+                        total_charge += charge_option["delta_soc"]
+                        chosen_events.append(charge_option)
+                        # TODO implement not choosing events if max charge is satisfied
+                        # and they don't contribute to min_soc
+
+                        if total_charge > max_charge and min_soc_satisfied:
+                            break
+
+                    else:
+                        if min_soc_satisfied:
+                            break
+                        raise ValueError(
+                            f"Not enough charging possible for vehicle {veh.id}!"
+                        )
+        # TODO run through all chosen events and add them as tasks to the vehicle
+        pass
 
     def run(self):
         # create tasks for all vehicles from input schedule

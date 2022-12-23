@@ -91,9 +91,7 @@ class Simulation:
         self.start_date = cfg_dict["start_date"]
         self.end_date = cfg_dict["end_date"]
         self.step_size = cfg_dict["step_size"]
-        time_steps: datetime.timedelta = (
-            self.end_date - self.start_date + datetime.timedelta(days=1)
-        )
+        time_steps: datetime.timedelta = self.end_date - self.start_date
         self.time_steps = int(time_steps.total_seconds() / 60 / self.step_size)
         self.time_series = pd.date_range(
             self.start_date,
@@ -314,6 +312,8 @@ class Simulation:
             Keys: "score", "consumption" (soc delta), "charge" (soc delta)
 
         """
+        # return value in case of failure
+        empty_dict = {"score": 0, "consumption": 0, "charge": 0, "delta_soc": 0}
         # run pre calculations
         time_window = end_time - start_time
         trip_to = self.driving_sim.calculate_trip(
@@ -327,7 +327,7 @@ class Simulation:
         # score the time spent charging and driving
         time_score = 1 - (driving_time / time_window)
         if time_score <= 0:
-            return None
+            return empty_dict
         # call spiceev to calculate charging
         charging_start = int(start_time + round(trip_to["trip_time"], 0))
         charging_time = time_window - driving_time
@@ -339,21 +339,25 @@ class Simulation:
             mock_vehicle,
         )
         charged_soc = spiceev_scenario.socs[-1][0] - current_soc  # type: ignore
+        if charged_soc <= 0:
+            return empty_dict
         charge_score = 1 - ((-drive_soc) / charged_soc)
         if charge_score <= 0:
-            return None
+            return empty_dict
 
         # calculate remaining scores which don't have cutoff criteria
         cost_score = 0  # TODO get €/kWh from inputs
         local_ee_score = 0  # TODO energy_from_ee / charged_energy
+        soc_score = 0.1 if current_soc < 0.8 else 0
         score = (
             time_score * self.weights["time_factor"]
             + charge_score * self.weights["energy_factor"]
             + cost_score * self.weights["cost_factor"]
             + local_ee_score * self.weights["local_renewables_factor"]
+            + soc_score  # TODO discuss with team
         )
         if score <= 0:
-            return None
+            return empty_dict
 
         charge_event = Task(
             charging_start,
@@ -366,10 +370,11 @@ class Simulation:
             "score": score,
             "consumption": drive_soc,
             "charge": charged_soc,
+            "delta_soc": charged_soc + drive_soc,
             "charge_event": charge_event,
         }
+        # create drive to and drive from charging point
         if current_location is not charging_location:
-            # TODO create drive to and drive from tasks
             task_to = Task(
                 start_time,
                 charging_start,
