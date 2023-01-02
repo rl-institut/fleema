@@ -18,6 +18,38 @@ class Schedule(SimulationType):
         # get tasks for every row of the schedule
         self.simulation.schedule.apply(self.simulation.task_from_schedule, axis=1)  # type: ignore
 
+    def get_charging_slots(self, break_list, soc_df, vehicle):
+        # initialize variables
+        charging_list = [{}] * len(break_list)
+        lowest_current_soc = vehicle.soc_start
+        for counter, task in enumerate(break_list):
+            # for all locations with chargers, evaluate the best option. save task, best location, evaluation
+            charging_list_temp = []
+            for loc in self.simulation.charging_locations:
+                soc_df_slice = soc_df.loc[soc_df["timestep"] >= task.start_time]
+                if len(soc_df_slice.index):
+                    lowest_current_soc = soc_df_slice.iat[0, 1]
+                charging_list_temp.append(
+                    self.simulation.evaluate_charging_location(
+                        vehicle.vehicle_type,
+                        loc,
+                        task.start_point,
+                        task.end_point,
+                        task.start_time,
+                        task.end_time,
+                        lowest_current_soc,
+                    )
+                )
+            # compare locations and choose the best one
+            # TODO change sorting depending on config? score is always most important,
+            # after could come cost, charge, consumption...
+            charging_list_temp.sort(key=itemgetter("consumption"))
+            charging_list_temp.sort(
+                key=itemgetter("score", "delta_soc", "charge"), reverse=True
+            )
+            charging_list[counter] = charging_list_temp[0]
+        return charging_list
+
     def _distribute_charging_slots(self, start, end):
         # go through all vehicles, check SoC after all tasks (end of day). continues if <20%
         # evaluate charging slots
@@ -26,35 +58,7 @@ class Schedule(SimulationType):
         for veh in self.simulation.vehicles.values():
             soc_df = self.get_predicted_soc(veh, start, end)
             break_list = veh.get_breaks(start, end)
-            # initialize variables
-            charging_list = [{}] * len(break_list)
-            lowest_current_soc = veh.soc_start
-            for counter, task in enumerate(break_list):
-                # for all locations with chargers, evaluate the best option. save task, best location, evaluation
-                charging_list_temp = []
-                for loc in self.simulation.charging_locations:
-                    soc_df_slice = soc_df.loc[soc_df["timestep"] >= task.start_time]
-                    if len(soc_df_slice.index):
-                        lowest_current_soc = soc_df_slice.iat[0, 1]
-                    charging_list_temp.append(
-                        self.simulation.evaluate_charging_location(
-                            veh.vehicle_type,
-                            loc,
-                            task.start_point,
-                            task.end_point,
-                            task.start_time,
-                            task.end_time,
-                            lowest_current_soc,
-                        )
-                    )
-                # compare locations and choose the best one
-                # TODO change sorting depending on config? score is always most important,
-                # after could come cost, charge, consumption...
-                charging_list_temp.sort(key=itemgetter("consumption"))
-                charging_list_temp.sort(
-                    key=itemgetter("score", "delta_soc", "charge"), reverse=True
-                )
-                charging_list[counter] = charging_list_temp[0]
+            charging_list = self.get_charging_slots(break_list, soc_df, veh)
 
             charging_list.sort(key=itemgetter("score"), reverse=True)
             chosen_events = []
