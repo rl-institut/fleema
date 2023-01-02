@@ -10,7 +10,7 @@ class Location:
 
     This class allows type checking.
 
-    Attributes
+    Parameters
     ----------
     name : str
         Name/ID of the location.
@@ -85,6 +85,7 @@ class Location:
         return None
 
     def set_power(self, power: float):
+        """Set power of grid connector at this location."""
         if self.grid_info is None:
             self.grid_info = {}
         self.grid_info["power"] = power

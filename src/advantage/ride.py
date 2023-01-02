@@ -14,6 +14,17 @@ class RideCalc:
         distances: pd.DataFrame,
         inclines: pd.DataFrame,
     ) -> None:
+        """RideCalc constructor.
+
+        Parameters
+        ----------
+        consumption_table : DataFrame
+            DataFrame containing consumption by vehicle type, speed, etc.
+        distances : DataFrame
+            Distance matrix between all Locations
+        inclines : DataFrame
+            Incline matrix between all Locations
+        """
         self.consumption_table = consumption_table
         self.distances = distances
         self.inclines = inclines
@@ -93,7 +104,7 @@ class RideCalc:
         Returns
         -------
         tuple[float, float]
-            Returns conusmption in kWh and the SoC delta resulting from this trip
+            Returns consumption in kWh and the SoC delta resulting from this trip
 
         """
         consumption_factor = self.get_consumption(
@@ -124,7 +135,7 @@ class RideCalc:
         Returns
         -------
         float
-            Returns consumption faktor in kWh/km
+            Returns consumption factor in kWh/km
 
         """
 

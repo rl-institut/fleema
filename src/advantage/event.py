@@ -8,8 +8,9 @@ if TYPE_CHECKING:
 
 @dataclass
 class Event:
-    """
-    Attributes
+    """Base event dataclass. Includes basic data and representation functions.
+
+    Parameters
     ----------
     start_time : int
         Starting time step of the event.
@@ -31,8 +32,9 @@ class Event:
 
 @dataclass
 class Task(Event):
-    """
-    Attributes
+    """Saves data for a charging, driving or break event.
+
+    Parameters
     ----------
     start_time : int
         Starting time step of the event.
@@ -56,8 +58,7 @@ class Task(Event):
 
     @property
     def is_calculated(self):
-        """
-        Checks, if float_time and delta_soc have been set.
+        """Checks, if float_time and delta_soc have been set.
 
         Returns
         -------

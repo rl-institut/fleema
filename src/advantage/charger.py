@@ -8,7 +8,7 @@ from advantage.util.helpers import deep_update
 class PlugType:
     """Class implements any type of plug given the parameters.
 
-    Attributes
+    Parameters
     ----------
     name : str
         Identifier of this plug type.
@@ -28,7 +28,7 @@ class PlugType:
 class ChargingPoint:
     """Dataclass containing all information about a single charging point.
 
-    Attributes
+    Parameters
     ----------
     id : str
         Identifier of this charging point.
@@ -57,7 +57,7 @@ class Charger:
 
     Depicts a charging station with possibly multiple charging points.
 
-    Attributes
+    Parameters
     ----------
     name : str
         Name/ID of the station.

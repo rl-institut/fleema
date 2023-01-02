@@ -10,7 +10,7 @@ import pathlib
 class VehicleType:
     """The VehicleType contains static vehicle data.
 
-    Attributes
+    Parameters
     ----------
     name : str
         Name/ID for the vehicle type.
@@ -49,7 +49,7 @@ class VehicleType:
 class Vehicle:
     """The vehicle contains tech parameters as well as tasks.
 
-    Attributes
+    Parameters
     ----------
     id : str
         ID of the vehicle.
@@ -153,6 +153,8 @@ class Vehicle:
             Current state of the simulation.
         charging_power : float
             Charging power of the vehicle's battery in percentage. Default is zero.
+        nominal_charging_capacity : float
+            Power of the connected charging point.
 
 
         """
@@ -180,6 +182,7 @@ class Vehicle:
             simulation_state.update_vehicle(self)
 
     def add_task(self, task: "Task"):
+        """Add a task to the self.tasks using the start_time as key."""
         if task.start_time in self.tasks:
             raise KeyError(
                 f"Key {task.start_time} already exists in tasks of vehicle {self.id}"
@@ -188,6 +191,7 @@ class Vehicle:
         self.tasks[task.start_time] = task
 
     def remove_task(self, task: "Task"):
+        """Remove a task from self.tasks."""
         if self.tasks[task.start_time] == task:
             del self.tasks[task.start_time]
         else:
@@ -217,7 +221,15 @@ class Vehicle:
         return True
 
     def get_breaks(self, start: int, end: int) -> List["Task"]:
-        # TODO rewrite based on dict
+        """Get break times according to self.tasks
+
+        Parameters
+        ----------
+        start : int
+            Starting timestep
+        end : int
+            Ending timestep
+        """
         if not self.has_valid_task_list:
             print(f"Task list of vehicle {self.id} is not valid.")
             # Error disabled for testing purposes until schedule is fixed
@@ -264,9 +276,18 @@ class Vehicle:
     def charge(
         self, timestamp, start, time, power, new_soc, charging_capacity, observer=None
     ):
-        """This method simulates charging and updates the attributes status and soc."""
-        # TODO call spiceev charging depending on soc, location, task
-        # TODO this requires a SpiceEV scenario object
+        """This methodupdates the vehicle with charging results.
+
+        Parameters
+        ----------
+        timestamp : str
+        start : int
+        time : int
+        power : float
+        new_soc : float
+        charging_capacity : float
+        observer : Optional[SimulationState]
+        """
         if not all(
             isinstance(i, int) or isinstance(i, float)
             for i in [start, time, power, new_soc]
@@ -300,7 +321,16 @@ class Vehicle:
         new_soc: float,
         observer=None,
     ):
-        """This method simulates driving and updates the attributes status and soc."""
+        """This method updates the vehicle with driving results.
+
+        Parameters
+        ----------
+        timestamp : str
+        start : int
+        time : int
+        destination : Location
+        new_soc : float
+        observer : Optional[SimulationState]"""
         # call drive api with task, soc, ...
         if not all(
             isinstance(i, int) or isinstance(i, float) for i in [start, time, new_soc]
@@ -331,7 +361,7 @@ class Vehicle:
         self._update_activity(timestamp, start, time, observer)
 
     def park(self, timestamp, start, time, observer=None):
-        """This method simulates parking and updates the attribute status."""
+        """This method updates the vehicle after a parking event."""
         if not all(isinstance(i, int) or isinstance(i, float) for i in [start, time]):
             raise TypeError("Argument has wrong type.")
         if not all(i >= 0 for i in [start, time]):
@@ -402,6 +432,7 @@ class Vehicle:
         return scenario_dict
 
     def _get_last_charging_demand(self):
+        """Returns the charging demand of the previous event."""
         if len(self.output["soc_start"]):
             charging_demand = self.output["soc_end"][-1] - self.output["soc_start"][-1]
             charging_demand *= self.vehicle_type.battery_capacity
@@ -410,6 +441,7 @@ class Vehicle:
             return 0
 
     def _get_last_consumption(self):
+        """Returns the consumption of the last event."""
         if len(self.output["soc_start"]):
             last_consumption = self.output["soc_end"][-1] - self.output["soc_start"][-1]
             last_consumption *= self.vehicle_type.battery_capacity

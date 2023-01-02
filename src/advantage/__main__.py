@@ -1,14 +1,9 @@
-"""
-This script starts the simulation.
-
-The simulation is instantiated by using the scenario name from the command line.
-"""
-
 from advantage.simulation import Simulation
 import argparse
 
 
 def main():
+    """Main function of the advantage tool. Starts the program by parsing a scenario name from the command line."""
     parser = argparse.ArgumentParser(
         description="SimBEV modelling tool for generating timeseries of electric "
         "vehicles."

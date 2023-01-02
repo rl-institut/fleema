@@ -34,7 +34,7 @@ class Simulation:
 
     It also contains the run function, which starts the simulation.
 
-    Attributes
+    Parameters
     ----------
     soc_min : float
         Lower limit of the battery's charging power (soc - state of charge).
@@ -224,7 +224,7 @@ class Simulation:
             )
         task = Task(
             dep_time,
-            arr_time,  # TODO maybe use calc_time here, currently leads to errors
+            arr_time,  # TODO maybe use calc_time here in future, currently leads to errors
             self.locations[row.departure_name],
             self.locations[row.arrival_name],
             "driving",
@@ -264,6 +264,22 @@ class Simulation:
         vehicle: "Vehicle",
         point_id=None,
     ):
+        """Calls SpiceEV with given parameters.
+
+        Parameters
+        ----------
+        location : Location
+        start_time : int
+        end_time : int
+        vehicle : Vehicle
+        point_id : Optional[str]
+
+        Returns
+        -------
+        Scenario
+            SpiceEV scenario object
+
+        """
         time_stamp = step_to_timestamp(self.time_series, start_time)
         charging_time = int(end_time - start_time)
         spice_dict = get_spice_ev_scenario_dict(
@@ -303,13 +319,12 @@ class Simulation:
             Ending time step of the time window
         current_soc : float
             SoC of vehicle before charging
-        desired_soc : float
-            SoC needed to complete upcoming task(s) until next break
 
         Returns
         -------
-        dict[float, float, float] or None
-            Keys: "score", "consumption" (soc delta), "charge" (soc delta)
+        dict[float, float, float, float, Task, Optional[Task], Optional[Task]]
+            Keys: "score", "consumption" (soc delta), "charge" (soc delta), "delta_soc" (total soc delta),
+            "charge_event", Optional: "task_to", "task_from"
 
         """
         # return value in case of failure

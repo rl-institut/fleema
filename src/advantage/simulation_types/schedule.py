@@ -11,14 +11,28 @@ class Schedule(SimulationType):
         super().__init__(simulation)
 
     def _create_initial_schedule(self):
-        # creates tasks from self.schedule and assigns them to the vehicles
-        # creates self.events: List of timesteps where an event happens
-        # TODO check similar functions in ebus toolbox
+        """Creates vehicles and tasks from the scenario schedule."""
         self.simulation.vehicles_from_schedule()
         # get tasks for every row of the schedule
         self.simulation.schedule.apply(self.simulation.task_from_schedule, axis=1)  # type: ignore
 
     def get_charging_slots(self, break_list, soc_df, vehicle):
+        """Calculate charging slots for a vehicle.
+
+        Parameters
+        ----------
+        break_list : List[Task]
+            Result from vehicle.get_breaks()
+        soc_df : DataFrame
+            Result from self.get_predicted_soc()
+        vehicle : Vehicle
+
+        Returns
+        -------
+        list
+            Returns a sorted list containing results from the evaluate charging station function.
+            Better results are at the top
+        """
         # initialize variables
         charging_list = [{}] * len(break_list)
         lowest_current_soc = vehicle.soc_start
@@ -51,6 +65,15 @@ class Schedule(SimulationType):
         return charging_list
 
     def _distribute_charging_slots(self, start, end):
+        """Choose charging slots in the specified timeframe and add them to the vehicle.
+
+        Parameters
+        ----------
+        start : int
+            Starting timestep
+        end : int
+            Ending timestep
+        """
         # go through all vehicles, check SoC after all tasks (end of day). continues if <20%
         # evaluate charging slots
         # distribute slots by highest total score (?)
@@ -109,6 +132,7 @@ class Schedule(SimulationType):
                         )
 
     def run(self):
+        """Run the scenario with this strategy."""
         # create tasks for all vehicles from input schedule
         self._create_initial_schedule()
         # create charging tasks based on rating

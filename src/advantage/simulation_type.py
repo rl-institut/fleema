@@ -11,7 +11,8 @@ if TYPE_CHECKING:
     from advantage.event import Task
 
 
-def class_from_str(strategy_name):
+def class_from_str(strategy_name: str):
+    """Returns a constructor from the specified strategy."""
     import_name = strategy_name.lower()
     class_name = "".join([s.capitalize() for s in strategy_name.split("_")])
     module = import_module("advantage.simulation_types." + import_name)
@@ -19,13 +20,29 @@ def class_from_str(strategy_name):
 
 
 class SimulationType:
-    """ """
-
     def __init__(self, simulation: "Simulation"):
+        """SimulationType base constructor.
+
+        Parameters
+        ----------
+        simulation : Simulation
+            The current simulation object
+        """
         self.simulation = simulation
 
     def execute_task(self, vehicle: "Vehicle", task: "Task", step: int):
-        # TODO maybe put this in extra function execute_task(self, vehicle, task)
+        """Makes a vehicle execute a specified task.
+
+        Parameters
+        ----------
+        vehicle : Vehicle
+            Vehicle object executing the task
+        task : Task
+            Task to be executed
+        step : int
+            Current simulation timestep
+        """
+        # TODO replace step with start_time of task? or double check if task is called at the correct time
         if task.task == "driving":
             if not task.is_calculated:
                 trip = self.simulation.driving_sim.calculate_trip(
