@@ -1,12 +1,26 @@
-"""
-This script starts the simulation.
-
-The simulation is instantiated by using the scenario name from the command line.
-"""
-
 from advantage.simulation import Simulation
+import argparse
 
 
-print("Running the ADVANTAGE tool...")
-simulation = Simulation.from_config("public_transport_base")
-print("-- Done --")
+def main():
+    """Main function of the advantage tool. Starts the program by parsing a scenario name from the command line."""
+    parser = argparse.ArgumentParser(
+        description="SimBEV modelling tool for generating timeseries of electric "
+        "vehicles."
+    )
+    parser.add_argument(
+        "scenario",
+        default="public_transport_base",
+        nargs="?",
+        help="Set the scenario which is located in ./scenarios .",
+    )
+    p_args = parser.parse_args()
+
+    print("Running the ADVANTAGE tool...")
+    simulation = Simulation.from_config(p_args.scenario)
+    simulation.run()
+    print("-- Done --")
+
+
+if __name__ == "__main__":
+    main()

@@ -16,7 +16,7 @@ Setting up an environment
 -------------------------
 As a User
 ^^^^^^^^
-| Create a new virtual environment (for example in PyCharm). Activate it with:
+| Create a new virtual environment (for example in PyCharm or via the command line ``python3 -m venv venv``). Activate it with:
 | Terminal:  ``source venv/bin/activate``
 | Windows: ``venv\Scripts\activate``
 | Note: You need to be in the project folder to activate the environment
@@ -26,13 +26,14 @@ As a User
 As a Developer
 ^^^^^^^^^^^^^^
 * Create a new virtual environment and activate it
-* Install the project and its dependencies with ``pip install -e .``
-* Install dev requirements with ``pip install -r dev_requirements.txt``
+* Install the project and its dependencies with ``pip install -e .[dev]``
 * For testing use the following commands
     * ``flake8 src``
     * ``mypy src``
     * ``pytest``
     * ``tox``
+* For autoformatting your code:
+    * ``black src``
 
 | Note: PyCharm might tell you that it can't find the advantage module.
 | In that case you have to right click the folder "src" and select
@@ -44,7 +45,8 @@ Running the program
 
 
 To run this from the command line, go to the root folder of this repository,
-then type ``python -m advantage`` into the terminal
+then type ``python -m advantage`` into the terminal. A scenario name can be given as 
+an additional argument.
 
 In PyCharm, this can be set up as a run configuration:
 

@@ -8,7 +8,7 @@ from advantage.util.helpers import deep_update
 class PlugType:
     """Class implements any type of plug given the parameters.
 
-    Attributes
+    Parameters
     ----------
     name : str
         Identifier of this plug type.
@@ -18,6 +18,7 @@ class PlugType:
         Type of plug. Example: "CCS", "inductive", "Schucko"
 
     """
+
     name: str
     capacity: float
     plug: Optional[str] = None
@@ -27,7 +28,7 @@ class PlugType:
 class ChargingPoint:
     """Dataclass containing all information about a single charging point.
 
-    Attributes
+    Parameters
     ----------
     id : str
         Identifier of this charging point.
@@ -35,12 +36,13 @@ class ChargingPoint:
         List of available plugs.
 
     """
+
     id: str
     plugs: List["PlugType"]
 
     def get_power(self, plug_types: List[str]):
         """Returns max power for a specific plug type (0 if the plug doesn't exist at this point)"""
-        max_power = 0.
+        max_power = 0.0
         for plug in self.plugs:
             if plug.plug not in plug_types:
                 continue
@@ -55,7 +57,7 @@ class Charger:
 
     Depicts a charging station with possibly multiple charging points.
 
-    Attributes
+    Parameters
     ----------
     name : str
         Name/ID of the station.
@@ -63,6 +65,7 @@ class Charger:
         List of ChargingPoint objects.
 
     """
+
     def __init__(self, name: str, charging_points: List["ChargingPoint"]) -> None:
         """
         Constructor of the Charger Class.
@@ -90,16 +93,17 @@ class Charger:
         """
         return len(self.charging_points)
 
-    def get_scenario_info(self, point_id: str, plug_types: List[str]) \
-            -> Dict[str, Dict[str, Dict[str, Dict[str, object]]]]:
-        """This method checks if Charger and the given charging point ID match.
+    def get_scenario_info(
+        self, point_id: str, plug_types: List[str]
+    ) -> Dict[str, Dict[str, Dict[str, Dict[str, object]]]]:
+        """Create the spiceev scenario dict for the charger.
 
         Parameters
         ----------
         point_id : str
-            Charging Point ID that is matched in this Charger instance.
+            Chosen charging point
         plug_types : list[str]
-            Plug types which point_id supports.
+            Plug types of the connected vehicle
 
         Returns
         -------
@@ -117,10 +121,7 @@ class Charger:
 
         if self.num_points:
             scenario_dict: Dict[str, Dict[str, Dict[str, Dict[str, object]]]] = {
-                "constants": {
-                    "charging_stations": {
-                    }
-                }
+                "constants": {"charging_stations": {}}
             }
             point_found = False
             for cp in self.charging_points:
@@ -132,7 +133,7 @@ class Charger:
                                 cp.id: {
                                     "max_power": cp.get_power(plug_types),
                                     "min_power": 0,
-                                    "parent": "GC1"
+                                    "parent": "GC1",
                                 }
                             }
                         }
@@ -141,9 +142,13 @@ class Charger:
             if point_found:
                 return scenario_dict
             else:
-                raise ValueError(f"Point ID {point_id} doesn't match any Points in charger {self.name}")
+                raise ValueError(
+                    f"Point ID {point_id} doesn't match any Points in charger {self.name}"
+                )
         else:
-            raise ValueError(f"Scenario dictionary requested of charger {self.name} with no charging points")
+            raise ValueError(
+                f"Scenario dictionary requested of charger {self.name} with no charging points"
+            )
 
     @classmethod
     def from_json(cls, name, number_charging_points: int, plug_types: List["PlugType"]):

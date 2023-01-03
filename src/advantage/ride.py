@@ -8,17 +8,39 @@ if TYPE_CHECKING:
 
 
 class RideCalc:
-    def __init__(self, consumption_table: pd.DataFrame, distances: pd.DataFrame, inclines: pd.DataFrame) -> None:
+    def __init__(
+        self,
+        consumption_table: pd.DataFrame,
+        distances: pd.DataFrame,
+        inclines: pd.DataFrame,
+    ) -> None:
+        """RideCalc constructor.
+
+        Parameters
+        ----------
+        consumption_table : DataFrame
+            DataFrame containing consumption by vehicle type, speed, etc.
+        distances : DataFrame
+            Distance matrix between all Locations
+        inclines : DataFrame
+            Incline matrix between all Locations
+        """
         self.consumption_table = consumption_table
         self.distances = distances
         self.inclines = inclines
 
-        self.uniques = [sorted(self.consumption_table[col].unique()) for col in self.consumption_table.iloc[:, :-1]]
+        self.uniques = [
+            sorted(self.consumption_table[col].unique())
+            for col in self.consumption_table.iloc[:, :-1]
+        ]
 
-    # TODO 6. write interpolation, based on find_rows and its input values
-    # TODO 5. create RideCalc in Simulation and use it in decisionmaking / point evaluation / ...
-
-    def calculate_trip(self, origin: "Location", destination: "Location", vehicle_type: "VehicleType", temperature):
+    def calculate_trip(
+        self,
+        origin: "Location",
+        destination: "Location",
+        vehicle_type: "VehicleType",
+        temperature: float = 20.0,
+    ):
         """Calculate consumption as a part of total SoC.
 
         Parameters
@@ -34,18 +56,34 @@ class RideCalc:
 
         Returns
         -------
-        float
-            Returns SoC delta resulting from this trip
+        dict[float, float, float]
+            Returns dict with the keys "consumption", "soc_delta", "trip_time"
 
         """
         # TODO add speed as scenario input, load level somewhere?
         speed = 8.65
         load_level = 0
         distance, incline = self.get_location_values(origin, destination)
+        trip_time = distance / speed * 60
+        consumption, soc_delta = self.calculate_consumption(
+            vehicle_type, incline, temperature, speed, load_level, distance
+        )
 
-        return self.calculate_consumption(vehicle_type, incline, temperature, speed, load_level, distance)
+        return {
+            "consumption": consumption,
+            "soc_delta": soc_delta,
+            "trip_time": trip_time,
+        }
 
-    def calculate_consumption(self, vehicle_type: "VehicleType", incline, temperature, speed, load_level, distance):
+    def calculate_consumption(
+        self,
+        vehicle_type: "VehicleType",
+        incline,
+        temperature,
+        speed,
+        load_level,
+        distance,
+    ):
         """Calculates the reduction in SoC of a vehicle type when driving the specified route.
 
         Parameters
@@ -65,16 +103,20 @@ class RideCalc:
 
         Returns
         -------
-        float
-            Returns SoC delta resulting from this trip
+        tuple[float, float]
+            Returns consumption in kWh and the SoC delta resulting from this trip
 
         """
-        consumption_factor = self.get_consumption(vehicle_type.name, incline, temperature, speed, load_level)
+        consumption_factor = self.get_consumption(
+            vehicle_type.name, incline, temperature, speed, load_level
+        )
         consumption = consumption_factor * distance
 
-        return consumption * vehicle_type.battery_capacity / 100
+        return consumption, consumption / vehicle_type.battery_capacity
 
-    def get_consumption(self, vehicle_type_name: str, incline, temperature, speed, load_level):
+    def get_consumption(
+        self, vehicle_type_name: str, incline, temperature, speed, load_level
+    ):
         """Get consumption in kWh/km for a specified vehicle type and route.
 
         Parameters
@@ -93,22 +135,26 @@ class RideCalc:
         Returns
         -------
         float
-            Returns SoC delta resulting from this trip
+            Returns consumption factor in kWh/km
 
         """
 
-        df = self.consumption_table[self.consumption_table["vehicle_type"] == vehicle_type_name]
+        df = self.consumption_table[
+            self.consumption_table["vehicle_type"] == vehicle_type_name
+        ]
 
         inc_col = df["incline"]
         tmp_col = df["t_amb"]
         lol_col = df["level_of_loading"]
-        speed_col = df["sp_type"]
+        speed_col = df["mean_speed"]
         cons_col = df["consumption"]
         data_table = list(zip(lol_col, inc_col, speed_col, tmp_col, cons_col))
 
-        consumption_value = self.nd_interp((load_level, incline, speed, temperature), data_table)
+        consumption_value = self.nd_interp(
+            (load_level, incline, speed, temperature), data_table
+        )
 
-        return consumption_value
+        return consumption_value * (-1)
 
     def nd_interp(self, input_values, lookup_table):
         """Interpolate value from multiple input values and a lookup table
@@ -148,7 +194,7 @@ class RideCalc:
             new_points = []
             # find points that differ in just that dimension
             for j, p1 in enumerate(points):
-                for p2 in points[j + 1:]:
+                for p2 in points[j + 1 :]:
                     for k in range(len(input_values)):
                         if p1[k] != p2[k] and i != k:
                             break
@@ -189,7 +235,7 @@ class RideCalc:
 
         Returns
         -------
-        float, float
+        tuple[float, float]
             Returns lower and upper unqiue boundary surrounding the input value (may be the same number twice)
 
         """
@@ -205,7 +251,7 @@ class RideCalc:
             for count, bound in enumerate(self.uniques[column]):
                 if bound > value:
                     upper = bound
-                    lower = self.uniques[column][count-1] if count > 0 else bound
+                    lower = self.uniques[column][count - 1] if count > 0 else bound
                     break
 
         return lower, upper
@@ -222,7 +268,7 @@ class RideCalc:
 
         Returns
         -------
-        float, float
+        tuple[float, float]
             Returns distance and incline between the locations
 
         """

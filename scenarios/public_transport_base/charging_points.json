@@ -10,22 +10,29 @@
         "min_charging_power": 0,
         "plug": "CCS"
     },
-  "inductive_50": {
-        "capacity": 50,
+  "inductive_ifak": {
+        "capacity": 11,
+        "min_charging_power": 0,
+        "plug": "inductive"
+    },
+  "inductive_high": {
+        "capacity": 200,
         "min_charging_power": 0,
         "plug": "inductive"
     }
   },
   "charging_points": {
     "Marktplatz": {
-      "plug_types": ["inductive_50"],
-      "EE": null,
-      "number_charging_points": 3
+      "plug_types": ["inductive_ifak"],
+      "generator": ["pv", "south"],
+      "number_charging_points": 3,
+      "grid_connection": 50
     },
     "Bahnhof": {
-      "plug_types": ["inductive_50"],
-      "EE": null,
-      "number_charging_points": 1
+      "plug_types": ["inductive_ifak"],
+      "generator": null,
+      "number_charging_points": 1,
+      "grid_connection": 11
     }
   }
 }

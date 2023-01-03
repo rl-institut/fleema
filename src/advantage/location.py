@@ -10,7 +10,7 @@ class Location:
 
     This class allows type checking.
 
-    Attributes
+    Parameters
     ----------
     name : str
         Name/ID of the location.
@@ -24,12 +24,14 @@ class Location:
     output :
 
     """
-    def __init__(self,
-                 name: str = "",
-                 location_type: str = "",
-                 chargers: Optional[List["Charger"]] = None,
-                 grid_info: Optional[dict] = None
-                 ):
+
+    def __init__(
+        self,
+        name: str = "",
+        location_type: str = "",
+        chargers: Optional[List["Charger"]] = None,
+        grid_info: Optional[dict] = None,
+    ):
         """
         Constructor of the Location class.
 
@@ -82,15 +84,21 @@ class Location:
         """This methods checks availability."""
         return None
 
-    def get_scenario_info(self, point_id: str, plug_types: List[str]):
-        """This method matches all the ChargingPoints in the location with the given ChargingPoint ID.
+    def set_power(self, power: float):
+        """Set power of grid connector at this location."""
+        if self.grid_info is None:
+            self.grid_info = {}
+        self.grid_info["power"] = power
+
+    def get_scenario_info(self, plug_types: List[str], point_id: Optional[str] = None):
+        """Create SpiceEV scenario dict for this Location.
 
         Parameters
         ----------
-        point_id : str
-            PointCharging ID that is sought-after in the location.
         plug_types : list[str]
-            Available Plugs for the ChargingPoint.
+            Plug types that the charging vehicle is compatible with
+        point_id : str, optional
+            ID of a specific charging point
 
         Returns
         -------
@@ -103,17 +111,21 @@ class Location:
         scenario_dict = {
             "constants": {
                 "grid_connectors": {
-                    "GC1": {
-                        "max_power": power,
-                        "cost": {
-                            "type": "fixed",
-                            "value": 0.3
-                        }
-                    }
+                    "GC1": {"max_power": power, "cost": {"type": "fixed", "value": 0.3}}
                 }
             }
         }
         for ch in self.chargers:
+            # create scenario dict for chosen point id or the point with the highest power
+            if point_id is None:
+                point_id = ""
+                highest_power = 0
+                for cp in ch.charging_points:
+                    power = cp.get_power(plug_types)
+                    if power > highest_power:
+                        highest_power = power
+                        point_id = cp.id
             info = ch.get_scenario_info(point_id, plug_types)
             deep_update(scenario_dict, info)
+
         return scenario_dict
