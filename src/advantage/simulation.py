@@ -105,6 +105,7 @@ class Simulation:
             "schedule"  # TODO implement in config (schedule vs ondemand)
         )
         self.weights = cfg_dict["weights"]
+        self.outputs = cfg_dict["outputs"]
 
         # TODO use scenario name in save_directory once scenario files have been reorganized
         save_directory_name = "{}_{}".format(
@@ -132,6 +133,7 @@ class Simulation:
                 info["charging_power"],
                 info["charging_curve"],
                 self.min_charging_power,
+                self.outputs["vehicle_csv"],
             )
         self.vehicles: Dict[Union[str, int], "Vehicle"] = {}
 
@@ -414,7 +416,7 @@ class Simulation:
         return result_dict
 
     @classmethod
-    def from_config(cls, scenario_name):
+    def from_config(cls, scenario_name, no_outputs_mode=False):
         """Creates a Simulation object from the specified scenario.
 
         The scenario needs to be located in the directory /scenarios.
@@ -478,6 +480,16 @@ class Simulation:
         end_date = cfg.get("basic", "end_date")
         end_date = date_string_to_datetime(end_date) + datetime.timedelta(1)
 
+        # parse output options
+        vehicle_csv = cfg.getboolean("outputs", "vehicle_csv")
+
+        outputs = {
+            "vehicle_csv": vehicle_csv,
+        }
+
+        if no_outputs_mode:
+            outputs = {key: False for key in outputs}
+
         # parse weights
         weights_dict = {
             "time_factor": cfg.getfloat("weights", "time_factor"),
@@ -497,6 +509,7 @@ class Simulation:
             "num_threads": cfg.getint("sim_params", "num_threads"),
             "step_size": cfg.getint("basic", "step_size"),
             "weights": weights_dict,
+            "outputs": outputs,
         }
 
         # read consumption_table

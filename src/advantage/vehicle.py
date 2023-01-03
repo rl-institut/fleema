@@ -39,6 +39,7 @@ class VehicleType:
     charging_capacity: dict = field(default_factory=dict)
     charging_curve: list = field(default_factory=list)
     min_charging_power: float = 0.0
+    event_csv: bool = True
     label: Optional[str] = None
 
     @property
@@ -158,28 +159,29 @@ class Vehicle:
 
 
         """
-        self.soc = round(self.soc, 4)
-        self.output["timestamp"].append(timestamp)
-        self.output["event_start"].append(event_start)
-        self.output["event_time"].append(event_time)
-        self.output["status"].append(self.status)
-        self.output["soc_start"].append(
-            self.output["soc_end"][-1]
-            if len(self.output["soc_end"]) > 0
-            else self.soc_start
-        )
-        self.output["soc_end"].append(self.soc)
-        charging_demand = self._get_last_charging_demand()
-        consumption = self._get_last_consumption()
-        self.output["energy"].append(charging_demand + consumption)
-        self.output["station_charging_capacity"].append(nominal_charging_capacity)
-        self.output["average_charging_power"].append(round(charging_power, 4))
-        if self.current_location is not None:
-            self.output["end_location"].append(self.current_location.name)
-        else:
-            self.output["end_location"].append("")
-        if simulation_state is not None:
-            simulation_state.update_vehicle(self)
+        if self.vehicle_type.event_csv:
+            self.soc = round(self.soc, 4)
+            self.output["timestamp"].append(timestamp)
+            self.output["event_start"].append(event_start)
+            self.output["event_time"].append(event_time)
+            self.output["status"].append(self.status)
+            self.output["soc_start"].append(
+                self.output["soc_end"][-1]
+                if len(self.output["soc_end"]) > 0
+                else self.soc_start
+            )
+            self.output["soc_end"].append(self.soc)
+            charging_demand = self._get_last_charging_demand()
+            consumption = self._get_last_consumption()
+            self.output["energy"].append(charging_demand + consumption)
+            self.output["station_charging_capacity"].append(nominal_charging_capacity)
+            self.output["average_charging_power"].append(round(charging_power, 4))
+            if self.current_location is not None:
+                self.output["end_location"].append(self.current_location.name)
+            else:
+                self.output["end_location"].append("")
+            if simulation_state is not None:
+                simulation_state.update_vehicle(self)
 
     def add_task(self, task: "Task"):
         """Add a task to the self.tasks using the start_time as key."""
@@ -379,10 +381,11 @@ class Vehicle:
             Save directory
 
         """
-        activity = pd.DataFrame(self.output)
+        if self.vehicle_type.event_csv:
+            activity = pd.DataFrame(self.output)
 
-        activity = activity.reset_index(drop=True)
-        activity.to_csv(pathlib.Path(directory, f"{self.id}_events.csv"))
+            activity = activity.reset_index(drop=True)
+            activity.to_csv(pathlib.Path(directory, f"{self.id}_events.csv"))
 
     @property
     def usable_soc(self):
