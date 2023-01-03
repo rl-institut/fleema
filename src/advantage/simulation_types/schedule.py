@@ -138,7 +138,8 @@ class Schedule(SimulationType):
         # create charging tasks based on rating
         self._distribute_charging_slots(0, self.simulation.time_steps)
         # create save directory
-        self.simulation.save_directory.mkdir(parents=True, exist_ok=True)
+        if True in self.simulation.outputs.values():
+            self.simulation.save_directory.mkdir(parents=True, exist_ok=True)
 
         # simulate fleet step by step
         for step in range(self.simulation.time_steps):
