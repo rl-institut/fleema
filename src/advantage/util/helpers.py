@@ -34,3 +34,10 @@ class VehicleStatus(Enum):
     DRIVING = "driving"
     PARKING = "parking"
     CHARGING = "charging"
+
+
+class TaskType(Enum):
+    DRIVING = "driving"
+    PARKING = "parking"
+    CHARGING = "charging"
+    BREAK = "break"
