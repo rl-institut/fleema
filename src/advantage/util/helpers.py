@@ -1,4 +1,5 @@
 import collections.abc
+from enum import Enum
 
 
 def deep_update(source, overrides):
@@ -27,3 +28,9 @@ def deep_update(source, overrides):
         else:
             source[key] = overrides[key]
     return source
+
+
+class VehicleStatus(Enum):
+    DRIVING = "driving"
+    PARKING = "parking"
+    CHARGING = "charging"
