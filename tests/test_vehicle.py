@@ -2,6 +2,7 @@ from advantage.vehicle import Vehicle, VehicleType
 from advantage.event import Task
 from advantage.location import Location
 from advantage.util.conversions import step_to_timestamp
+from advantage.util.helpers import VehicleStatus
 
 import pytest
 import datetime
@@ -11,7 +12,7 @@ import pandas as pd
 @pytest.fixture()
 def car() -> Vehicle:
     car_type = VehicleType(battery_capacity=30, base_consumption=0.2)
-    car = Vehicle("car", vehicle_type=car_type, soc=0.5, status="driving")
+    car = Vehicle("car", vehicle_type=car_type, soc=0.5, status=VehicleStatus.DRIVING)
     return car
 
 
