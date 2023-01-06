@@ -10,7 +10,7 @@ def main():
     )
     parser.add_argument(
         "scenario",
-        default="public_transport_base",
+        default="bad_birnbach",
         nargs="?",
         help="Set the scenario which is located in ./scenarios .",
     )

@@ -9,6 +9,7 @@ def step_to_timestamp(time_series, time_step):
     time_series : 'pandas.core.indexes.datetimes.DatetimeIndex
         Series of timestamps to look up from.
     time_step : int
+    time_step : int
         Time step in a series of timestamps.
 
     Returns
