@@ -4,7 +4,9 @@ from advantage.event import Task
 from typing import Optional, List, Dict
 import pandas as pd
 import pathlib
+
 from advantage.util.helpers import VehicleStatus
+from advantage.util.helpers import TaskType
 
 
 @dataclass
@@ -58,7 +60,8 @@ class Vehicle:
     vehicle_type : VehicleType
         VehicleType of the Vehicle instance.
     status : VehicleStatus
-        Describes current state of the Vehicle object wrapped in an Enum. Example: VehicleStatus.DRIVING
+        Describes current state of the Vehicle object wrapped in an Enum.
+        VehicleStatus: DRIVING, PARKING, CHARGING
     soc : float
         State of charge: Current charge of the battery. Shown in percentage.
     availability : bool
@@ -93,7 +96,8 @@ class Vehicle:
         vehicle_type : VehicleType
             VehicleType of the Vehicle instance. Default instantiates a VehicleType object.
         status : VehicleStatus
-            Describes current state of the Vehicle object wrapped in an Enum. Example: VehicleStatus.DRIVING
+            Describes current state of the Vehicle object wrapped in an Enum.
+            VehicleStatus: DRIVING, PARKING, CHARGING
         soc : float
             State of charge: Current charge of the battery. Shown in percentage.
         availability : bool
@@ -246,12 +250,12 @@ class Vehicle:
                     first_task.start_time,
                     first_task.start_point,
                     first_task.start_point,
-                    "break",
+                    TaskType.BREAK,
                 )
             )
         previous_task = first_task
         for _, task in sorted(self.tasks.items()):
-            if task.end_time < end and task.task == "driving":
+            if task.end_time < end and task.task == TaskType.DRIVING:
                 # TODO are other task types relevant?
                 if task.start_time > previous_task.end_time:
                     breaks.append(
@@ -260,7 +264,7 @@ class Vehicle:
                             task.start_time,  # TODO maybe -1?
                             previous_task.end_point,
                             task.start_point,
-                            "break",
+                            TaskType.BREAK,
                         )
                     )
                 previous_task = task
@@ -271,7 +275,7 @@ class Vehicle:
                     end,  # TODO maybe -1?
                     previous_task.end_point,
                     previous_task.end_point,
-                    "break",
+                    TaskType.BREAK,
                 )
             )
         return breaks
@@ -279,7 +283,7 @@ class Vehicle:
     def charge(
         self, timestamp, start, time, power, new_soc, charging_capacity, observer=None
     ):
-        """This methodupdates the vehicle with charging results.
+        """This method updates the vehicle with charging results.
 
         Parameters
         ----------
