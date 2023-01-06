@@ -3,6 +3,7 @@ from advantage.event import Task
 from advantage.location import Location
 from advantage.util.conversions import step_to_timestamp
 from advantage.util.helpers import VehicleStatus
+from advantage.util.helpers import TaskType
 
 import pytest
 import datetime
@@ -151,9 +152,9 @@ def test_scenario_info(car):
 def test_task_list_sanity(car):
     location_1 = Location("location_1")
     location_2 = Location("location_2")
-    task_1 = Task(0, 1, location_1, location_2, "driving")
-    task_2 = Task(2, 4, location_2, location_2, "charging")
-    task_3 = Task(5, 6, location_2, location_1, "driving")
+    task_1 = Task(0, 1, location_1, location_2, TaskType.DRIVING)
+    task_2 = Task(2, 4, location_2, location_2, TaskType.CHARGING)
+    task_3 = Task(5, 6, location_2, location_1, TaskType.DRIVING)
     for task in [task_1, task_2, task_3]:
         car.add_task(task)
 
@@ -163,9 +164,9 @@ def test_task_list_sanity(car):
 def test_incorrect_task_list(car):
     location_1 = Location("location_1")
     location_2 = Location("location_2")
-    task_1 = Task(0, 1, location_1, location_1, "driving")
-    task_2 = Task(2, 4, location_2, location_2, "charging")
-    task_3 = Task(5, 6, location_2, location_1, "driving")
+    task_1 = Task(0, 1, location_1, location_1, TaskType.DRIVING)
+    task_2 = Task(2, 4, location_2, location_2, TaskType.CHARGING)
+    task_3 = Task(5, 6, location_2, location_1, TaskType.DRIVING)
     for task in [task_1, task_2, task_3]:
         car.add_task(task)
 

@@ -21,6 +21,7 @@ from advantage.simulation_state import SimulationState
 from advantage.simulation_type import class_from_str
 from advantage.ride import RideCalc
 from advantage.spiceev_interface import get_spice_ev_scenario_dict, run_spice_ev
+from advantage.util.helpers import TaskType
 
 from advantage.util.conversions import (
     date_string_to_datetime,
@@ -229,7 +230,7 @@ class Simulation:
             arr_time,  # TODO maybe use calc_time here in future, currently leads to errors
             self.locations[row.departure_name],
             self.locations[row.arrival_name],
-            "driving",
+            TaskType.DRIVING,
             trip["trip_time"],
             trip["soc_delta"],
         )
@@ -381,7 +382,7 @@ class Simulation:
             charging_start + charging_time,
             charging_location,
             charging_location,
-            "charging",
+            TaskType.CHARGING,
         )
         result_dict = {
             "score": score,
@@ -397,7 +398,7 @@ class Simulation:
                 charging_start,
                 current_location,
                 charging_location,
-                "driving",
+                TaskType.DRIVING,
                 trip_to["trip_time"],
                 trip_to["soc_delta"],
             )
@@ -408,7 +409,7 @@ class Simulation:
                 end_time,
                 charging_location,
                 next_location,
-                "driving",
+                TaskType.DRIVING,
                 trip_to["trip_time"],
                 trip_to["soc_delta"],
             )
