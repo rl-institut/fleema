@@ -428,6 +428,8 @@ class Simulation:
         ----------
         scenario_name : str
             Name of the scenario and the directory in which the necessary input lies.
+        no_outputs_mode : bool
+            Flag that indicates if output is needed.
 
         Returns
         -------
@@ -441,15 +443,15 @@ class Simulation:
             If the config file scenario.cfg is not found or can't be read..
 
         """
-        scenario_path = pathlib.Path("scenarios", scenario_name)
-        if not scenario_path.is_dir():
+        scenario_data_path = pathlib.Path("scenario_data", scenario_name)
+        if not scenario_data_path.is_dir():
             raise FileNotFoundError(
-                f"Scenario {scenario_name} not found in ./scenarios."
+                f"Scenario {scenario_name} not found in ./scenario_data."
             )
 
         # read config file
         cfg = cp.ConfigParser()
-        cfg_file = pathlib.Path(scenario_path, "scenario.cfg")
+        cfg_file = pathlib.Path(f"scenario_settings/{scenario_name}", "scenario.cfg")
         if not cfg_file.is_file():
             raise FileNotFoundError(f"Config file {cfg_file} not found.")
         try:
@@ -458,14 +460,14 @@ class Simulation:
             raise FileNotFoundError(f"Cannot read config file {cfg_file} - malformed?")
 
         schedule = pd.read_csv(
-            pathlib.Path(scenario_path, cfg["files"]["schedule"]), sep=","
+            pathlib.Path(scenario_data_path, cfg["files"]["schedule"]), sep=","
         )
 
         vehicle_types_file = cfg["files"]["vehicle_types"]
         ext = vehicle_types_file.split(".")[-1]
         if ext != "json":
             print("File extension mismatch: vehicle type file should be .json")
-        with open(pathlib.Path(scenario_path, cfg["files"]["vehicle_types"])) as f:
+        with open(pathlib.Path(scenario_data_path, cfg["files"]["vehicle_types"])) as f:
             vehicle_types = json.load(f)
         vehicle_types = vehicle_types["vehicle_types"]
 
@@ -473,7 +475,7 @@ class Simulation:
         ext = charging_points_file.split(".")[-1]
         if ext != "json":
             print("File extension mismatch: charging_point file should be .json")
-        with open(pathlib.Path(scenario_path, cfg["files"]["charging_points"])) as f:
+        with open(pathlib.Path(scenario_data_path, cfg["files"]["charging_points"])) as f:
             charging_points = json.load(f)
 
         start_date = cfg.get("basic", "start_date")
@@ -514,15 +516,15 @@ class Simulation:
         }
 
         # read consumption_table
-        consumption_path = pathlib.Path(scenario_path, cfg["files"]["consumption"])
+        consumption_path = pathlib.Path(scenario_data_path, cfg["files"]["consumption"])
         consumption_df = pd.read_csv(consumption_path)
 
         # read distance table
-        distance_table = pathlib.Path(scenario_path, cfg["files"]["distance"])
+        distance_table = pathlib.Path(scenario_data_path, cfg["files"]["distance"])
         distance_df = pd.read_csv(distance_table, index_col=0)
 
         # read incline table
-        incline_table = pathlib.Path(scenario_path, cfg["files"]["incline"])
+        incline_table = pathlib.Path(scenario_data_path, cfg["files"]["incline"])
         incline_df = pd.read_csv(incline_table, index_col=0)
 
         consumption_dict = {
