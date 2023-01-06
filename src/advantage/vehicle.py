@@ -58,7 +58,7 @@ class Vehicle:
     vehicle_type : VehicleType
         VehicleType of the Vehicle instance.
     status : VehicleStatus
-        Describes current state of the Vehicle object. Example: "parking", "driving", "charging"
+        Describes current state of the Vehicle object wrapped in an Enum. Example: VehicleStatus.DRIVING
     soc : float
         State of charge: Current charge of the battery. Shown in percentage.
     availability : bool
