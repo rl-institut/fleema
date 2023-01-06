@@ -6,7 +6,7 @@ import pathlib
 
 @pytest.fixture()
 def driving_sim():
-    cons_path = pathlib.Path("scenarios", "public_transport_base", "consumption.csv")
+    cons_path = pathlib.Path("scenarios", "bad_birnbach", "consumption.csv")
     cons = pd.read_csv(cons_path)
     return RideCalc(cons, cons, cons)  # TODO add inclines/distances
 
