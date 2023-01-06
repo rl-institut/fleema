@@ -12,7 +12,7 @@ def main():
         "scenario",
         default="bad_birnbach",
         nargs="?",
-        help="Set the scenario which is located in ./scenarios .",
+        help="Set the scenario which is located in ./scenario_data .",
     )
     p_args = parser.parse_args()
 

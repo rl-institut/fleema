@@ -69,6 +69,7 @@ class Simulation:
         charging_points,
         cfg_dict,
         consumption_dict,
+        pv: pd.DataFrame
     ):
         """Init Method of the Simulation class.
 
@@ -532,6 +533,10 @@ class Simulation:
             "incline": incline_df,
         }
 
+        # read pv table
+        pv_table = pathlib.Path(scenario_data_path, cfg["files"]["pv"])
+        pv_df = pd.read_csv(pv_table, index_col=False)
+
         return Simulation(
-            schedule, vehicle_types, charging_points, cfg_dict, consumption_dict
+            schedule, vehicle_types, charging_points, cfg_dict, consumption_dict, pv_df
         )
