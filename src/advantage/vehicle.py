@@ -7,6 +7,7 @@ from advantage.location import Location
 from advantage.event import Task
 from advantage.util.enums import Status
 
+
 @dataclass
 class VehicleType:
     """The VehicleType contains static vehicle data.
