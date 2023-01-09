@@ -2,7 +2,7 @@ import advantage.vehicle as vehicle
 from advantage.util.conversions import step_to_timestamp
 from advantage.simulation_state import SimulationState
 from advantage.location import Location
-from advantage.util.helpers import VehicleStatus
+from advantage.vehicle import Status
 
 import pytest
 import datetime
@@ -75,19 +75,19 @@ def test_remove_multi_vehicle(car, sim_state):
 
 
 def test_update_vehicle_drive(car, sim_state):
-    car.status = VehicleStatus.DRIVING
+    car.status = Status.DRIVING
     sim_state.update_vehicle(car)
     assert car in sim_state.driving_vehicles
 
 
 def test_update_vehicle_charge(car, sim_state):
-    car.status = VehicleStatus.CHARGING
+    car.status = Status.CHARGING
     sim_state.update_vehicle(car)
     assert car in sim_state.charging_vehicles
 
 
 def test_update_vehicle_park(car, sim_state):
-    car.status = VehicleStatus.PARKING
+    car.status = Status.PARKING
     sim_state.update_vehicle(car)
     assert car in sim_state.parking_vehicles
 

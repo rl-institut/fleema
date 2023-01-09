@@ -1,7 +1,7 @@
 import pandas as pd
 from typing import TYPE_CHECKING
 from dataclasses import dataclass, asdict
-from advantage.util.helpers import TaskType
+from advantage.vehicle import Status
 
 if TYPE_CHECKING:
     from advantage.location import Location
@@ -45,15 +45,15 @@ class Task(Event):
         Starting point of the task.
     arrival_point : Location
         End point of the task.
-    task : TaskType
-        Task types (Enum): DRIVING, CHARGING, PARKING, BREAK.
+    task : Status
+        Status (Enum): DRIVING, CHARGING, PARKING, BREAK.
     delta_soc : float
         A positive delta_soc means charging, negative is consumption.
     """
 
     start_point: "Location"
     end_point: "Location"
-    task: TaskType
+    task: Status
     float_time: float = 0.0
     delta_soc: float = 0.0
 

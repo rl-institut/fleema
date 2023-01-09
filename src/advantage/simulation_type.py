@@ -4,7 +4,7 @@ import pandas as pd
 from statistics import mean
 
 from advantage.util.conversions import step_to_timestamp
-from advantage.util.helpers import TaskType
+from vehicle import Status
 
 if TYPE_CHECKING:
     from advantage.simulation import Simulation
@@ -44,7 +44,7 @@ class SimulationType:
             Current simulation timestep
         """
         # TODO replace step with start_time of task? or double check if task is called at the correct time
-        if task.task == TaskType.DRIVING:
+        if task.task == Status.DRIVING:
             if not task.is_calculated:
                 trip = self.simulation.driving_sim.calculate_trip(
                     task.start_point,
@@ -61,7 +61,7 @@ class SimulationType:
                 vehicle.soc + task.delta_soc,
                 self.simulation.observer,
             )
-        elif task.task == TaskType.CHARGING:
+        elif task.task == Status.CHARGING:
             # call spiceev to calculate charging
             spiceev_scenario = self.simulation.call_spiceev(
                 task.start_point,
@@ -105,10 +105,10 @@ class SimulationType:
         consumption_list.append((start, vehicle.soc))
         for _, task in sorted(vehicle.tasks.items()):
             if start < task.end_time < end:
-                if task.task == TaskType.DRIVING:
+                if task.task == Status.DRIVING:
                     consumption += task.delta_soc
                     consumption_list.append((task.end_time, vehicle.soc + consumption))
-                if task.task == TaskType.CHARGING:
+                if task.task == Status.CHARGING:
                     # TODO check how much this would charge
                     pass
         return pd.DataFrame(consumption_list, columns=["timestep", "soc"])
