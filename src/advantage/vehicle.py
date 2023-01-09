@@ -2,19 +2,10 @@ from dataclasses import dataclass, field
 from typing import Optional, List, Dict
 import pandas as pd
 import pathlib
-from enum import Enum
 
 from advantage.location import Location
 from advantage.event import Task
-
-
-class Status(Enum):
-    """Used for vehicle-statuses and task-types."""
-    DRIVING = "driving"
-    PARKING = "parking"
-    CHARGING = "charging"
-    BREAK = "break"
-
+from advantage.util.enums import Status
 
 @dataclass
 class VehicleType:
