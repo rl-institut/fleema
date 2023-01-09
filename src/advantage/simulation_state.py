@@ -1,5 +1,5 @@
 from advantage.vehicle import Vehicle
-from advantage.util.helpers import VehicleStatus
+from vehicle import Status
 
 
 class SimulationState:
@@ -32,10 +32,9 @@ class SimulationState:
 
     def update_vehicle(self, vehicle: "Vehicle"):
         self.remove_vehicle(vehicle)
-        # TODO add enum for status
-        if vehicle.status == VehicleStatus.DRIVING:
+        if vehicle.status == Status.DRIVING:
             self.driving_vehicles.append(vehicle)
-        elif vehicle.status == VehicleStatus.PARKING:
+        elif vehicle.status == Status.PARKING:
             self.parking_vehicles.append(vehicle)
-        elif vehicle.status == VehicleStatus.CHARGING:
+        elif vehicle.status == Status.CHARGING:
             self.charging_vehicles.append(vehicle)

@@ -2,8 +2,7 @@ from advantage.vehicle import Vehicle, VehicleType
 from advantage.event import Task
 from advantage.location import Location
 from advantage.util.conversions import step_to_timestamp
-from advantage.util.helpers import VehicleStatus
-from advantage.util.helpers import TaskType
+from advantage.vehicle import Status
 
 import pytest
 import datetime
@@ -13,7 +12,7 @@ import pandas as pd
 @pytest.fixture()
 def car() -> Vehicle:
     car_type = VehicleType(battery_capacity=30, base_consumption=0.2)
-    car = Vehicle("car", vehicle_type=car_type, soc=0.5, status=VehicleStatus.DRIVING)
+    car = Vehicle("car", vehicle_type=car_type, soc=0.5, status=Status.DRIVING)
     return car
 
 
@@ -152,9 +151,9 @@ def test_scenario_info(car):
 def test_task_list_sanity(car):
     location_1 = Location("location_1")
     location_2 = Location("location_2")
-    task_1 = Task(0, 1, location_1, location_2, TaskType.DRIVING)
-    task_2 = Task(2, 4, location_2, location_2, TaskType.CHARGING)
-    task_3 = Task(5, 6, location_2, location_1, TaskType.DRIVING)
+    task_1 = Task(0, 1, location_1, location_2, Status.DRIVING)
+    task_2 = Task(2, 4, location_2, location_2, Status.CHARGING)
+    task_3 = Task(5, 6, location_2, location_1, Status.DRIVING)
     for task in [task_1, task_2, task_3]:
         car.add_task(task)
 
@@ -164,9 +163,9 @@ def test_task_list_sanity(car):
 def test_incorrect_task_list(car):
     location_1 = Location("location_1")
     location_2 = Location("location_2")
-    task_1 = Task(0, 1, location_1, location_1, TaskType.DRIVING)
-    task_2 = Task(2, 4, location_2, location_2, TaskType.CHARGING)
-    task_3 = Task(5, 6, location_2, location_1, TaskType.DRIVING)
+    task_1 = Task(0, 1, location_1, location_1, Status.DRIVING)
+    task_2 = Task(2, 4, location_2, location_2, Status.CHARGING)
+    task_3 = Task(5, 6, location_2, location_1, Status.DRIVING)
     for task in [task_1, task_2, task_3]:
         car.add_task(task)
 

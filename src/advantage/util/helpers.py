@@ -1,5 +1,11 @@
+"""This script includes general functions unrelated to any classes.
+
+Functions
+-------
+deep_update
+
+"""
 import collections.abc
-from enum import Enum
 
 
 def deep_update(source, overrides):
@@ -28,16 +34,3 @@ def deep_update(source, overrides):
         else:
             source[key] = overrides[key]
     return source
-
-
-class VehicleStatus(Enum):
-    DRIVING = "driving"
-    PARKING = "parking"
-    CHARGING = "charging"
-
-
-class TaskType(Enum):
-    DRIVING = "driving"
-    PARKING = "parking"
-    CHARGING = "charging"
-    BREAK = "break"
