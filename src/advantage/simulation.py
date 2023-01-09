@@ -443,21 +443,19 @@ class Simulation:
             If the config file scenario.cfg is not found or can't be read..
 
         """
-        scenario_data_path = pathlib.Path("scenario_data", scenario_name)
-        if not scenario_data_path.is_dir():
-            raise FileNotFoundError(
-                f"Scenario {scenario_name} not found in ./scenario_data."
-            )
 
         # read config file
         cfg = cp.ConfigParser()
-        cfg_file = pathlib.Path(f"scenario_settings/{scenario_name}", "scenario.cfg")
+        cfg_file = pathlib.Path(f"scenario_setting/{scenario_name}", "scenario.cfg")
         if not cfg_file.is_file():
             raise FileNotFoundError(f"Config file {cfg_file} not found.")
         try:
             cfg.read(cfg_file)
         except Exception:
             raise FileNotFoundError(f"Cannot read config file {cfg_file} - malformed?")
+
+        # read scenario_data_path, raises KeyError if data_path doesn't exist as key in cfg
+        scenario_data_path = pathlib.Path(cfg["basic"]["data_path"])
 
         schedule = pd.read_csv(
             pathlib.Path(scenario_data_path, cfg["files"]["schedule"]), sep=","
