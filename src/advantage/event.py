@@ -1,7 +1,7 @@
 import pandas as pd
 from typing import TYPE_CHECKING
 from dataclasses import dataclass, asdict
-from advantage.vehicle import Status
+from advantage.util.enums import Status
 
 if TYPE_CHECKING:
     from advantage.location import Location

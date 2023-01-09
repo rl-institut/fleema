@@ -4,7 +4,7 @@ import pandas as pd
 from statistics import mean
 
 from advantage.util.conversions import step_to_timestamp
-from vehicle import Status
+from advantage.util.enums import Status
 
 if TYPE_CHECKING:
     from advantage.simulation import Simulation

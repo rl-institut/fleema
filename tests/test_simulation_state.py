@@ -2,7 +2,7 @@ import advantage.vehicle as vehicle
 from advantage.util.conversions import step_to_timestamp
 from advantage.simulation_state import SimulationState
 from advantage.location import Location
-from advantage.vehicle import Status
+from advantage.util.enums import Status
 
 import pytest
 import datetime

@@ -1,5 +1,5 @@
 from advantage.vehicle import Vehicle
-from vehicle import Status
+from advantage.util.enums import Status
 
 
 class SimulationState:
