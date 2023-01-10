@@ -79,57 +79,80 @@ class Schedule(SimulationType):
         # distribute slots by highest total score (?)
         # for conflicts, check amount of charging spots at location and total possible power
         for veh in self.simulation.vehicles.values():
-            soc_df = self.get_predicted_soc(veh, start, end)
-            break_list = veh.get_breaks(start, end)
-            charging_list = self.get_charging_slots(break_list, soc_df, veh)
+            # rerun the loop until valid schedule has been created
+            # TODO check if this could ever be an infinite loop, in theory it should delete tasks until possible
+            valid_schedule = False
+            while not valid_schedule:
+                # initialize variables
+                soc_df = self.get_predicted_soc(veh, start, end)
+                break_list = veh.get_breaks(start, end)
+                charging_list = self.get_charging_slots(break_list, soc_df, veh)
 
-            charging_list.sort(key=itemgetter("score"), reverse=True)
-            chosen_events = []
-            total_charge = 0
-            min_soc_satisfied = False
-            max_charge = 1 - soc_df.iat[-1, 1]
-            # check if vehicle falls under minimum soc
-            min_charge = max(self.simulation.soc_min - soc_df.iat[-1, 1], 0)
-            if min_charge:
-                soc_df_slice = soc_df.loc[
-                    soc_df["soc"] <= self.simulation.soc_min
-                ].copy()
-                soc_df_slice["necessary_charging"] = (
-                    self.simulation.soc_min - soc_df_slice["soc"]
-                )
+                charging_list.sort(key=itemgetter("score"), reverse=True)
+                chosen_events = []
+                total_charge = 0
+                min_soc_satisfied = False
+                max_charge = 1 - soc_df.iat[-1, 1]
+                # check if vehicle falls under minimum soc
+                min_charge = max(self.simulation.soc_min - soc_df.iat[-1, 1], 0)
+                if min_charge:
+                    soc_df_slice = soc_df.loc[
+                        soc_df["soc"] <= self.simulation.soc_min
+                    ].copy()
+                    soc_df_slice["necessary_charging"] = (
+                        self.simulation.soc_min - soc_df_slice["soc"]
+                    )
 
-                for charge_option in charging_list:
-                    if charge_option["score"] > 0:
-                        # if not min_soc_satisfied:
-                        charge_index = soc_df_slice.loc[
-                            soc_df_slice["timestep"]
-                            >= charge_option["charge_event"].start_time
-                        ].index
-                        soc_df_slice.loc[
-                            charge_index, "necessary_charging"
-                        ] -= charge_option["delta_soc"]
-                        min_soc_bool = soc_df_slice["necessary_charging"] <= 0
-                        min_soc_satisfied = min_soc_bool.all()
-                        total_charge += charge_option["delta_soc"]
-                        veh.add_task(charge_option["charge_event"])
-                        if "task_to" in charge_option:
-                            veh.add_task(charge_option["task_to"])
-                        if "task_from" in charge_option:
-                            veh.add_task(charge_option["task_from"])
+                    # iterate through a sorted list of charging options, best options first
+                    for charge_option in charging_list:
+                        # only use options with a score higher than 0. TODO set higher minimum score in config?
+                        if charge_option["score"] > 0:
+                            # if not min_soc_satisfied:
+                            charge_index = soc_df_slice.loc[
+                                soc_df_slice["timestep"]
+                                >= charge_option["charge_event"].start_time
+                            ].index
+                            soc_df_slice.loc[
+                                charge_index, "necessary_charging"
+                            ] -= charge_option["delta_soc"]
+                            min_soc_bool = soc_df_slice["necessary_charging"] <= 0
+                            min_soc_satisfied = min_soc_bool.all()
+                            total_charge += charge_option["delta_soc"]
+                            veh.add_task(charge_option["charge_event"])
+                            if "task_to" in charge_option:
+                                veh.add_task(charge_option["task_to"])
+                            if "task_from" in charge_option:
+                                veh.add_task(charge_option["task_from"])
 
-                        chosen_events.append(charge_option)
-                        # TODO implement not choosing events if max charge is satisfied
-                        # and they don't contribute to min_soc
+                            chosen_events.append(charge_option)
+                            # TODO implement not choosing events if max charge is satisfied
+                            # and they don't contribute to min_soc
 
-                        if total_charge > max_charge and min_soc_satisfied:
-                            break
+                            if total_charge > max_charge and min_soc_satisfied:
+                                valid_schedule = True
+                                break
 
-                    else:
-                        if min_soc_satisfied:
-                            break
-                        raise ValueError(
-                            f"Not enough charging possible for vehicle {veh.id}!"
-                        )
+                        else:
+                            if min_soc_satisfied:
+                                valid_schedule = True
+                                break
+                            # get all tasks that still need charging to be possible
+                            impossible_tasks = soc_df_slice.loc[
+                                soc_df_slice["necessary_charging"] > 0
+                            ]
+                            # get starting time of first impossible task (row 0, last column = "necessary_charging")
+                            first_impossible_task_start = impossible_tasks.iat[0, -1]
+                            # cancel the impossible task. not setting the valid_schedule flag results in
+                            # a recalculation of charging slots without the impossible task
+                            del veh.tasks[first_impossible_task_start]
+                            print(
+                                f"""Not enough charging possible for vehicle {veh.id},
+                                ride starting at timestep {first_impossible_task_start} had to be removed!"""
+                            )
+                            # TODO save the removal for output information
+                            # raise ValueError(
+                            #     f"Not enough charging possible for vehicle {veh.id}!"
+                            # )
 
     def run(self):
         """Run the scenario with this strategy."""
