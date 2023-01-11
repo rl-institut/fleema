@@ -445,9 +445,14 @@ class Simulation:
 
         """
 
+        # set setting_path
+        scenario_setting_path = pathlib.Path("scenario_setting", scenario_name)
+        if not scenario_setting_path.is_dir():
+            raise FileNotFoundError(f"{scenario_name} is not found.")
+
         # read config file
         cfg = cp.ConfigParser()
-        cfg_file = pathlib.Path(f"scenario_setting/{scenario_name}", "scenario.cfg")
+        cfg_file = pathlib.Path(scenario_setting_path, "scenario.cfg")
         if not cfg_file.is_file():
             raise FileNotFoundError(f"Config file {cfg_file} not found.")
         try:
