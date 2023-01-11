@@ -1,8 +1,7 @@
 from advantage.vehicle import Vehicle, VehicleType
-from advantage.event import Task
+from advantage.event import Task, Status
 from advantage.location import Location
 from advantage.util.conversions import step_to_timestamp
-from advantage.vehicle import Status
 
 import pytest
 import datetime
