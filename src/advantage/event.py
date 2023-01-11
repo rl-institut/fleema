@@ -1,10 +1,18 @@
 import pandas as pd
 from typing import TYPE_CHECKING
 from dataclasses import dataclass, asdict
-from advantage.util.enums import Status
+from enum import Enum
 
 if TYPE_CHECKING:
     from advantage.location import Location
+
+
+class Status(Enum):
+    """Used for vehicle-statuses and task-types."""
+    DRIVING = "driving"
+    PARKING = "parking"
+    CHARGING = "charging"
+    BREAK = "break"
 
 
 @dataclass
