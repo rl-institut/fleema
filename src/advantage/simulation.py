@@ -21,7 +21,7 @@ from advantage.simulation_state import SimulationState
 from advantage.simulation_type import class_from_str
 from advantage.ride import RideCalc
 from advantage.spiceev_interface import get_spice_ev_scenario_dict, run_spice_ev
-from advantage.util.enums import Status
+from advantage.event import Status
 
 from advantage.util.conversions import (
     date_string_to_datetime,
