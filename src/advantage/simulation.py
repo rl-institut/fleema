@@ -71,7 +71,6 @@ class Simulation:
         cfg_dict,
         consumption_dict,
         pv: pd.DataFrame,
-        temperature: pd.DataFrame
     ):
         """Init Method of the Simulation class.
 
@@ -122,8 +121,9 @@ class Simulation:
         consumption = consumption_dict["consumption"]
         distances = consumption_dict["distance"]
         inclines = consumption_dict["incline"]
+        temperature = consumption_dict["temperature"]
 
-        self.driving_sim = RideCalc(consumption, distances, inclines)
+        self.driving_sim = RideCalc(consumption, distances, inclines, temperature)
 
         # use other args to create objects
         self.vehicle_types: Dict[str, "VehicleType"] = {}
@@ -532,21 +532,20 @@ class Simulation:
         incline_table = pathlib.Path(scenario_data_path, cfg["files"]["incline"])
         incline_df = pd.read_csv(incline_table, index_col=0)
 
+        # read temperature table
+        temperature_table = pathlib.Path(scenario_data_path, cfg["files"]["temperature"])
+        temperature_df = pd.read_csv(temperature_table, index_col=False)
+
         consumption_dict = {
             "consumption": consumption_df,
             "distance": distance_df,
             "incline": incline_df,
+            "temperature": temperature_df,
         }
 
         # read pv table
         pv_table = pathlib.Path(scenario_data_path, cfg["files"]["pv"])
         pv_df = pd.read_csv(pv_table, index_col=False)
-        print(pv_df)
-
-        # read temperature table
-        temperature_table = pathlib.Path(scenario_data_path, cfg["files"]["temperature"])
-        temperature_df = pd.read_csv(temperature_table, index_col=False)
-        print(temperature_df)
 
         return Simulation(
             schedule,
@@ -555,5 +554,4 @@ class Simulation:
             cfg_dict,
             consumption_dict,
             pv_df,
-            temperature_df
         )
