@@ -11,3 +11,5 @@ _build
 .idea
 /venv
 results/*/
+scenario_setting/
+scenario_data/

@@ -212,12 +212,13 @@ class Vehicle:
             return None
 
     def get_next_task(self, time_step: int):
+        "Returns next task, not including the given timestep."
         # get the biggest tasks key (last time step where a task starts)
         last_task_start = max(self.tasks)
         # only runs, if a task comes after specified time step
         if time_step <= last_task_start:
             # check every timestep for a new task, until one is found
-            for i in range(time_step, last_task_start + 1):
+            for i in range(time_step + 1, last_task_start + 1):
                 task = self.get_task(i)
                 if task is not None:
                     return task
