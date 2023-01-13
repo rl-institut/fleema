@@ -192,8 +192,10 @@ class Vehicle:
         # otherwise, add new task to list, ordered by starting time
         self.tasks[task.start_time] = task
 
-    def remove_task(self, task: "Task"):
+    def remove_task(self, task: Optional["Task"]):
         """Remove a task from self.tasks."""
+        if task is None:
+            return
         if self.tasks[task.start_time] == task:
             del self.tasks[task.start_time]
         else:
@@ -205,6 +207,19 @@ class Vehicle:
         try:
             return self.tasks[time_step]
         except KeyError:
+            return None
+
+    def get_next_task(self, time_step: int):
+        # get the biggest tasks key (last time step where a task starts)
+        last_task_start = max(self.tasks)
+        # only runs, if a task comes after specified time step
+        if time_step <= last_task_start:
+            # check every timestep for a new task, until one is found
+            for i in range(time_step, last_task_start + 1):
+                task = self.get_task(i)
+                if task is not None:
+                    return task
+        else:
             return None
 
     @property
