@@ -329,13 +329,13 @@ class Simulation:
 
         Returns
         -------
-        dict[float, float, float, float, Task, Optional[Task], Optional[Task]]
-            Keys: "score", "consumption" (soc delta), "charge" (soc delta), "delta_soc" (total soc delta),
+        dict[int, float, float, float, float, Task, Optional[Task], Optional[Task]]
+            Keys: "timestep", "score", "consumption" (soc delta), "charge" (soc delta), "delta_soc" (total soc delta),
             "charge_event", Optional: "task_to", "task_from"
 
         """
         # return value in case of failure
-        empty_dict = {"score": 0, "consumption": 0, "charge": 0, "delta_soc": 0}
+        empty_dict = {"timestep": start_time, "score": 0, "consumption": 0, "charge": 0, "delta_soc": 0}
         # run pre calculations
         time_window = end_time - start_time
         trip_to = self.driving_sim.calculate_trip(
@@ -389,6 +389,7 @@ class Simulation:
             Status.CHARGING,
         )
         result_dict = {
+            "timestep": start_time,
             "score": score,
             "consumption": drive_soc,
             "charge": charged_soc,
@@ -451,7 +452,9 @@ class Simulation:
         # set setting_path
         scenario_setting_path = pathlib.Path("scenario_setting", scenario_name)
         if not scenario_setting_path.is_dir():
-            raise FileNotFoundError(f"Scenario {scenario_name} not found in ./scenario_setting.")
+            raise FileNotFoundError(
+                f"Scenario {scenario_name} not found in ./scenario_setting."
+            )
 
         # read config file
         cfg = cp.ConfigParser()
@@ -482,7 +485,9 @@ class Simulation:
         ext = charging_points_file.split(".")[-1]
         if ext != "json":
             print("File extension mismatch: charging_point file should be .json")
-        with open(pathlib.Path(scenario_data_path, cfg["files"]["charging_points"])) as f:
+        with open(
+            pathlib.Path(scenario_data_path, cfg["files"]["charging_points"])
+        ) as f:
             charging_points = json.load(f)
 
         start_date = cfg.get("basic", "start_date")

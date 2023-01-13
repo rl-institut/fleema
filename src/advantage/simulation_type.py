@@ -106,8 +106,12 @@ class SimulationType:
             if start < task.end_time < end:
                 if task.task == Status.DRIVING:
                     consumption += task.delta_soc
-                    consumption_list.append((task.start_time, task.end_time, vehicle.soc + consumption))
+                    consumption_list.append(
+                        (task.start_time, task.end_time, vehicle.soc + consumption)
+                    )
                 if task.task == Status.CHARGING:
                     # TODO check how much this would charge
                     pass
-        return pd.DataFrame(consumption_list, columns=["drive_start", "timestep", "soc"])
+        return pd.DataFrame(
+            consumption_list, columns=["drive_start", "timestep", "soc"]
+        )

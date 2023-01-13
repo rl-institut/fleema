@@ -9,6 +9,7 @@ if TYPE_CHECKING:
 
 class Status(Enum):
     """Used for vehicle-statuses and task-types."""
+
     DRIVING = "driving"
     PARKING = "parking"
     CHARGING = "charging"
