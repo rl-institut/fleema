@@ -11,6 +11,7 @@ import pandas as pd
 import json
 import datetime
 import warnings
+import math
 from typing import List, Dict, Union
 
 from advantage.location import Location
@@ -358,7 +359,7 @@ class Simulation:
             mock_vehicle,
         )
         charged_soc = spiceev_scenario.socs[-1][0] - current_soc  # type: ignore
-        if charged_soc <= 0:
+        if charged_soc <= 0 or math.isnan(charged_soc):
             return empty_dict
         charge_score = 1 - ((-drive_soc) / charged_soc)
         if charge_score <= 0:
