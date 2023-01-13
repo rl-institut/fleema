@@ -70,7 +70,8 @@ class Simulation:
         charging_points,
         cfg_dict,
         consumption_dict,
-        pv: pd.DataFrame
+        pv: pd.DataFrame,
+        temperature: pd.DataFrame
     ):
         """Init Method of the Simulation class.
 
@@ -540,7 +541,19 @@ class Simulation:
         # read pv table
         pv_table = pathlib.Path(scenario_data_path, cfg["files"]["pv"])
         pv_df = pd.read_csv(pv_table, index_col=False)
+        print(pv_df)
+
+        # read temperature table
+        temperature_table = pathlib.Path(scenario_data_path, cfg["files"]["temperature"])
+        temperature_df = pd.read_csv(temperature_table, index_col=False)
+        print(temperature_df)
 
         return Simulation(
-            schedule, vehicle_types, charging_points, cfg_dict, consumption_dict, pv_df
+            schedule,
+            vehicle_types,
+            charging_points,
+            cfg_dict,
+            consumption_dict,
+            pv_df,
+            temperature_df
         )
