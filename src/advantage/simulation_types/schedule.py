@@ -173,6 +173,7 @@ class Schedule(SimulationType):
                         vehicle.remove_task(next_task)
                         next_task.start_point = first_impossible_task.start_point
                         vehicle.add_task(next_task)
+                        # TODO change time needed for this task?
 
                     print(
                         f"""Not enough charging possible for vehicle {vehicle.id},
