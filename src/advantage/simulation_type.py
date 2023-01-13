@@ -101,7 +101,7 @@ class SimulationType:
         """
         consumption = 0.0
         consumption_list = []
-        consumption_list.append((start, vehicle.soc))
+        consumption_list.append((start, start, vehicle.soc))
         for _, task in sorted(vehicle.tasks.items()):
             if start < task.end_time < end:
                 if task.task == Status.DRIVING:
