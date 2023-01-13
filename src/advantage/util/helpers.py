@@ -1,3 +1,10 @@
+"""This script includes general functions unrelated to any classes.
+
+Functions
+-------
+deep_update
+
+"""
 import collections.abc
 
 

@@ -1,9 +1,9 @@
 from dataclasses import dataclass, field
-from advantage.location import Location
-from advantage.event import Task
 from typing import Optional, List, Dict
 import pandas as pd
 import pathlib
+from advantage.location import Location
+from advantage.event import Status, Task
 
 
 @dataclass
@@ -56,8 +56,9 @@ class Vehicle:
         ID of the vehicle.
     vehicle_type : VehicleType
         VehicleType of the Vehicle instance.
-    status : str
-        Describes current state of the Vehicle object. Example: "parking", "driving", "charging"
+    status : Status
+        Describes current state of the Vehicle object wrapped in an Enum.
+        Status: DRIVING, PARKING, CHARGING
     soc : float
         State of charge: Current charge of the battery. Shown in percentage.
     availability : bool
@@ -76,7 +77,7 @@ class Vehicle:
         self,
         vehicle_id: str,
         vehicle_type: "VehicleType" = VehicleType(),
-        status: str = "parking",
+        status: Status = Status.PARKING,
         soc: float = 1.0,
         soc_min: float = 0.2,
         availability: bool = True,  # TODO Warum availability, wenn es schon einen Status gibt?
@@ -91,8 +92,9 @@ class Vehicle:
             ID of the vehicle.
         vehicle_type : VehicleType
             VehicleType of the Vehicle instance. Default instantiates a VehicleType object.
-        status : str
-            Describes current state of the Vehicle object. Example: "parking", "driving", "charging"
+        status : Status
+            Describes current state of the Vehicle object wrapped in an Enum.
+            Status: DRIVING, PARKING, CHARGING
         soc : float
             State of charge: Current charge of the battery. Shown in percentage.
         availability : bool
@@ -260,12 +262,12 @@ class Vehicle:
                     first_task.start_time,
                     first_task.start_point,
                     first_task.start_point,
-                    "break",
+                    Status.BREAK,
                 )
             )
         previous_task = first_task
         for _, task in sorted(self.tasks.items()):
-            if task.end_time < end and task.task == "driving":
+            if task.end_time < end and task.task == Status.DRIVING:
                 # TODO are other task types relevant?
                 if task.start_time > previous_task.end_time:
                     breaks.append(
@@ -274,7 +276,7 @@ class Vehicle:
                             task.start_time,  # TODO maybe -1?
                             previous_task.end_point,
                             task.start_point,
-                            "break",
+                            Status.BREAK,
                         )
                     )
                 previous_task = task
@@ -285,7 +287,7 @@ class Vehicle:
                     end,  # TODO maybe -1?
                     previous_task.end_point,
                     previous_task.end_point,
-                    "break",
+                    Status.BREAK,
                 )
             )
         return breaks
@@ -293,7 +295,7 @@ class Vehicle:
     def charge(
         self, timestamp, start, time, power, new_soc, charging_capacity, observer=None
     ):
-        """This methodupdates the vehicle with charging results.
+        """This method updates the vehicle with charging results.
 
         Parameters
         ----------
@@ -318,7 +320,7 @@ class Vehicle:
             raise ValueError(
                 "SoC can't be reached in specified time window with given power."
             )
-        self.status = "charging"
+        self.status = Status.CHARGING
         self.soc = new_soc
         self._update_activity(
             timestamp,
@@ -372,7 +374,7 @@ class Vehicle:
         #     raise ValueError(
         #         f"SoC of vehicle {self.id} became smaller than the minimum SoC at {timestamp}."
         #     )
-        self.status = "driving"
+        self.status = Status.DRIVING
         self.soc = new_soc
         self.current_location = destination
         self._update_activity(timestamp, start, time, observer)
@@ -383,7 +385,7 @@ class Vehicle:
             raise TypeError("Argument has wrong type.")
         if not all(i >= 0 for i in [start, time]):
             raise ValueError("Arguments can't be negative.")
-        self.status = "parking"
+        self.status = Status.PARKING
         self._update_activity(timestamp, start, time, observer)
 
     def export(self, directory):

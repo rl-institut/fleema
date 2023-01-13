@@ -1,9 +1,18 @@
 import pandas as pd
 from typing import TYPE_CHECKING
 from dataclasses import dataclass, asdict
+from enum import Enum
 
 if TYPE_CHECKING:
     from advantage.location import Location
+
+
+class Status(Enum):
+    """Used for vehicle-statuses and task-types."""
+    DRIVING = "driving"
+    PARKING = "parking"
+    CHARGING = "charging"
+    BREAK = "break"
 
 
 @dataclass
@@ -44,15 +53,15 @@ class Task(Event):
         Starting point of the task.
     arrival_point : Location
         End point of the task.
-    task : str
-        Task type: driving, charging, parking, break.
+    task : Status
+        Status (Enum): DRIVING, CHARGING, PARKING, BREAK.
     delta_soc : float
         A positive delta_soc means charging, negative is consumption.
     """
 
     start_point: "Location"
     end_point: "Location"
-    task: str  # TODO enum
+    task: Status
     float_time: float = 0.0
     delta_soc: float = 0.0
 

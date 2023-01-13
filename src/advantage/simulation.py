@@ -21,6 +21,7 @@ from advantage.simulation_state import SimulationState
 from advantage.simulation_type import class_from_str
 from advantage.ride import RideCalc
 from advantage.spiceev_interface import get_spice_ev_scenario_dict, run_spice_ev
+from advantage.event import Status
 
 from advantage.util.conversions import (
     date_string_to_datetime,
@@ -69,6 +70,7 @@ class Simulation:
         charging_points,
         cfg_dict,
         consumption_dict,
+        pv: pd.DataFrame
     ):
         """Init Method of the Simulation class.
 
@@ -229,7 +231,7 @@ class Simulation:
             arr_time,  # TODO maybe use calc_time here in future, currently leads to errors
             self.locations[row.departure_name],
             self.locations[row.arrival_name],
-            "driving",
+            Status.DRIVING,
             trip["trip_time"],
             trip["soc_delta"],
         )
@@ -381,7 +383,7 @@ class Simulation:
             charging_start + charging_time,
             charging_location,
             charging_location,
-            "charging",
+            Status.CHARGING,
         )
         result_dict = {
             "score": score,
@@ -397,7 +399,7 @@ class Simulation:
                 charging_start,
                 current_location,
                 charging_location,
-                "driving",
+                Status.DRIVING,
                 trip_to["trip_time"],
                 trip_to["soc_delta"],
             )
@@ -408,7 +410,7 @@ class Simulation:
                 end_time,
                 charging_location,
                 next_location,
-                "driving",
+                Status.DRIVING,
                 trip_to["trip_time"],
                 trip_to["soc_delta"],
             )
@@ -427,6 +429,8 @@ class Simulation:
         ----------
         scenario_name : str
             Name of the scenario and the directory in which the necessary input lies.
+        no_outputs_mode : bool
+            Flag that indicates if output is needed.
 
         Returns
         -------
@@ -440,15 +444,15 @@ class Simulation:
             If the config file scenario.cfg is not found or can't be read..
 
         """
-        scenario_path = pathlib.Path("scenarios", scenario_name)
-        if not scenario_path.is_dir():
-            raise FileNotFoundError(
-                f"Scenario {scenario_name} not found in ./scenarios."
-            )
+
+        # set setting_path
+        scenario_setting_path = pathlib.Path("scenario_setting", scenario_name)
+        if not scenario_setting_path.is_dir():
+            raise FileNotFoundError(f"Scenario {scenario_name} not found in ./scenario_setting.")
 
         # read config file
         cfg = cp.ConfigParser()
-        cfg_file = pathlib.Path(scenario_path, "scenario.cfg")
+        cfg_file = pathlib.Path(scenario_setting_path, "scenario.cfg")
         if not cfg_file.is_file():
             raise FileNotFoundError(f"Config file {cfg_file} not found.")
         try:
@@ -456,15 +460,18 @@ class Simulation:
         except Exception:
             raise FileNotFoundError(f"Cannot read config file {cfg_file} - malformed?")
 
+        # read scenario_data_path, raises KeyError if data_path doesn't exist as key in cfg
+        scenario_data_path = pathlib.Path(cfg["basic"]["data_path"])
+
         schedule = pd.read_csv(
-            pathlib.Path(scenario_path, cfg["files"]["schedule"]), sep=","
+            pathlib.Path(scenario_data_path, cfg["files"]["schedule"]), sep=","
         )
 
         vehicle_types_file = cfg["files"]["vehicle_types"]
         ext = vehicle_types_file.split(".")[-1]
         if ext != "json":
             print("File extension mismatch: vehicle type file should be .json")
-        with open(pathlib.Path(scenario_path, cfg["files"]["vehicle_types"])) as f:
+        with open(pathlib.Path(scenario_data_path, cfg["files"]["vehicle_types"])) as f:
             vehicle_types = json.load(f)
         vehicle_types = vehicle_types["vehicle_types"]
 
@@ -472,7 +479,7 @@ class Simulation:
         ext = charging_points_file.split(".")[-1]
         if ext != "json":
             print("File extension mismatch: charging_point file should be .json")
-        with open(pathlib.Path(scenario_path, cfg["files"]["charging_points"])) as f:
+        with open(pathlib.Path(scenario_data_path, cfg["files"]["charging_points"])) as f:
             charging_points = json.load(f)
 
         start_date = cfg.get("basic", "start_date")
@@ -513,15 +520,15 @@ class Simulation:
         }
 
         # read consumption_table
-        consumption_path = pathlib.Path(scenario_path, cfg["files"]["consumption"])
+        consumption_path = pathlib.Path(scenario_data_path, cfg["files"]["consumption"])
         consumption_df = pd.read_csv(consumption_path)
 
         # read distance table
-        distance_table = pathlib.Path(scenario_path, cfg["files"]["distance"])
+        distance_table = pathlib.Path(scenario_data_path, cfg["files"]["distance"])
         distance_df = pd.read_csv(distance_table, index_col=0)
 
         # read incline table
-        incline_table = pathlib.Path(scenario_path, cfg["files"]["incline"])
+        incline_table = pathlib.Path(scenario_data_path, cfg["files"]["incline"])
         incline_df = pd.read_csv(incline_table, index_col=0)
 
         consumption_dict = {
@@ -530,6 +537,10 @@ class Simulation:
             "incline": incline_df,
         }
 
+        # read pv table
+        pv_table = pathlib.Path(scenario_data_path, cfg["files"]["pv"])
+        pv_df = pd.read_csv(pv_table, index_col=False)
+
         return Simulation(
-            schedule, vehicle_types, charging_points, cfg_dict, consumption_dict
+            schedule, vehicle_types, charging_points, cfg_dict, consumption_dict, pv_df
         )

@@ -10,9 +10,9 @@ def main():
     )
     parser.add_argument(
         "scenario",
-        default="public_transport_base",
+        default="base_scenario",
         nargs="?",
-        help="Set the scenario which is located in ./scenarios .",
+        help="Set the scenario which is located in ./scenario_data .",
     )
     p_args = parser.parse_args()
 
