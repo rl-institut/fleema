@@ -195,10 +195,7 @@ class Schedule(SimulationType):
                 vehicle.remove_task(first_impossible_task)
 
                 next_task = vehicle.get_next_task(int(first_impossible_task_start))
-                if None not in [
-                    next_task,
-                    first_impossible_task,
-                ]:  # checks if neither task is None
+                if next_task is not None:
                     vehicle.remove_task(next_task)
                     next_task.start_point = first_impossible_task.start_point
                     vehicle.add_task(next_task)
