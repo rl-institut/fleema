@@ -13,6 +13,7 @@ class RideCalc:
         consumption_table: pd.DataFrame,
         distances: pd.DataFrame,
         inclines: pd.DataFrame,
+        temperature: pd.DataFrame,
     ) -> None:
         """RideCalc constructor.
 
@@ -24,10 +25,13 @@ class RideCalc:
             Distance matrix between all Locations
         inclines : DataFrame
             Incline matrix between all Locations
+        temperature : Dataframe
+            Highest, lowest and median temperature for a day
         """
         self.consumption_table = consumption_table
         self.distances = distances
         self.inclines = inclines
+        self.temperature = temperature
 
         self.uniques = [
             sorted(self.consumption_table[col].unique())
@@ -276,3 +280,21 @@ class RideCalc:
         incline = self.inclines.at[origin.name, destination.name]
 
         return distance, incline
+
+    def get_temperature(self, step, option: str = "Median Temperature"):
+        """Returns temperature according to the given timestep parameter.
+
+        Parameters
+        ----------
+        step : int
+            Represents the 24 hours in a day. Between 0 and 23.
+        option : string
+            Option: "Median Temperature", "Highest Temperature" or "Lowest Temperature"
+
+        Returns
+        -------
+        float
+            temperature
+        """
+        row = self.temperature.loc[self.temperature["Hour"] == step]
+        return row[option].values[0]
