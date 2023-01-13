@@ -1,6 +1,7 @@
 from advantage.simulation_type import SimulationType
 from typing import TYPE_CHECKING
 from operator import itemgetter
+import pandas as pd
 
 if TYPE_CHECKING:
     from advantage.simulation import Simulation
