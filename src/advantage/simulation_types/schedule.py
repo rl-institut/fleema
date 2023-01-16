@@ -64,9 +64,7 @@ class Schedule(SimulationType):
                 key=itemgetter("score", "delta_soc", "charge"), reverse=True
             )
             charging_list[counter] = charging_list_temp[0]
-        charging_list.sort(
-            key=itemgetter("score", "delta_soc", "charge"), reverse=True
-        )
+        charging_list.sort(key=itemgetter("score", "delta_soc", "charge"), reverse=True)
         return charging_list
 
     def _distribute_charging_slots(self, start: int, end: int, end_soc: float):

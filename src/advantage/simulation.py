@@ -29,6 +29,7 @@ from advantage.util.conversions import (
     datetime_string_to_datetime,
     step_to_timestamp,
 )
+from advantage.util.helpers import block_printing
 
 
 class Simulation:
@@ -298,6 +299,7 @@ class Simulation:
         scenario = run_spice_ev(spice_dict, "balanced")
         return scenario
 
+    @block_printing
     def evaluate_charging_location(
         self,
         vehicle_type: "VehicleType",
@@ -335,7 +337,13 @@ class Simulation:
 
         """
         # return value in case of failure
-        empty_dict = {"timestep": start_time, "score": 0, "consumption": 0, "charge": 0, "delta_soc": 0}
+        empty_dict = {
+            "timestep": start_time,
+            "score": 0,
+            "consumption": 0,
+            "charge": 0,
+            "delta_soc": 0,
+        }
         # run pre calculations
         time_window = end_time - start_time
         trip_to = self.driving_sim.calculate_trip(
