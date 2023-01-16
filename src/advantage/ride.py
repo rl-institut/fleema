@@ -1,3 +1,5 @@
+import datetime
+
 import pandas as pd
 
 from typing import TYPE_CHECKING
@@ -281,13 +283,13 @@ class RideCalc:
 
         return distance, incline
 
-    def get_temperature(self, step, option: str = "Median Temperature"):
+    def get_temperature(self, dep_time, option: str = "Median Temperature"):
         """Returns temperature according to the given timestep parameter.
 
         Parameters
         ----------
-        step : int
-            Represents the 24 hours in a day. Between 0 and 23.
+        dep_time : str
+            Departure time represented by a string.
         option : string
             Option: "Median Temperature", "Highest Temperature" or "Lowest Temperature"
 
@@ -296,5 +298,7 @@ class RideCalc:
         float
             temperature
         """
+
+        step = datetime.datetime.strptime(dep_time, '%Y-%m-%d %H:%M:%S')
         row = self.temperature.loc[self.temperature["Hour"] == step]
         return row[option].values[0]
