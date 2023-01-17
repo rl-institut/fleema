@@ -101,8 +101,7 @@ class SimulationType:
             DataFrame with columns "timestep" and "soc", containing predicted soc at specified times
         """
         consumption = 0.0
-        consumption_list = []
-        consumption_list.append((start, start, vehicle.soc))
+        consumption_list = [(start, start, vehicle.soc)]
         for _, task in sorted(vehicle.tasks.items()):
             if start < task.end_time < end:
                 if task.task == Status.DRIVING:

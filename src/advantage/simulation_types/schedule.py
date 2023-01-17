@@ -76,6 +76,8 @@ class Schedule(SimulationType):
             Starting timestep
         end : int
             Ending timestep
+        end_soc : float
+            desired end SoC
         """
         # go through all vehicles, check SoC after all tasks (end of day). continues if <20%
         # evaluate charging slots
