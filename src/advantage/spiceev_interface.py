@@ -4,7 +4,7 @@ from src.scenario import Scenario
 from advantage.util.helpers import deep_update
 
 
-def get_spice_ev_scenario_dict(vehicle, location, point_id, timestamp, time):
+def get_spice_ev_scenario_dict(vehicle, location, point_id, timestamp, time, pv_series = None):
     """This function creates a dictionary for SpiceEV.
 
     Parameters
@@ -26,6 +26,8 @@ def get_spice_ev_scenario_dict(vehicle, location, point_id, timestamp, time):
         Nested SpiceEV dictionary.
 
     """
+    # TODO include pv in an appropriate format
+    # TODO
     scenario_dict = {
         "scenario": {
             "start_time": timestamp.isoformat(),
@@ -33,7 +35,9 @@ def get_spice_ev_scenario_dict(vehicle, location, point_id, timestamp, time):
             "n_intervals": time,
             "discharge_limit": 0.5,
         },
-        "constants": {},
+        "constants": {
+            "photovoltaics": pv_series,
+        },
         "events": {
             "grid_operator_signals": {},
             "external_load": {},

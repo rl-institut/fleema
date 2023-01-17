@@ -65,12 +65,10 @@ class Simulation:
 
     def __init__(
         self,
-        schedule: pd.DataFrame,
         vehicle_types,
         charging_points,
         cfg_dict,
-        consumption_dict,
-        pv: pd.DataFrame
+        data_dict,
     ):
         """Init Method of the Simulation class.
 
@@ -115,12 +113,15 @@ class Simulation:
         )
         self.save_directory = pathlib.Path("results", save_directory_name)
 
-        self.schedule = schedule
+        # scenario data
+        self.schedule = data_dict["schedule"]
+        self.pv = data_dict["pv"]
+        self.costs = data_dict["cost"]
 
         # driving simulation
-        consumption = consumption_dict["consumption"]
-        distances = consumption_dict["distance"]
-        inclines = consumption_dict["incline"]
+        consumption = data_dict["consumption"]
+        distances = data_dict["distance"]
+        inclines = data_dict["incline"]
 
         self.driving_sim = RideCalc(consumption, distances, inclines)
 
@@ -351,6 +352,11 @@ class Simulation:
         charging_start = int(start_time + round(trip_to["trip_time"], 0))
         charging_time = time_window - driving_time
         mock_vehicle = Vehicle("vehicle", vehicle_type, soc=current_soc)
+
+        # calculate remaining scores which don't have cutoff criteria
+        pv_series = self.get_timeseries(start_time, end_time)
+        cost_series = self.get_cost_timeseries(start_time, end_time)
+        # TODO add pv and cost series to spiceev call
         spiceev_scenario = self.call_spiceev(
             charging_location,
             charging_start,
@@ -364,7 +370,6 @@ class Simulation:
         if charge_score <= 0:
             return empty_dict
 
-        # calculate remaining scores which don't have cutoff criteria
         cost_score = 0  # TODO get €/kWh from inputs
         local_ee_score = 0  # TODO energy_from_ee / charged_energy
         soc_score = 0.1 if current_soc < 0.8 else 0
@@ -417,6 +422,10 @@ class Simulation:
             result_dict["task_from"] = task_from
         return result_dict
 
+    def get_timeseries(self, start, end, name):        
+        start_stamp = step_to_timestamp(self.time_series, start)
+        end_stamp = step_to_timestamp(self.time_series, end)
+
     @classmethod
     def from_config(cls, scenario_name, no_outputs_mode=False):
         """Creates a Simulation object from the specified scenario.
@@ -462,10 +471,6 @@ class Simulation:
 
         # read scenario_data_path, raises KeyError if data_path doesn't exist as key in cfg
         scenario_data_path = pathlib.Path(cfg["basic"]["data_path"])
-
-        schedule = pd.read_csv(
-            pathlib.Path(scenario_data_path, cfg["files"]["schedule"]), sep=","
-        )
 
         vehicle_types_file = cfg["files"]["vehicle_types"]
         ext = vehicle_types_file.split(".")[-1]
@@ -519,28 +524,15 @@ class Simulation:
             "outputs": outputs,
         }
 
-        # read consumption_table
-        consumption_path = pathlib.Path(scenario_data_path, cfg["files"]["consumption"])
-        consumption_df = pd.read_csv(consumption_path)
+        data_dict = {}
+        files = ["schedule", "consumption", "distance", "incline", "pv", "cost"]
+        for file in files:
 
-        # read distance table
-        distance_table = pathlib.Path(scenario_data_path, cfg["files"]["distance"])
-        distance_df = pd.read_csv(distance_table, index_col=0)
-
-        # read incline table
-        incline_table = pathlib.Path(scenario_data_path, cfg["files"]["incline"])
-        incline_df = pd.read_csv(incline_table, index_col=0)
-
-        consumption_dict = {
-            "consumption": consumption_df,
-            "distance": distance_df,
-            "incline": incline_df,
-        }
-
-        # read pv table
-        pv_table = pathlib.Path(scenario_data_path, cfg["files"]["pv"])
-        pv_df = pd.read_csv(pv_table, index_col=False)
+            # read specificed file
+            file_path = pathlib.Path(scenario_data_path, cfg["files"][file])
+            file_df = pd.read_csv(file_path)
+            data_dict[file] = file_df
 
         return Simulation(
-            schedule, vehicle_types, charging_points, cfg_dict, consumption_dict, pv_df
+            vehicle_types, charging_points, cfg_dict, data_dict,
         )

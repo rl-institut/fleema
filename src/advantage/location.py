@@ -112,7 +112,7 @@ class Location:
             "constants": {
                 "grid_connectors": {
                     "GC1": {"max_power": power, "cost": {"type": "fixed", "value": 0.3}}
-                }
+                },
             }
         }
         for ch in self.chargers:

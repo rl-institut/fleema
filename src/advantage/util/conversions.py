@@ -9,12 +9,11 @@ def step_to_timestamp(time_series, time_step):
     time_series : 'pandas.core.indexes.datetimes.DatetimeIndex
         Series of timestamps to look up from.
     time_step : int
-    time_step : int
-        Time step in a series of timestamps.
+        Relevant time step of the simulation.
 
     Returns
     -------
-    pandas._libs.tslibs.timestamps.Timestamp
+    datetime.DateTime
         Timestamp that is looked up in the time series.
 
     """
