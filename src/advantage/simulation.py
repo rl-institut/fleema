@@ -11,6 +11,7 @@ import pandas as pd
 import json
 import datetime
 import warnings
+import math
 from typing import List, Dict, Union
 
 from advantage.location import Location
@@ -28,6 +29,7 @@ from advantage.util.conversions import (
     datetime_string_to_datetime,
     step_to_timestamp,
 )
+from advantage.util.helpers import block_printing
 
 
 class Simulation:
@@ -70,7 +72,7 @@ class Simulation:
         charging_points,
         cfg_dict,
         consumption_dict,
-        pv: pd.DataFrame
+        pv: pd.DataFrame,
     ):
         """Init Method of the Simulation class.
 
@@ -295,6 +297,7 @@ class Simulation:
         scenario = run_spice_ev(spice_dict, "balanced")
         return scenario
 
+    @block_printing
     def evaluate_charging_location(
         self,
         vehicle_type: "VehicleType",
@@ -326,13 +329,19 @@ class Simulation:
 
         Returns
         -------
-        dict[float, float, float, float, Task, Optional[Task], Optional[Task]]
-            Keys: "score", "consumption" (soc delta), "charge" (soc delta), "delta_soc" (total soc delta),
+        dict[int, float, float, float, float, Task, Optional[Task], Optional[Task]]
+            Keys: "timestep", "score", "consumption" (soc delta), "charge" (soc delta), "delta_soc" (total soc delta),
             "charge_event", Optional: "task_to", "task_from"
 
         """
         # return value in case of failure
-        empty_dict = {"score": 0, "consumption": 0, "charge": 0, "delta_soc": 0}
+        empty_dict = {
+            "timestep": start_time,
+            "score": 0,
+            "consumption": 0,
+            "charge": 0,
+            "delta_soc": 0,
+        }
         # run pre calculations
         time_window = end_time - start_time
         trip_to = self.driving_sim.calculate_trip(
@@ -358,7 +367,7 @@ class Simulation:
             mock_vehicle,
         )
         charged_soc = spiceev_scenario.socs[-1][0] - current_soc  # type: ignore
-        if charged_soc <= 0:
+        if charged_soc <= 0 or math.isnan(charged_soc):
             return empty_dict
         charge_score = 1 - ((-drive_soc) / charged_soc)
         if charge_score <= 0:
@@ -386,6 +395,7 @@ class Simulation:
             Status.CHARGING,
         )
         result_dict = {
+            "timestep": start_time,
             "score": score,
             "consumption": drive_soc,
             "charge": charged_soc,
@@ -448,7 +458,9 @@ class Simulation:
         # set setting_path
         scenario_setting_path = pathlib.Path("scenario_setting", scenario_name)
         if not scenario_setting_path.is_dir():
-            raise FileNotFoundError(f"Scenario {scenario_name} not found in ./scenario_setting.")
+            raise FileNotFoundError(
+                f"Scenario {scenario_name} not found in ./scenario_setting."
+            )
 
         # read config file
         cfg = cp.ConfigParser()
@@ -479,7 +491,9 @@ class Simulation:
         ext = charging_points_file.split(".")[-1]
         if ext != "json":
             print("File extension mismatch: charging_point file should be .json")
-        with open(pathlib.Path(scenario_data_path, cfg["files"]["charging_points"])) as f:
+        with open(
+            pathlib.Path(scenario_data_path, cfg["files"]["charging_points"])
+        ) as f:
             charging_points = json.load(f)
 
         start_date = cfg.get("basic", "start_date")

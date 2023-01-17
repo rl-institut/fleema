@@ -101,14 +101,17 @@ class SimulationType:
             DataFrame with columns "timestep" and "soc", containing predicted soc at specified times
         """
         consumption = 0.0
-        consumption_list = []
-        consumption_list.append((start, vehicle.soc))
+        consumption_list = [(start, start, vehicle.soc)]
         for _, task in sorted(vehicle.tasks.items()):
             if start < task.end_time < end:
                 if task.task == Status.DRIVING:
                     consumption += task.delta_soc
-                    consumption_list.append((task.end_time, vehicle.soc + consumption))
+                    consumption_list.append(
+                        (task.start_time, task.end_time, vehicle.soc + consumption)
+                    )
                 if task.task == Status.CHARGING:
                     # TODO check how much this would charge
                     pass
-        return pd.DataFrame(consumption_list, columns=["timestep", "soc"])
+        return pd.DataFrame(
+            consumption_list, columns=["drive_start", "timestep", "soc"]
+        )
