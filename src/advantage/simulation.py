@@ -71,7 +71,6 @@ class Simulation:
         charging_points,
         cfg_dict,
         data_dict,
-        pv: pd.DataFrame,
     ):
         """Init Method of the Simulation class.
 
@@ -363,9 +362,6 @@ class Simulation:
         charging_time = time_window - driving_time
         mock_vehicle = Vehicle("vehicle", vehicle_type, soc=current_soc)
 
-        # calculate remaining scores which don't have cutoff criteria
-        pv_series = self.get_timeseries(start_time, end_time)
-        cost_series = self.get_cost_timeseries(start_time, end_time)
         # TODO add pv and cost series to spiceev call
         spiceev_scenario = self.call_spiceev(
             charging_location,
@@ -432,10 +428,6 @@ class Simulation:
             )
             result_dict["task_from"] = task_from
         return result_dict
-
-    def get_timeseries(self, start, end, name):        
-        start_stamp = step_to_timestamp(self.time_series, start)
-        end_stamp = step_to_timestamp(self.time_series, end)
 
     @classmethod
     def from_config(cls, scenario_name, no_outputs_mode=False):
@@ -541,11 +533,15 @@ class Simulation:
 
         data_dict = {}
         files = ["schedule", "consumption", "distance", "incline", "pv", "cost"]
+        index_col_files = ["distance", "incline"]
         for file in files:
 
             # read specificed file
             file_path = pathlib.Path(scenario_data_path, cfg["files"][file])
-            file_df = pd.read_csv(file_path)
+            if file in index_col_files:
+                file_df = pd.read_csv(file_path, index_col=0)
+            else:
+                file_df = pd.read_csv(file_path)
             data_dict[file] = file_df
 
         return Simulation(

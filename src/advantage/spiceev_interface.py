@@ -35,9 +35,7 @@ def get_spice_ev_scenario_dict(vehicle, location, point_id, timestamp: datetime.
             "n_intervals": time,
             "discharge_limit": 0.5,
         },
-        "constants": {
-            "photovoltaics": pv_series,
-        },
+        "constants": {},
         "events": {
             "grid_operator_signals": {},
             "external_load": {},
@@ -46,7 +44,7 @@ def get_spice_ev_scenario_dict(vehicle, location, point_id, timestamp: datetime.
                     "csv_file": pathlib.Path("scenario_data", "bad_birnbach", "pv.csv"),
                     "start_time": timeseries_start.isoformat(),
                     "step_duration_s": 3600,
-                    "column": "power",
+                    "column": "total_kW",
                     "nominal_power": 150,
                     "factor": 1,
                     "grid_connector_id": "GC1",
