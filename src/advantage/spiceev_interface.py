@@ -5,7 +5,9 @@ from src.scenario import Scenario
 from advantage.util.helpers import deep_update
 
 
-def get_spice_ev_scenario_dict(vehicle, location, point_id, timestamp: datetime.datetime, time):
+def get_spice_ev_scenario_dict(
+    vehicle, location, point_id, timestamp: datetime.datetime, time
+):
     """This function creates a dictionary for SpiceEV.
 
     Parameters
@@ -40,7 +42,7 @@ def get_spice_ev_scenario_dict(vehicle, location, point_id, timestamp: datetime.
             "grid_operator_signals": {},
             "external_load": {},
             "energy_feed_in": {
-                "GC1 feed-in":{
+                "GC1 feed-in": {
                     "csv_file": pathlib.Path("scenario_data", "bad_birnbach", "pv.csv"),
                     "start_time": timeseries_start.isoformat(),
                     "step_duration_s": 3600,
@@ -55,7 +57,7 @@ def get_spice_ev_scenario_dict(vehicle, location, point_id, timestamp: datetime.
                 "start_time": timeseries_start.isoformat(),
                 "step_duration_s": 3600,  # 60 minutes
                 "grid_connector_id": "GC1",
-                "column": "cost"
+                "column": "cost",
             },
             "vehicle_events": {},
         },

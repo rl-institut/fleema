@@ -1,7 +1,6 @@
 from importlib import import_module
 from typing import TYPE_CHECKING
 import pandas as pd
-from statistics import mean
 
 from advantage.util.conversions import step_to_timestamp
 from advantage.event import Status

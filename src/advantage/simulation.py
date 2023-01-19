@@ -545,5 +545,8 @@ class Simulation:
             data_dict[file] = file_df
 
         return Simulation(
-            vehicle_types, charging_points, cfg_dict, data_dict,
+            vehicle_types,
+            charging_points,
+            cfg_dict,
+            data_dict,
         )
