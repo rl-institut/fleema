@@ -77,7 +77,7 @@ class SimulationType:
                 step_to_timestamp(self.simulation.time_series, step),
                 task.start_time,
                 task.end_time - task.start_time,
-                mean(spiceev_scenario.totalLoad["GC1"]),
+                nominal_charging_power,  # mean(spiceev_scenario.totalLoad["GC1"]), TODO find actual power
                 spiceev_scenario.socs[-1][0],
                 nominal_charging_power,
                 self.simulation.observer,

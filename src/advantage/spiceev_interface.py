@@ -1,10 +1,11 @@
 import datetime
+import pathlib
 from src.scenario import Scenario
 
 from advantage.util.helpers import deep_update
 
 
-def get_spice_ev_scenario_dict(vehicle, location, point_id, timestamp, time, pv_series = None):
+def get_spice_ev_scenario_dict(vehicle, location, point_id, timestamp: datetime.datetime, time):
     """This function creates a dictionary for SpiceEV.
 
     Parameters
@@ -26,8 +27,7 @@ def get_spice_ev_scenario_dict(vehicle, location, point_id, timestamp, time, pv_
         Nested SpiceEV dictionary.
 
     """
-    # TODO include pv in an appropriate format
-    # TODO
+    timeseries_start = datetime.datetime(timestamp.year, 1, 1, 0, 0, 0)
     scenario_dict = {
         "scenario": {
             "start_time": timestamp.isoformat(),
@@ -41,10 +41,28 @@ def get_spice_ev_scenario_dict(vehicle, location, point_id, timestamp, time, pv_
         "events": {
             "grid_operator_signals": {},
             "external_load": {},
-            "energy_feed_in": {},
+            "energy_feed_in": {
+                "GC1 feed-in":{
+                    "csv_file": pathlib.Path("scenario_data", "bad_birnbach", "pv.csv"),
+                    "start_time": timeseries_start.isoformat(),
+                    "step_duration_s": 3600,
+                    "column": "power",
+                    "nominal_power": 150,
+                    "factor": 1,
+                    "grid_connector_id": "GC1",
+                },
+            },
+            "energy_price_from_csv": {
+                "csv_file": pathlib.Path("scenario_data", "bad_birnbach", "cost.csv"),
+                "start_time": timeseries_start.isoformat(),
+                "step_duration_s": 3600,  # 60 minutes
+                "grid_connector_id": "GC1",
+                "column": "cost"
+            },
             "vehicle_events": {},
         },
     }
+    # TODO photovoltaics is only relevant for Einspeisevergütung
     spice_ev_dict = dict(scenario_dict, **vehicle.scenario_info)
     deep_update(
         spice_ev_dict, location.get_scenario_info(vehicle.vehicle_type.plugs, point_id)

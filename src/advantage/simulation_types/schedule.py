@@ -90,7 +90,7 @@ class Schedule(SimulationType):
             counter = 1
             while chosen_events is None:
                 print(
-                    f"==== Finding charging slots for {veh.id}, iteration {counter} ===="
+                    f"==== Finding charging slots for vehicle {veh.id}, iteration {counter} ===="
                 )
                 chosen_events = self._find_charging_slots(start, end, veh, end_soc)
                 counter += 1
