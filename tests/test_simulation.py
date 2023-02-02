@@ -1,7 +1,6 @@
 from advantage.simulation import Simulation
 
 import pytest
-import pathlib
 
 
 def test_from_config():
