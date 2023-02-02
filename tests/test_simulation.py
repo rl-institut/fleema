@@ -1,6 +1,7 @@
 from advantage.simulation import Simulation
 
 import pytest
+import pathlib
 
 
 def test_from_config():
@@ -9,7 +10,7 @@ def test_from_config():
 
 
 def test_bad_config_name():
-    scenario_path = "scenario_data/bad_birnbach/configs/bad_scenario.cfg"
+    scenario_path = pathlib.Path("scenario_data/bad_birnbach/configs/bad_scenario.cfg")
     with pytest.raises(
             FileNotFoundError,
             match=f"Config file {scenario_path} not found.",
