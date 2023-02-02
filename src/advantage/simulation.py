@@ -112,10 +112,10 @@ class Simulation:
         self.outputs = cfg_dict["outputs"]
 
         # TODO use scenario name in save_directory once scenario files have been reorganized
-        save_directory_name = "{}_{}".format(
-            self.simulation_type, datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")
+        save_directory_name = "{}_{}_{}".format(
+            cfg_dict["scenario_name"], self.simulation_type, datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")
         )
-        self.save_directory = pathlib.Path("results", save_directory_name)
+        self.save_directory = pathlib.Path(cfg_dict["scenario_data_path"], "results", save_directory_name)
 
         self.schedule = schedule
 
@@ -437,8 +437,8 @@ class Simulation:
 
         Parameters
         ----------
-        scenario_name : str
-            Name of the scenario and the directory in which the necessary input lies.
+        config_path : str
+            Path to the scenario config.
         no_outputs_mode : bool
             Flag that indicates if output is needed.
 
@@ -526,6 +526,8 @@ class Simulation:
             "step_size": cfg.getint("basic", "step_size"),
             "weights": weights_dict,
             "outputs": outputs,
+            "scenario_data_path": scenario_data_path,
+            "scenario_name": config_path.stem,
         }
 
         # read consumption_table
