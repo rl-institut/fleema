@@ -1,36 +1,42 @@
 {
   "plug_types": {
     "conductive_50": {
-        "capacity": 50,
-        "min_charging_power": 0,
-        "plug": "CCS"
+      "capacity": 50,
+      "min_charging_power": 0,
+      "plug": "CCS"
     },
     "conductive_150": {
-        "capacity": 150,
-        "min_charging_power": 0,
-        "plug": "CCS"
+      "capacity": 150,
+      "min_charging_power": 0,
+      "plug": "CCS"
     },
-  "inductive_ifak": {
-        "capacity": 11,
-        "min_charging_power": 0,
-        "plug": "inductive"
+    "inductive_ifak": {
+      "capacity": 11,
+      "min_charging_power": 0,
+      "plug": "inductive"
     },
-  "inductive_high": {
-        "capacity": 200,
-        "min_charging_power": 0,
-        "plug": "inductive"
+    "inductive_high": {
+      "capacity": 200,
+      "min_charging_power": 0,
+      "plug": "inductive"
     }
   },
   "charging_points": {
     "Marktplatz": {
       "plug_types": ["inductive_ifak"],
-      "generator": ["pv", "south"],
       "number_charging_points": 3,
-      "grid_connection": 50
+      "grid_connection": 50,
+      "energy_feed_in": {
+        "csv_file": "scenario_data/bad_birnbach/pv.csv",
+        "start_time": "2022-01-01T00:30:00",
+        "step_duration_s": 3600,
+        "column": "total_kW",
+        "nominal_power": 150,
+        "factor": 1
+      }
     },
     "Bahnhof": {
       "plug_types": ["inductive_ifak"],
-      "generator": null,
       "number_charging_points": 1,
       "grid_connection": 11
     }

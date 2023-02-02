@@ -41,24 +41,14 @@ def get_spice_ev_scenario_dict(
         "events": {
             "grid_operator_signals": {},
             "external_load": {},
-            "energy_feed_in": {
-                "GC1 feed-in": {
-                    "csv_file": pathlib.Path("scenario_data", "bad_birnbach", "pv.csv"),
-                    "start_time": timeseries_start.isoformat(),
-                    "step_duration_s": 3600,
-                    "column": "total_kW",
-                    "nominal_power": 150,
-                    "factor": 1,
-                    "grid_connector_id": "GC1",
-                },
-            },
-            "energy_price_from_csv": {
-                "csv_file": pathlib.Path("scenario_data", "bad_birnbach", "cost.csv"),
-                "start_time": timeseries_start.isoformat(),
-                "step_duration_s": 3600,  # 60 minutes
-                "grid_connector_id": "GC1",
-                "column": "cost",
-            },
+            "energy_feed_in": {},
+            # "energy_price_from_csv": {
+            #     "csv_file": pathlib.Path("scenario_data", "bad_birnbach", "cost.csv"),
+            #     "start_time": timeseries_start.isoformat(),
+            #     "step_duration_s": 3600,  # 60 minutes
+            #     "grid_connector_id": "GC1",
+            #     "column": "cost",
+            # },
             "vehicle_events": {},
         },
     }
@@ -92,7 +82,7 @@ def run_spice_ev(spice_ev_dict, strategy) -> "Scenario":
 
     """
     scenario = Scenario(spice_ev_dict)
-    scenario.run(strategy, {})
+    scenario.run(strategy, {"testing": True})
     return scenario
 
 

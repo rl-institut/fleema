@@ -117,8 +117,7 @@ class Simulation:
 
         # scenario data
         self.schedule = data_dict["schedule"]
-        self.pv = data_dict["pv"]
-        self.costs = data_dict["cost"]
+        self.cost_path = None  # TODO
 
         # driving simulation
         consumption = data_dict["consumption"]
@@ -160,6 +159,8 @@ class Simulation:
             self.locations[name].chargers.append(charger)
             if "grid_connection" in info:
                 self.locations[name].set_power(float(info["grid_connection"]))
+            if "energy_feed_in" in info:
+                self.locations[name].set_generator(info["energy_feed_in"])
             else:
                 self.locations[name].set_power(50.0)
             # TODO add grid info to location here?
@@ -203,7 +204,7 @@ class Simulation:
                     f"Vehicle number {vehicle_id} has multiple vehicle types assigned to it!"
                 )
             self.vehicles[vehicle_id] = Vehicle(
-                vehicle_id, self.vehicle_types[vehicle_type[0]], soc_min=self.soc_min
+                vehicle_id, self.vehicle_types[vehicle_type[0]]
             )
 
     def task_from_schedule(self, row):  # TODO move function to vehicle?
@@ -532,7 +533,7 @@ class Simulation:
         }
 
         data_dict = {}
-        files = ["schedule", "consumption", "distance", "incline", "pv", "cost"]
+        files = ["schedule", "consumption", "distance", "incline"]
         index_col_files = ["distance", "incline"]
         for file in files:
 

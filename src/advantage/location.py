@@ -28,7 +28,7 @@ class Location:
     def __init__(
         self,
         name: str = "",
-        location_type: str = "",
+        location_type: str = "",  # TODO remove?
         chargers: Optional[List["Charger"]] = None,
         grid_info: Optional[dict] = None,
     ):
@@ -53,6 +53,7 @@ class Location:
         self.chargers = chargers if chargers else []
         self.grid_info = grid_info
         self.output = None
+        self.generator_exists = False
 
     @property
     def num_chargers(self):
@@ -90,6 +91,11 @@ class Location:
             self.grid_info = {}
         self.grid_info["power"] = power
 
+    def set_generator(self, generator_dict):
+        self.generator_dict = generator_dict
+        self.generator_dict["grid_connector_id"] = "GC1"
+        self.generator_exists = True
+
     def get_scenario_info(self, plug_types: List[str], point_id: Optional[str] = None):
         """Create SpiceEV scenario dict for this Location.
 
@@ -111,10 +117,16 @@ class Location:
         scenario_dict = {
             "constants": {
                 "grid_connectors": {
-                    "GC1": {"max_power": power, "cost": {"type": "fixed", "value": 0.3}}
+                    "GC1": {"max_power": power, "cost": {"type": "fixed", "value": 0.3}}  # TODO change cost params
                 },
-            }
+            },
         }
+        if self.generator_exists:
+            scenario_dict["events"] = {
+                "energy_feed_in": {                    
+                    "GC1 feed-in": self.generator_dict                        
+                }
+            }
         for ch in self.chargers:
             # create scenario dict for chosen point id or the point with the highest power
             if point_id is None:
