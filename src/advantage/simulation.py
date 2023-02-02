@@ -428,7 +428,7 @@ class Simulation:
         return result_dict
 
     @classmethod
-    def from_config(cls, scenario_name, no_outputs_mode=False):
+    def from_config(cls, config_path, no_outputs_mode=False):
         """Creates a Simulation object from the specified scenario.
 
         The scenario needs to be located in the directory /scenarios.
@@ -456,24 +456,19 @@ class Simulation:
         """
 
         # set setting_path
-        scenario_setting_path = pathlib.Path("scenario_setting", scenario_name)
-        if not scenario_setting_path.is_dir():
-            raise FileNotFoundError(
-                f"Scenario {scenario_name} not found in ./scenario_setting."
-            )
+        config_path = pathlib.Path(config_path)
 
         # read config file
         cfg = cp.ConfigParser()
-        cfg_file = pathlib.Path(scenario_setting_path, "scenario.cfg")
-        if not cfg_file.is_file():
-            raise FileNotFoundError(f"Config file {cfg_file} not found.")
+        if not config_path.is_file():
+            raise FileNotFoundError(f"Config file {config_path} not found.")
         try:
-            cfg.read(cfg_file)
+            cfg.read(config_path)
         except Exception:
-            raise FileNotFoundError(f"Cannot read config file {cfg_file} - malformed?")
+            raise FileNotFoundError(f"Cannot read config file {config_path} - malformed?")
 
-        # read scenario_data_path, raises KeyError if data_path doesn't exist as key in cfg
-        scenario_data_path = pathlib.Path(cfg["basic"]["data_path"])
+        # get scenario data path by going up two directories
+        scenario_data_path = config_path.parent.parent
 
         schedule = pd.read_csv(
             pathlib.Path(scenario_data_path, cfg["files"]["schedule"]), sep=","
