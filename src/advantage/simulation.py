@@ -113,9 +113,13 @@ class Simulation:
 
         # TODO use scenario name in save_directory once scenario files have been reorganized
         save_directory_name = "{}_{}_{}".format(
-            cfg_dict["scenario_name"], self.simulation_type, datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")
+            cfg_dict["scenario_name"],
+            self.simulation_type,
+            datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S"),
         )
-        self.save_directory = pathlib.Path(cfg_dict["scenario_data_path"], "results", save_directory_name)
+        self.save_directory = pathlib.Path(
+            cfg_dict["scenario_data_path"], "results", save_directory_name
+        )
 
         self.schedule = schedule
 
@@ -465,7 +469,9 @@ class Simulation:
         try:
             cfg.read(config_path)
         except Exception:
-            raise FileNotFoundError(f"Cannot read config file {config_path} - malformed?")
+            raise FileNotFoundError(
+                f"Cannot read config file {config_path} - malformed?"
+            )
 
         # get scenario data path by going up two directories
         scenario_data_path = config_path.parent.parent
