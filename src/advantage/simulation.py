@@ -293,9 +293,9 @@ class Simulation:
         spice_dict = get_spice_ev_scenario_dict(
             vehicle, location, point_id, time_stamp, charging_time
         )
-        spice_dict["constants"]["vehicles"][vehicle.id][
+        spice_dict["components"]["vehicles"][vehicle.id][
             "connected_charging_station"
-        ] = list(spice_dict["constants"]["charging_stations"].keys())[0]
+        ] = list(spice_dict["components"]["charging_stations"].keys())[0]
         scenario = run_spice_ev(spice_dict, "balanced")
         return scenario
 

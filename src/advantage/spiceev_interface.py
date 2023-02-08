@@ -1,6 +1,5 @@
 import datetime
-import pathlib
-from src.scenario import Scenario
+from spice_ev.scenario import Scenario
 
 from advantage.util.helpers import deep_update
 
@@ -37,7 +36,7 @@ def get_spice_ev_scenario_dict(
             "n_intervals": time,
             "discharge_limit": 0.5,
         },
-        "constants": {},
+        "components": {},
         "events": {
             "grid_operator_signals": {},
             "external_load": {},
@@ -58,7 +57,7 @@ def get_spice_ev_scenario_dict(
         spice_ev_dict, location.get_scenario_info(vehicle.vehicle_type.plugs, point_id)
     )
     departure_time = timestamp + datetime.timedelta(minutes=time)
-    spice_ev_dict["constants"]["vehicles"][vehicle.id][
+    spice_ev_dict["components"]["vehicles"][vehicle.id][
         "estimated_time_of_departure"
     ] = departure_time.isoformat()
 

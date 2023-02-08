@@ -426,7 +426,7 @@ class Vehicle:
 
         """
         scenario_dict = {
-            "constants": {
+            "components": {
                 "vehicle_types": {
                     self.vehicle_type.name: {
                         "name": self.vehicle_type.name,

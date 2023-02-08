@@ -115,7 +115,7 @@ class Location:
 
         power = self.grid_info["power"] if self.grid_info else 0
         scenario_dict = {
-            "constants": {
+            "components": {
                 "grid_connectors": {
                     "GC1": {"max_power": power, "cost": {"type": "fixed", "value": 0.3}}  # TODO change cost params
                 },

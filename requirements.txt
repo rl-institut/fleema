@@ -1,2 +1,2 @@
 pandas >= 1.4.0
--e git+https://github.com/rl-institut/spice_ev.git@dev#egg=spiceev
+-e git+https://github.com/rl-institut/spice_ev.git@dev#egg=spice_ev
