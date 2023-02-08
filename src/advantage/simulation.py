@@ -21,7 +21,7 @@ from advantage.charger import Charger, PlugType
 from advantage.simulation_state import SimulationState
 from advantage.simulation_type import class_from_str
 from advantage.ride import RideCalc
-from advantage.spiceev_interface import get_spice_ev_scenario_dict, run_spice_ev
+from advantage.spiceev_interface import get_spice_ev_scenario_dict, run_spice_ev, get_charging_characteristic
 from advantage.event import Status
 
 from advantage.util.conversions import (
@@ -363,7 +363,6 @@ class Simulation:
         charging_time = time_window - driving_time
         mock_vehicle = Vehicle("vehicle", vehicle_type, soc=current_soc)
 
-        # TODO add pv and cost series to spiceev call
         spiceev_scenario = self.call_spiceev(
             charging_location,
             charging_start,
@@ -377,14 +376,16 @@ class Simulation:
         if charge_score <= 0:
             return empty_dict
 
-        cost_score = 0  # TODO get €/kWh from inputs
-        local_ee_score = 0  # TODO energy_from_ee / charged_energy
+        charging_result = get_charging_characteristic(spiceev_scenario)
+
+        cost_score = charging_result["cost"]
+        local_feed_in_score = charging_result["feed_in"]
         soc_score = 0.1 if current_soc < 0.8 else 0
         score = (
             time_score * self.weights["time_factor"]
             + charge_score * self.weights["energy_factor"]
             + cost_score * self.weights["cost_factor"]
-            + local_ee_score * self.weights["local_renewables_factor"]
+            + local_feed_in_score * self.weights["local_renewables_factor"]
             + soc_score  # TODO discuss with team
         )
         if score <= 0:
