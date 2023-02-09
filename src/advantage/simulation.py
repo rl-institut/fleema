@@ -378,7 +378,8 @@ class Simulation:
 
         charging_result = get_charging_characteristic(spiceev_scenario)
 
-        cost_score = charging_result["cost"]
+        max_cost = 1  # TODO get this from somewhere
+        cost_score = (max_cost - charging_result["cost"]) / max_cost  # TODO properly evaluate this score
         local_feed_in_score = charging_result["feed_in"]
         soc_score = 0.1 if current_soc < 0.8 else 0
         score = (
