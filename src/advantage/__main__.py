@@ -9,15 +9,15 @@ def main():
         "vehicles."
     )
     parser.add_argument(
-        "scenario",
-        default="base_scenario",
+        "config",
+        default="scenario_data/bad_birnbach/configs/base_scenario.cfg",
         nargs="?",
-        help="Set the scenario which is located in ./scenario_data .",
+        help="Set the scenario path from working directory (usually repository root).",
     )
     p_args = parser.parse_args()
 
     print("Running the ADVANTAGE tool...")
-    simulation = Simulation.from_config(p_args.scenario)
+    simulation = Simulation.from_config(p_args.config)
     simulation.run()
     print("-- Done --")
 
