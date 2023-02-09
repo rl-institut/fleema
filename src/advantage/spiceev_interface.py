@@ -86,9 +86,8 @@ def run_spice_ev(spice_ev_dict, strategy) -> "Scenario":
 
 # TODO add function that takes a task (if task == driving) and runs spiceev with it
 
+
 def get_charging_characteristic(scenario):
-    # TODO look at connChargeByTS, feedInPower and prices to calculate cost per kWh and part of PV energy of total charging
-    timestep = 1 # TODO get from scenario
     total_cost = 0
     total_charge = 0
     total_charge_from_feed_in = 0
@@ -104,7 +103,7 @@ def get_charging_characteristic(scenario):
 
     average_cost = total_cost / total_charge
 
-    feed_in_factor = min(total_charge_from_feed_in/total_charge, 1)
+    feed_in_factor = min(total_charge_from_feed_in / total_charge, 1)
     result_dict = {
         "cost": round(average_cost, 4),
         "feed_in": round(feed_in_factor, 4),

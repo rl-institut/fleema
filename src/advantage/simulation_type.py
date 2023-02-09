@@ -1,7 +1,6 @@
 from importlib import import_module
 from typing import TYPE_CHECKING
 import pandas as pd
-from spice_ev.report import aggregate_local_results
 
 from advantage.util.conversions import step_to_timestamp
 from advantage.event import Status
@@ -72,7 +71,7 @@ class SimulationType:
             nominal_charging_power = list(
                 spiceev_scenario.components.charging_stations.values()
             )[0].max_power
-            report = aggregate_local_results(spiceev_scenario, "GC1")
+            # report = aggregate_local_results(spiceev_scenario, "GC1")
             # execute charging event
             vehicle.charge(
                 step_to_timestamp(self.simulation.time_series, step),

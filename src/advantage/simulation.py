@@ -21,7 +21,11 @@ from advantage.charger import Charger, PlugType
 from advantage.simulation_state import SimulationState
 from advantage.simulation_type import class_from_str
 from advantage.ride import RideCalc
-from advantage.spiceev_interface import get_spice_ev_scenario_dict, run_spice_ev, get_charging_characteristic
+from advantage.spiceev_interface import (
+    get_spice_ev_scenario_dict,
+    run_spice_ev,
+    get_charging_characteristic,
+)
 from advantage.event import Status
 
 from advantage.util.conversions import (
@@ -379,7 +383,9 @@ class Simulation:
         charging_result = get_charging_characteristic(spiceev_scenario)
 
         max_cost = 1  # TODO get this from somewhere
-        cost_score = (max_cost - charging_result["cost"]) / max_cost  # TODO properly evaluate this score
+        cost_score = (
+            max_cost - charging_result["cost"]
+        ) / max_cost  # TODO properly evaluate this score
         local_feed_in_score = charging_result["feed_in"]
         soc_score = 0.1 if current_soc < 0.8 else 0
         score = (
@@ -538,7 +544,6 @@ class Simulation:
         files = ["schedule", "consumption", "distance", "incline"]
         index_col_files = ["distance", "incline"]
         for file in files:
-
             # read specificed file
             file_path = pathlib.Path(scenario_data_path, cfg["files"][file])
             if file in index_col_files:

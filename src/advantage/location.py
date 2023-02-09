@@ -117,15 +117,16 @@ class Location:
         scenario_dict = {
             "components": {
                 "grid_connectors": {
-                    "GC1": {"max_power": power, "cost": {"type": "fixed", "value": 0.3}}  # TODO change cost params
+                    "GC1": {
+                        "max_power": power,
+                        "cost": {"type": "fixed", "value": 0.3},
+                    }  # TODO change cost params
                 },
             },
         }
         if self.generator_exists:
             scenario_dict["events"] = {
-                "energy_feed_in": {                    
-                    "GC1 feed-in": self.generator_dict                        
-                }
+                "energy_feed_in": {"GC1 feed-in": self.generator_dict}
             }
         for ch in self.chargers:
             # create scenario dict for chosen point id or the point with the highest power

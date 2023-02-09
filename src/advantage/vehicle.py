@@ -35,7 +35,9 @@ class VehicleType:
     name: str = "vehicle_name"
     battery_capacity: float = 50.0
     soc_min: float = 0.2
-    base_consumption: float = 0.0  # TODO decide if this is necessary, currently used for spiceev?
+    base_consumption: float = (
+        0.0  # TODO decide if this is necessary, currently used for spiceev?
+    )
     charging_capacity: dict = field(default_factory=dict)
     charging_curve: list = field(default_factory=list)
     min_charging_power: float = 0.0

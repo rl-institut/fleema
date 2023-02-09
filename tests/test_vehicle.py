@@ -42,9 +42,9 @@ def test_constructor(car):
         error_list.append(
             f"Battery capacity is {car.vehicle_type.base_consumption}, should be 0.2"
         )
-    if car.usable_soc != 0.5:
+    if car.usable_soc != 0.3:
         error_list.append(
-            f"Battery capacity is {car.vehicle_type.base_consumption}, should be 0.5"
+            f"Battery capacity is {car.usable_soc}, should be 0.3"
         )
 
     assert not error_list, "errors occured:\n{}".format("\n".join(error_list))
