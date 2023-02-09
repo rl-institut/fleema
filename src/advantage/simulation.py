@@ -121,7 +121,7 @@ class Simulation:
 
         # scenario data
         self.schedule = data_dict["schedule"]
-        self.cost_path = None  # TODO
+        self.cost_options = cfg_dict["cost_options"]
 
         # driving simulation
         consumption = data_dict["consumption"]
@@ -295,7 +295,7 @@ class Simulation:
         time_stamp = step_to_timestamp(self.time_series, start_time)
         charging_time = int(end_time - start_time)
         spice_dict = get_spice_ev_scenario_dict(
-            vehicle, location, point_id, time_stamp, charging_time
+            vehicle, location, point_id, time_stamp, charging_time, self.cost_options
         )
         spice_dict["components"]["vehicles"][vehicle.id][
             "connected_charging_station"
@@ -515,6 +515,14 @@ class Simulation:
             "vehicle_csv": vehicle_csv,
         }
 
+        # parse cost options
+        cost_options = {
+            "csv_path": pathlib.Path(scenario_data_path, cfg["files"]["cost"]),
+            "start_time": cfg["cost_options"]["start_time"],
+            "step_duration": int(cfg["cost_options"]["step_duration"]),
+            "column": cfg["cost_options"]["column"],
+        }
+
         if no_outputs_mode:
             outputs = {key: False for key in outputs}
 
@@ -538,6 +546,7 @@ class Simulation:
             "step_size": cfg.getint("basic", "step_size"),
             "weights": weights_dict,
             "outputs": outputs,
+            "cost_options": cost_options,
         }
 
         data_dict = {}
