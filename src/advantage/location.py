@@ -92,6 +92,7 @@ class Location:
         self.grid_info["power"] = power
 
     def set_generator(self, generator_dict):
+        """Set generator infos for this location."""
         self.generator_dict = generator_dict
         self.generator_dict["grid_connector_id"] = "GC1"
         self.generator_exists = True

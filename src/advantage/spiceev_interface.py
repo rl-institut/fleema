@@ -88,6 +88,19 @@ def run_spice_ev(spice_ev_dict, strategy) -> "Scenario":
 
 
 def get_charging_characteristic(scenario):
+    """Calculate average cost and part of charging from feed-in in a spice_ev scenario.
+
+    Parameters
+    ----------
+    scenario : Scenario
+        SpiceEV Scenario object.
+
+    Returns
+    -------
+    dict[string, float]
+        Keys: "cost" contains average cost in €/kWh, "feed_in": renewable part of charging energy [0-1]
+
+    """
     total_cost = 0
     total_charge = 0
     total_charge_from_feed_in = 0
