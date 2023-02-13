@@ -50,6 +50,7 @@ class SimulationType:
                     task.start_point,
                     task.end_point,
                     vehicle.vehicle_type,
+                    self.simulation.time_series[step]
                 )
                 task.delta_soc = trip["soc_delta"]
                 task.float_time = trip["trip_time"]
