@@ -220,6 +220,7 @@ class Simulation:
             self.locations[row.departure_name],
             self.locations[row.arrival_name],
             vehicle.vehicle_type,
+            row.departure_time
         )
         dep_time = self.datetime_to_timesteps(row.departure_time)
         arr_time = self.datetime_to_timesteps(row.arrival_time)

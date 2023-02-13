@@ -45,7 +45,7 @@ class RideCalc:
         origin: "Location",
         destination: "Location",
         vehicle_type: "VehicleType",
-        temperature: float = 20.0,
+        dep_time: str = "2022-01-01 01:01:00",
     ):
         """Calculate consumption as a part of total SoC.
 
@@ -57,8 +57,8 @@ class RideCalc:
             Ending location of trip
         vehicle_type : VehicleType
             Vehicle type to look up in consumption and for calculation of SoC
-        temperature : float
-            Ambient temperature
+        dep_time : str
+            Departure time represented by a string.
 
         Returns
         -------
@@ -67,6 +67,7 @@ class RideCalc:
 
         """
         # TODO add speed as scenario input, load level somewhere?
+        temperature = self.get_temperature(dep_time)
         speed = 8.65
         load_level = 0
         distance, incline = self.get_location_values(origin, destination)
@@ -299,6 +300,6 @@ class RideCalc:
             temperature
         """
 
-        step = datetime.datetime.strptime(dep_time, '%Y-%m-%d %H:%M:%S')
+        step = datetime.datetime.strptime(dep_time, '%Y-%m-%d %H:%M:%S').hour
         row = self.temperature.loc[self.temperature["Hour"] == step]
         return row[option].values[0]
