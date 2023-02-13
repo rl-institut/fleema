@@ -1,4 +1,5 @@
 import datetime
+import warnings
 
 import pandas as pd
 
@@ -45,7 +46,7 @@ class RideCalc:
         origin: "Location",
         destination: "Location",
         vehicle_type: "VehicleType",
-        dep_time: str = "2022-01-01 01:01:00",
+        departure_time: str = "2022-01-01 01:01:00",
     ):
         """Calculate consumption as a part of total SoC.
 
@@ -57,7 +58,7 @@ class RideCalc:
             Ending location of trip
         vehicle_type : VehicleType
             Vehicle type to look up in consumption and for calculation of SoC
-        dep_time : str
+        departure_time : str
             Departure time represented by a string.
 
         Returns
@@ -67,7 +68,7 @@ class RideCalc:
 
         """
         # TODO add speed as scenario input, load level somewhere?
-        temperature = self.get_temperature(dep_time)
+        temperature = self.get_temperature(departure_time)
         speed = 8.65
         load_level = 0
         distance, incline = self.get_location_values(origin, destination)
@@ -284,22 +285,29 @@ class RideCalc:
 
         return distance, incline
 
-    def get_temperature(self, dep_time, option: str = "Median Temperature"):
+    def get_temperature(self, departure_time, option: str = "median"):
         """Returns temperature according to the given timestep parameter.
 
         Parameters
         ----------
-        dep_time : str
+        departure_time : str
             Departure time represented by a string.
         option : string
-            Option: "Median Temperature", "Highest Temperature" or "Lowest Temperature"
+            Option: "median", "highest" or "lowest"
 
         Returns
         -------
         float
             temperature
         """
-
-        step = datetime.datetime.strptime(dep_time, '%Y-%m-%d %H:%M:%S').hour
-        row = self.temperature.loc[self.temperature["Hour"] == step]
+        if option not in ["median", "lowest", "highest"]:
+            warnings.warn("Wrong value for temperature option parameter."
+                          "Options include 'median', 'lowest' and 'highest'.")
+            option = "median"
+        try:
+            step = datetime.datetime.strptime(departure_time, '%Y-%m-%d %H:%M:%S').hour
+        except ValueError:
+            warnings.warn("Wrong datetime string format. Example: '2022-01-01 01:01:00'")
+            step = 0
+        row = self.temperature.loc[self.temperature["hour"] == step]
         return row[option].values[0]

@@ -149,6 +149,6 @@ class Schedule(SimulationType):
                 if task is None:
                     continue
                 else:
-                    self.execute_task(veh, task, step)
+                    self.execute_task(veh, task)
 
                 veh.export(self.simulation.save_directory)
