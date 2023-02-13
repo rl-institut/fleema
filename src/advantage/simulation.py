@@ -114,10 +114,14 @@ class Simulation:
         self.outputs = cfg_dict["outputs"]
 
         # TODO use scenario name in save_directory once scenario files have been reorganized
-        save_directory_name = "{}_{}".format(
-            self.simulation_type, datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")
+        save_directory_name = "{}_{}_{}".format(
+            cfg_dict["scenario_name"],
+            self.simulation_type,
+            datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S"),
         )
-        self.save_directory = pathlib.Path("results", save_directory_name)
+        self.save_directory = pathlib.Path(
+            cfg_dict["scenario_data_path"], "results", save_directory_name
+        )
 
         # scenario data
         self.schedule = data_dict["schedule"]
@@ -439,7 +443,7 @@ class Simulation:
         return result_dict
 
     @classmethod
-    def from_config(cls, scenario_name, no_outputs_mode=False):
+    def from_config(cls, config_path, no_outputs_mode=False):
         """Creates a Simulation object from the specified scenario.
 
         The scenario needs to be located in the directory /scenarios.
@@ -448,8 +452,8 @@ class Simulation:
 
         Parameters
         ----------
-        scenario_name : str
-            Name of the scenario and the directory in which the necessary input lies.
+        config_path : str
+            Path to the scenario config.
         no_outputs_mode : bool
             Flag that indicates if output is needed.
 
@@ -467,24 +471,21 @@ class Simulation:
         """
 
         # set setting_path
-        scenario_setting_path = pathlib.Path("scenario_setting", scenario_name)
-        if not scenario_setting_path.is_dir():
-            raise FileNotFoundError(
-                f"Scenario {scenario_name} not found in ./scenario_setting."
-            )
+        config_path = pathlib.Path(config_path)
 
         # read config file
         cfg = cp.ConfigParser()
-        cfg_file = pathlib.Path(scenario_setting_path, "scenario.cfg")
-        if not cfg_file.is_file():
-            raise FileNotFoundError(f"Config file {cfg_file} not found.")
+        if not config_path.is_file():
+            raise FileNotFoundError(f"Config file {config_path} not found.")
         try:
-            cfg.read(cfg_file)
+            cfg.read(config_path)
         except Exception:
-            raise FileNotFoundError(f"Cannot read config file {cfg_file} - malformed?")
+            raise FileNotFoundError(
+                f"Cannot read config file {config_path} - malformed?"
+            )
 
-        # read scenario_data_path, raises KeyError if data_path doesn't exist as key in cfg
-        scenario_data_path = pathlib.Path(cfg["basic"]["data_path"])
+        # get scenario data path by going up two directories
+        scenario_data_path = config_path.parent.parent
 
         vehicle_types_file = cfg["files"]["vehicle_types"]
         ext = vehicle_types_file.split(".")[-1]
@@ -546,6 +547,8 @@ class Simulation:
             "step_size": cfg.getint("basic", "step_size"),
             "weights": weights_dict,
             "outputs": outputs,
+            "scenario_data_path": scenario_data_path,
+            "scenario_name": config_path.stem,
             "cost_options": cost_options,
         }
 
