@@ -126,6 +126,7 @@ class Simulation:
         # scenario data
         self.schedule = data_dict["schedule"]
         self.cost_options = cfg_dict["cost_options"]
+        self.feed_in_cost = cfg_dict["feed_in_cost"]
 
         # driving simulation
         consumption = data_dict["consumption"]
@@ -384,7 +385,7 @@ class Simulation:
         if charge_score <= 0:
             return empty_dict
 
-        charging_result = get_charging_characteristic(spiceev_scenario)
+        charging_result = get_charging_characteristic(spiceev_scenario, self.feed_in_cost)
 
         max_cost = 1  # TODO get this from somewhere
         cost_score = (
@@ -535,6 +536,7 @@ class Simulation:
             "local_renewables_factor": cfg.getfloat(
                 "weights", "local_renewables_factor"
             ),
+            "soc_factor": cfg.getfloat("weights", "soc_factor"),
         }
 
         cfg_dict = {
@@ -550,6 +552,7 @@ class Simulation:
             "scenario_data_path": scenario_data_path,
             "scenario_name": config_path.stem,
             "cost_options": cost_options,
+            "feed_in_cost": cfg.getfloat("cost_options", "feed_in_price", fallback=0),
         }
 
         data_dict = {}

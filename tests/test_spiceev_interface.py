@@ -42,10 +42,21 @@ def time_series():
     return time_series
 
 
-def test_create_dict(car, time_series, spot):
+@pytest.fixture()
+def cost_options(time_series):
+    cost_options = {
+        "csv_path": "scenario_data/bad_birnbach/cost.csv",
+        "start_time": step_to_timestamp(time_series, 0).isoformat(),
+        "step_duration": 3600,
+        "column": "cost",
+    }
+    return cost_options
+
+
+def test_create_dict(car, time_series, spot, cost_options):
     start_step = 5
     time_stamp = step_to_timestamp(time_series, start_step)
-    spice_dict = get_spice_ev_scenario_dict(car, spot, "point_0", time_stamp, 10)
+    spice_dict = get_spice_ev_scenario_dict(car, spot, "point_0", time_stamp, 10, cost_options)
     error_list = []
     if "vehicles" not in spice_dict["components"].keys():
         error_list.append("Vehicles is not in components.")
@@ -55,10 +66,10 @@ def test_create_dict(car, time_series, spot):
     assert not error_list, "errors occured:\n{}".format("\n".join(error_list))
 
 
-def test_run_spice_ev(car, time_series, spot):
+def test_run_spice_ev(car, time_series, spot, cost_options):
     start_step = 5
     time_stamp = step_to_timestamp(time_series, start_step)
-    spice_dict = get_spice_ev_scenario_dict(car, spot, "point_0", time_stamp, 10)
+    spice_dict = get_spice_ev_scenario_dict(car, spot, "point_0", time_stamp, 10, cost_options)
     spice_dict["components"]["vehicles"]["car"]["connected_charging_station"] = "point_0"
     scenario = run_spice_ev(spice_dict, "balanced")
     # check if soc is higher than before

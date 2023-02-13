@@ -1,5 +1,4 @@
 import datetime
-import pathlib
 from spice_ev.scenario import Scenario
 
 from advantage.util.helpers import deep_update
