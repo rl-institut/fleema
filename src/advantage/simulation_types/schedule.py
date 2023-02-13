@@ -204,7 +204,7 @@ class Schedule(SimulationType):
                 print(
                     f"Not enough charging possible for vehicle {vehicle.id},",
                     f"ride starting at timestep {first_impossible_task_start} had to be removed!",
-                )
+                )  # TODO log this in output file
                 return None
                 # TODO save the removal for output information
                 # raise ValueError(

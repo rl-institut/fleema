@@ -387,13 +387,13 @@ class Simulation:
             max_cost - charging_result["cost"]
         ) / max_cost  # TODO properly evaluate this score
         local_feed_in_score = charging_result["feed_in"]
-        soc_score = 0.1 if current_soc < 0.8 else 0
+        soc_score = 0.1 if current_soc < 0.8 else 0  # TODO improve this formula
         score = (
             time_score * self.weights["time_factor"]
             + charge_score * self.weights["energy_factor"]
             + cost_score * self.weights["cost_factor"]
             + local_feed_in_score * self.weights["local_renewables_factor"]
-            + soc_score  # TODO discuss with team
+            + soc_score * self.weights["soc_factor"]
         )
         if score <= 0:
             return empty_dict
