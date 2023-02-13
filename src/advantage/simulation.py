@@ -563,5 +563,10 @@ class Simulation:
         pv_df = pd.read_csv(pv_table, index_col=False)
 
         return Simulation(
-            schedule, vehicle_types, charging_points, cfg_dict, consumption_dict, pv_df
+            schedule,
+            vehicle_types,
+            charging_points,
+            cfg_dict,
+            consumption_dict,
+            pv_df,
         )
