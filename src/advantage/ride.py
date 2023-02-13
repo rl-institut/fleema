@@ -302,7 +302,8 @@ class RideCalc:
         """
         if option not in ["median", "lowest", "highest"]:
             warnings.warn("Wrong value for temperature option parameter."
-                          "Options include 'median', 'lowest' and 'highest'.")
+                          "Options include 'median', 'lowest' and 'highest'."
+                          "The default value is 'median'.")
             option = "median"
         try:
             step = datetime.datetime.strptime(departure_time, '%Y-%m-%d %H:%M:%S').hour
