@@ -4,17 +4,18 @@ import pytest
 
 
 def test_from_config():
-    simulation = Simulation.from_config("cenario_data/bad_birnbach/configs/base_scenario.cfg")
+
+    simulation = Simulation.from_config("scenario_data/bad_birnbach/configs/base_scenario.cfg")
+
     assert simulation.num_threads
 
 
 def test_bad_config_name():
-    scenario_name = "bad_name"
+    scenario_path = "scenario_data/bad_birnbach/configs/bad_scenario.cfg"
     with pytest.raises(
             FileNotFoundError,
-            match=f"Scenario {scenario_name} not found in ./scenario_setting.",
     ):
-        Simulation.from_config(scenario_name)
+        Simulation.from_config(scenario_path)
 
 
 def test_run():

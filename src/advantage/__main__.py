@@ -17,7 +17,7 @@ def main():
     p_args = parser.parse_args()
 
     print("Running the ADVANTAGE tool...")
-    simulation = Simulation.from_config(p_args.scenario)
+    simulation = Simulation.from_config(p_args.config)
     simulation.run()
     print("-- Done --")
 
