@@ -295,20 +295,30 @@ class RideCalc:
         option : string
             Option: "median", "highest" or "lowest"
 
+        Warnings
+        --------
+        bad option
+            Parameter option allows 'median' (default), 'lowest' and 'highest'.
+            Sets option to 'median'.
+        bad format
+            Parameter allows following format: '%Y-%m-%d %H:%M:%S'. Example: '2022-01-01 01:01:00'
+            Sets departure_time to '2022-01-01 12:00:00'.
+
         Returns
         -------
         float
             temperature
         """
         if option not in ["median", "lowest", "highest"]:
-            warnings.warn("Wrong value for temperature option parameter."
+            warnings.warn("Bad option: Wrong value for temperature option parameter."
                           "Options include 'median', 'lowest' and 'highest'."
                           "The default value is 'median'.")
             option = "median"
         try:
-            step = datetime.datetime.strptime(departure_time, '%Y-%m-%d %H:%M:%S').hour
+            datetime.datetime.strptime(departure_time, '%Y-%m-%d %H:%M:%S')
         except ValueError:
-            warnings.warn("Wrong datetime string format. Example: '2022-01-01 01:01:00'")
-            step = 0
+            warnings.warn("Bad format: Wrong datetime string format. Example: '2022-01-01 01:01:00'")
+            departure_time = '2022-01-01 12:00:00'
+        step = datetime.datetime.strptime(departure_time, '%Y-%m-%d %H:%M:%S').hour
         row = self.temperature.loc[self.temperature["hour"] == step]
         return row[option].values[0]
