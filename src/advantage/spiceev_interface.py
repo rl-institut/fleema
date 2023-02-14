@@ -1,4 +1,5 @@
 import datetime
+import warnings
 from spice_ev.scenario import Scenario
 
 from advantage.util.helpers import deep_update
@@ -63,7 +64,7 @@ def get_spice_ev_scenario_dict(
     return spice_ev_dict
 
 
-def run_spice_ev(spice_ev_dict, strategy) -> "Scenario":
+def run_spice_ev(spice_ev_dict, strategy, ignore_warnings=True) -> "Scenario":
     """This function runs the scenario and returns it.
 
     Parameters
@@ -80,7 +81,12 @@ def run_spice_ev(spice_ev_dict, strategy) -> "Scenario":
 
     """
     scenario = Scenario(spice_ev_dict)
-    scenario.run(strategy, {"testing": True})
+    if ignore_warnings:
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", UserWarning)
+            scenario.run(strategy, {})
+    else:
+        scenario.run(strategy, {})
     return scenario
 
 

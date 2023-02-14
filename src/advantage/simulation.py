@@ -112,6 +112,7 @@ class Simulation:
         )
         self.weights = cfg_dict["weights"]
         self.outputs = cfg_dict["outputs"]
+        self.ignore_spice_ev_warnings = cfg_dict["ignore_spice_ev_warnings"]
 
         # TODO use scenario name in save_directory once scenario files have been reorganized
         save_directory_name = "{}_{}_{}".format(
@@ -305,7 +306,7 @@ class Simulation:
         spice_dict["components"]["vehicles"][vehicle.id][
             "connected_charging_station"
         ] = list(spice_dict["components"]["charging_stations"].keys())[0]
-        scenario = run_spice_ev(spice_dict, "balanced")
+        scenario = run_spice_ev(spice_dict, "balanced", self.ignore_spice_ev_warnings)
         return scenario
 
     @block_printing
@@ -385,7 +386,9 @@ class Simulation:
         if charge_score <= 0:
             return empty_dict
 
-        charging_result = get_charging_characteristic(spiceev_scenario, self.feed_in_cost)
+        charging_result = get_charging_characteristic(
+            spiceev_scenario, self.feed_in_cost
+        )
 
         max_cost = 1  # TODO get this from somewhere
         cost_score = (
@@ -553,6 +556,9 @@ class Simulation:
             "scenario_name": config_path.stem,
             "cost_options": cost_options,
             "feed_in_cost": cfg.getfloat("cost_options", "feed_in_price", fallback=0),
+            "ignore_spice_ev_warnings": cfg.getboolean(
+                "sim_params", "ignore_spice_ev_warnings", fallback=True
+            ),
         }
 
         data_dict = {}
