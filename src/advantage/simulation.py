@@ -37,7 +37,7 @@ class Simulation:
 
     It also contains the run function, which starts the simulation.
 
-    Parameters
+    Attributes
     ----------
     soc_min : float
         Lower limit of the battery's charging power (soc - state of charge).
@@ -210,7 +210,7 @@ class Simulation:
             )
 
     def task_from_schedule(self, row):  # TODO move function to vehicle?
-        """Creates Task from a specificed schedule row and adds it to the vehicle.
+        """Creates Task from a specified schedule row and adds it to the vehicle.
 
         Parameters
         ----------
