@@ -14,7 +14,7 @@ testpaths = [
 
 [tool.mypy]
 mypy_path = "advantage"
-exclude = "spiceev"
+exclude = "spice-ev"
 ignore_missing_imports = true
 no_implicit_optional = true
 show_error_codes = true

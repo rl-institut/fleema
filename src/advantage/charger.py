@@ -121,14 +121,14 @@ class Charger:
 
         if self.num_points:
             scenario_dict: Dict[str, Dict[str, Dict[str, Dict[str, object]]]] = {
-                "constants": {"charging_stations": {}}
+                "components": {"charging_stations": {}}
             }
             point_found = False
             for cp in self.charging_points:
                 if cp.id == point_id:
                     point_found = True
                     cp_dict = {
-                        "constants": {
+                        "components": {
                             "charging_stations": {
                                 cp.id: {
                                     "max_power": cp.get_power(plug_types),

@@ -21,7 +21,11 @@ from advantage.charger import Charger, PlugType
 from advantage.simulation_state import SimulationState
 from advantage.simulation_type import class_from_str
 from advantage.ride import RideCalc
-from advantage.spiceev_interface import get_spice_ev_scenario_dict, run_spice_ev
+from advantage.spiceev_interface import (
+    get_spice_ev_scenario_dict,
+    run_spice_ev,
+    get_charging_characteristic,
+)
 from advantage.event import Status
 
 from advantage.util.conversions import (
@@ -67,12 +71,10 @@ class Simulation:
 
     def __init__(
         self,
-        schedule: pd.DataFrame,
         vehicle_types,
         charging_points,
         cfg_dict,
-        consumption_dict,
-        pv: pd.DataFrame,
+        data_dict,
     ):
         """Init Method of the Simulation class.
 
@@ -110,6 +112,7 @@ class Simulation:
         )
         self.weights = cfg_dict["weights"]
         self.outputs = cfg_dict["outputs"]
+        self.ignore_spice_ev_warnings = cfg_dict["ignore_spice_ev_warnings"]
 
         # TODO use scenario name in save_directory once scenario files have been reorganized
         save_directory_name = "{}_{}_{}".format(
@@ -121,12 +124,15 @@ class Simulation:
             cfg_dict["scenario_data_path"], "results", save_directory_name
         )
 
-        self.schedule = schedule
+        # scenario data
+        self.schedule = data_dict["schedule"]
+        self.cost_options = cfg_dict["cost_options"]
+        self.feed_in_cost = cfg_dict["feed_in_cost"]
 
         # driving simulation
-        consumption = consumption_dict["consumption"]
-        distances = consumption_dict["distance"]
-        inclines = consumption_dict["incline"]
+        consumption = data_dict["consumption"]
+        distances = data_dict["distance"]
+        inclines = data_dict["incline"]
 
         self.driving_sim = RideCalc(consumption, distances, inclines)
 
@@ -163,6 +169,8 @@ class Simulation:
             self.locations[name].chargers.append(charger)
             if "grid_connection" in info:
                 self.locations[name].set_power(float(info["grid_connection"]))
+            if "energy_feed_in" in info:
+                self.locations[name].set_generator(info["energy_feed_in"])
             else:
                 self.locations[name].set_power(50.0)
             # TODO add grid info to location here?
@@ -206,7 +214,7 @@ class Simulation:
                     f"Vehicle number {vehicle_id} has multiple vehicle types assigned to it!"
                 )
             self.vehicles[vehicle_id] = Vehicle(
-                vehicle_id, self.vehicle_types[vehicle_type[0]], soc_min=self.soc_min
+                vehicle_id, self.vehicle_types[vehicle_type[0]]
             )
 
     def task_from_schedule(self, row):  # TODO move function to vehicle?
@@ -293,12 +301,12 @@ class Simulation:
         time_stamp = step_to_timestamp(self.time_series, start_time)
         charging_time = int(end_time - start_time)
         spice_dict = get_spice_ev_scenario_dict(
-            vehicle, location, point_id, time_stamp, charging_time
+            vehicle, location, point_id, time_stamp, charging_time, self.cost_options
         )
-        spice_dict["constants"]["vehicles"][vehicle.id][
+        spice_dict["components"]["vehicles"][vehicle.id][
             "connected_charging_station"
-        ] = list(spice_dict["constants"]["charging_stations"].keys())[0]
-        scenario = run_spice_ev(spice_dict, "balanced")
+        ] = list(spice_dict["components"]["charging_stations"].keys())[0]
+        scenario = run_spice_ev(spice_dict, "balanced", self.ignore_spice_ev_warnings)
         return scenario
 
     @block_printing
@@ -364,6 +372,7 @@ class Simulation:
         charging_start = int(start_time + round(trip_to["trip_time"], 0))
         charging_time = time_window - driving_time
         mock_vehicle = Vehicle("vehicle", vehicle_type, soc=current_soc)
+
         spiceev_scenario = self.call_spiceev(
             charging_location,
             charging_start,
@@ -377,16 +386,22 @@ class Simulation:
         if charge_score <= 0:
             return empty_dict
 
-        # calculate remaining scores which don't have cutoff criteria
-        cost_score = 0  # TODO get €/kWh from inputs
-        local_ee_score = 0  # TODO energy_from_ee / charged_energy
-        soc_score = 0.1 if current_soc < 0.8 else 0
+        charging_result = get_charging_characteristic(
+            spiceev_scenario, self.feed_in_cost
+        )
+
+        max_cost = 1  # TODO get this from somewhere
+        cost_score = (
+            max_cost - charging_result["cost"]
+        ) / max_cost  # TODO properly evaluate this score
+        local_feed_in_score = charging_result["feed_in"]
+        soc_score = 0.1 if current_soc < 0.8 else 0  # TODO improve this formula
         score = (
             time_score * self.weights["time_factor"]
             + charge_score * self.weights["energy_factor"]
             + cost_score * self.weights["cost_factor"]
-            + local_ee_score * self.weights["local_renewables_factor"]
-            + soc_score  # TODO discuss with team
+            + local_feed_in_score * self.weights["local_renewables_factor"]
+            + soc_score * self.weights["soc_factor"]
         )
         if score <= 0:
             return empty_dict
@@ -476,10 +491,6 @@ class Simulation:
         # get scenario data path by going up two directories
         scenario_data_path = config_path.parent.parent
 
-        schedule = pd.read_csv(
-            pathlib.Path(scenario_data_path, cfg["files"]["schedule"]), sep=","
-        )
-
         vehicle_types_file = cfg["files"]["vehicle_types"]
         ext = vehicle_types_file.split(".")[-1]
         if ext != "json":
@@ -509,6 +520,14 @@ class Simulation:
             "vehicle_csv": vehicle_csv,
         }
 
+        # parse cost options
+        cost_options = {
+            "csv_path": pathlib.Path(scenario_data_path, cfg["files"]["cost"]),
+            "start_time": cfg["cost_options"]["start_time"],
+            "step_duration": int(cfg["cost_options"]["step_duration"]),
+            "column": cfg["cost_options"]["column"],
+        }
+
         if no_outputs_mode:
             outputs = {key: False for key in outputs}
 
@@ -520,6 +539,7 @@ class Simulation:
             "local_renewables_factor": cfg.getfloat(
                 "weights", "local_renewables_factor"
             ),
+            "soc_factor": cfg.getfloat("weights", "soc_factor"),
         }
 
         cfg_dict = {
@@ -534,30 +554,28 @@ class Simulation:
             "outputs": outputs,
             "scenario_data_path": scenario_data_path,
             "scenario_name": config_path.stem,
+            "cost_options": cost_options,
+            "feed_in_cost": cfg.getfloat("cost_options", "feed_in_price", fallback=0),
+            "ignore_spice_ev_warnings": cfg.getboolean(
+                "sim_params", "ignore_spice_ev_warnings", fallback=True
+            ),
         }
 
-        # read consumption_table
-        consumption_path = pathlib.Path(scenario_data_path, cfg["files"]["consumption"])
-        consumption_df = pd.read_csv(consumption_path)
-
-        # read distance table
-        distance_table = pathlib.Path(scenario_data_path, cfg["files"]["distance"])
-        distance_df = pd.read_csv(distance_table, index_col=0)
-
-        # read incline table
-        incline_table = pathlib.Path(scenario_data_path, cfg["files"]["incline"])
-        incline_df = pd.read_csv(incline_table, index_col=0)
-
-        consumption_dict = {
-            "consumption": consumption_df,
-            "distance": distance_df,
-            "incline": incline_df,
-        }
-
-        # read pv table
-        pv_table = pathlib.Path(scenario_data_path, cfg["files"]["pv"])
-        pv_df = pd.read_csv(pv_table, index_col=False)
+        data_dict = {}
+        files = ["schedule", "consumption", "distance", "incline"]
+        index_col_files = ["distance", "incline"]
+        for file in files:
+            # read specificed file
+            file_path = pathlib.Path(scenario_data_path, cfg["files"][file])
+            if file in index_col_files:
+                file_df = pd.read_csv(file_path, index_col=0)
+            else:
+                file_df = pd.read_csv(file_path)
+            data_dict[file] = file_df
 
         return Simulation(
-            schedule, vehicle_types, charging_points, cfg_dict, consumption_dict, pv_df
+            vehicle_types,
+            charging_points,
+            cfg_dict,
+            data_dict,
         )

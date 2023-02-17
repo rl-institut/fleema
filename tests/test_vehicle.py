@@ -42,9 +42,9 @@ def test_constructor(car):
         error_list.append(
             f"Battery capacity is {car.vehicle_type.base_consumption}, should be 0.2"
         )
-    if car.usable_soc != 0.5:
+    if car.usable_soc != 0.3:
         error_list.append(
-            f"Battery capacity is {car.vehicle_type.base_consumption}, should be 0.5"
+            f"Battery capacity is {car.usable_soc}, should be 0.3"
         )
 
     assert not error_list, "errors occured:\n{}".format("\n".join(error_list))
@@ -144,7 +144,7 @@ def test_park_input_checks(car, time_series):
 
 
 def test_scenario_info(car):
-    assert car.scenario_info["constants"]["vehicles"]["car"]["soc"] == 0.5
+    assert car.scenario_info["components"]["vehicles"]["car"]["soc"] == 0.5
 
 
 def test_task_list_sanity(car):
