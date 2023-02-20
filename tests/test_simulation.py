@@ -4,7 +4,9 @@ import pytest
 
 
 def test_from_config():
+
     simulation = Simulation.from_config("scenario_data/bad_birnbach/configs/base_scenario.cfg")
+
     assert simulation.num_threads
 
 

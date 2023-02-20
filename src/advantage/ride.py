@@ -1,3 +1,6 @@
+import datetime
+import warnings
+
 import pandas as pd
 
 from typing import TYPE_CHECKING
@@ -13,6 +16,7 @@ class RideCalc:
         consumption_table: pd.DataFrame,
         distances: pd.DataFrame,
         inclines: pd.DataFrame,
+        temperature: pd.DataFrame,
     ) -> None:
         """RideCalc constructor.
 
@@ -24,10 +28,13 @@ class RideCalc:
             Distance matrix between all Locations
         inclines : DataFrame
             Incline matrix between all Locations
+        temperature : Dataframe
+            Highest, lowest and median temperature for a day
         """
         self.consumption_table = consumption_table
         self.distances = distances
         self.inclines = inclines
+        self.temperature = temperature
 
         self.uniques = [
             sorted(self.consumption_table[col].unique())
@@ -39,7 +46,7 @@ class RideCalc:
         origin: "Location",
         destination: "Location",
         vehicle_type: "VehicleType",
-        temperature: float = 20.0,
+        departure_time: str = "2022-01-01 01:01:00",
     ):
         """Calculate consumption as a part of total SoC.
 
@@ -51,8 +58,8 @@ class RideCalc:
             Ending location of trip
         vehicle_type : VehicleType
             Vehicle type to look up in consumption and for calculation of SoC
-        temperature : float
-            Ambient temperature
+        departure_time : str
+            Departure time represented by a string.
 
         Returns
         -------
@@ -61,6 +68,7 @@ class RideCalc:
 
         """
         # TODO add speed as scenario input, load level somewhere?
+        temperature = self.get_temperature(departure_time)
         speed = 8.65
         load_level = 0
         distance, incline = self.get_location_values(origin, destination)
@@ -276,3 +284,41 @@ class RideCalc:
         incline = self.inclines.at[origin.name, destination.name]
 
         return distance, incline
+
+    def get_temperature(self, departure_time, option: str = "median"):
+        """Returns temperature according to the given timestep parameter.
+
+        Parameters
+        ----------
+        departure_time : str
+            Departure time represented by a string.
+        option : string
+            Option: "median", "highest" or "lowest"
+
+        Warnings
+        --------
+        bad option
+            Parameter option allows 'median' (default), 'lowest' and 'highest'.
+            Sets option to 'median'.
+        bad format
+            Parameter allows following format: '%Y-%m-%d %H:%M:%S'. Example: '2022-01-01 01:01:00'
+            Sets departure_time to '2022-01-01 12:00:00'.
+
+        Returns
+        -------
+        float
+            temperature
+        """
+        if option not in ["median", "lowest", "highest"]:
+            warnings.warn("Bad option: Wrong value for temperature option parameter."
+                          "Options include 'median', 'lowest' and 'highest'."
+                          "The default value is 'median'.")
+            option = "median"
+        try:
+            datetime.datetime.strptime(departure_time, '%Y-%m-%d %H:%M:%S')
+        except ValueError:
+            warnings.warn("Bad format: Wrong datetime string format. Example: '2022-01-01 01:01:00'")
+            departure_time = '2022-01-01 12:00:00'
+        step = datetime.datetime.strptime(departure_time, '%Y-%m-%d %H:%M:%S').hour
+        row = self.temperature.loc[self.temperature["hour"] == step]
+        return row[option].values[0]

@@ -133,8 +133,9 @@ class Simulation:
         consumption = data_dict["consumption"]
         distances = data_dict["distance"]
         inclines = data_dict["incline"]
+        temperature = data_dict["temperature"]
 
-        self.driving_sim = RideCalc(consumption, distances, inclines)
+        self.driving_sim = RideCalc(consumption, distances, inclines, temperature)
 
         # use other args to create objects
         self.vehicle_types: Dict[str, "VehicleType"] = {}
@@ -231,6 +232,7 @@ class Simulation:
             self.locations[row.departure_name],
             self.locations[row.arrival_name],
             vehicle.vehicle_type,
+            row.departure_time
         )
         dep_time = self.datetime_to_timesteps(row.departure_time)
         arr_time = self.datetime_to_timesteps(row.arrival_time)
@@ -562,7 +564,7 @@ class Simulation:
         }
 
         data_dict = {}
-        files = ["schedule", "consumption", "distance", "incline"]
+        files = ["schedule", "consumption", "distance", "incline", "temperature"]
         index_col_files = ["distance", "incline"]
         for file in files:
             # read specificed file

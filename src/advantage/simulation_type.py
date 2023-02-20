@@ -30,7 +30,7 @@ class SimulationType:
         """
         self.simulation = simulation
 
-    def execute_task(self, vehicle: "Vehicle", task: "Task", step: int):
+    def execute_task(self, vehicle: "Vehicle", task: "Task"):
         """Makes a vehicle execute a specified task.
 
         Parameters
@@ -39,8 +39,6 @@ class SimulationType:
             Vehicle object executing the task
         task : Task
             Task to be executed
-        step : int
-            Current simulation timestep
         """
         # TODO replace step with start_time of task? or double check if task is called at the correct time
         if task.task == Status.DRIVING:
@@ -49,11 +47,12 @@ class SimulationType:
                     task.start_point,
                     task.end_point,
                     vehicle.vehicle_type,
+                    self.simulation.time_series[task.start_time]
                 )
                 task.delta_soc = trip["soc_delta"]
                 task.float_time = trip["trip_time"]
             vehicle.drive(
-                step_to_timestamp(self.simulation.time_series, step),
+                step_to_timestamp(self.simulation.time_series, task.start_time),
                 task.start_time,
                 task.end_time - task.start_time,
                 task.end_point,
@@ -74,7 +73,7 @@ class SimulationType:
             # report = aggregate_local_results(spiceev_scenario, "GC1")
             # execute charging event
             vehicle.charge(
-                step_to_timestamp(self.simulation.time_series, step),
+                step_to_timestamp(self.simulation.time_series, task.start_time),
                 task.start_time,
                 task.end_time - task.start_time,
                 nominal_charging_power,  # mean(spiceev_scenario.totalLoad["GC1"]), TODO find actual power
