@@ -34,8 +34,10 @@ class VehicleType:
 
     name: str = "vehicle_name"
     battery_capacity: float = 50.0
-    soc_min: float = 0.0
-    base_consumption: float = 0.0  # TODO decide if this is necessary
+    soc_min: float = 0.2
+    base_consumption: float = (
+        0.0  # TODO decide if this is necessary, currently used for spiceev?
+    )
     charging_capacity: dict = field(default_factory=dict)
     charging_curve: list = field(default_factory=list)
     min_charging_power: float = 0.0
@@ -79,7 +81,6 @@ class Vehicle:
         vehicle_type: "VehicleType" = VehicleType(),
         status: Status = Status.PARKING,
         soc: float = 1.0,
-        soc_min: float = 0.2,
         availability: bool = True,  # TODO Warum availability, wenn es schon einen Status gibt?
         rotation: Optional[str] = None,
         current_location: Optional["Location"] = None,
@@ -109,7 +110,6 @@ class Vehicle:
         self.status = status
         self.soc_start = soc
         self.soc = soc
-        self.soc_min = soc_min
         self.availability = availability
         self.rotation = rotation
         self.current_location = current_location
@@ -428,7 +428,7 @@ class Vehicle:
 
         """
         scenario_dict = {
-            "constants": {
+            "components": {
                 "vehicle_types": {
                     self.vehicle_type.name: {
                         "name": self.vehicle_type.name,

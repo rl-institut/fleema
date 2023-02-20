@@ -90,7 +90,7 @@ class Schedule(SimulationType):
             counter = 1
             while chosen_events is None:
                 print(
-                    f"==== Finding charging slots for {veh.id}, iteration {counter} ===="
+                    f"==== Finding charging slots for vehicle {veh.id}, iteration {counter} ===="
                 )
                 chosen_events = self._find_charging_slots(start, end, veh, end_soc)
                 counter += 1
@@ -204,7 +204,7 @@ class Schedule(SimulationType):
                 print(
                     f"Not enough charging possible for vehicle {vehicle.id},",
                     f"ride starting at timestep {first_impossible_task_start} had to be removed!",
-                )
+                )  # TODO log this in output file
                 return None
                 # TODO save the removal for output information
                 # raise ValueError(

@@ -26,7 +26,7 @@ def test_num_charger(wallbox):
 
 def test_scenario_info(wallbox):
     i = wallbox.get_scenario_info("home_1_0", ["Type2", "Schuko", "ChaDeMo"])
-    assert i["constants"]["charging_stations"]["home_1_0"]["max_power"] == 11
+    assert i["components"]["charging_stations"]["home_1_0"]["max_power"] == 11
 
 
 def test_scenario_info_wrong_id(wallbox):
