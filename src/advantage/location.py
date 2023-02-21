@@ -1,3 +1,5 @@
+import pandas as pd
+import pathlib
 from typing import List, TYPE_CHECKING, Optional
 from advantage.util.helpers import deep_update
 
@@ -10,7 +12,7 @@ class Location:
 
     This class allows type checking.
 
-    Parameters
+    Attributes
     ----------
     name : str
         Name/ID of the location.
@@ -21,7 +23,10 @@ class Location:
     grid_info : dict, optional
         Dictionary with grid connection in kW, load and generator time series.
         Example: {"power": 50, "load": load_df, "generator": gen_df}
-    output :
+    TODO
+    output : dict
+        Dictionary with
+
 
     """
 
@@ -31,6 +36,7 @@ class Location:
         location_type: str = "",  # TODO remove?
         chargers: Optional[List["Charger"]] = None,
         grid_info: Optional[dict] = None,
+        event_csv: Optional[bool] = True,
     ):
         """
         Constructor of the Location class.
@@ -143,3 +149,53 @@ class Location:
             deep_update(scenario_dict, info)
 
         return scenario_dict
+
+    def update_output(self, start_time, charging_time, charging_power):
+        """Records newest output when it is called during the vehicle method charge().
+
+        TODO
+        Parameters
+        ----------
+        start_time : str
+        charging_time : int
+        charging_power : float
+        directory : :obj:`pathlib.Path`
+            Save directory
+
+        """
+        current_time = pd.Timestamp(start_time)
+        for i in range(charging_time):
+            x = pd.Timedelta(hours=i)
+            current_time = current_time - x
+
+            if current_time not in self.output:
+                self.output[current_time] = {}
+                self.output[current_time]['total_power'] = charging_power
+                self.output[current_time]['total_connected_vehicles'] = 1
+                self.output[current_time][f'{self.name}_connected_vehicles'] = 1
+            else:
+                self.output[current_time]['total_power'] += charging_power
+                self.output[current_time]['total_connected_vehicles'] += 1
+                self.output[current_time][f'{self.name}_connected_vehicles'] += 1
+            self.output[current_time][f'{self.name}_power'] = charging_power
+
+        if self.event_csv:
+
+            total_power = []
+            total_connected_vehicles = []
+            individual_power = []
+            individual_cv = []
+            for k, v in self.output.items():
+                total_power.append(v['total_power'])
+                total_connected_vehicles.append(v['total_connected_vehicles'])
+                individual_power.append(v[f'{self.name}_power'])
+                individual_cv.append(v[f'{self.name}_connected_vehicles'])
+
+            activity = pd.DataFrame({
+                    'timestamp': self.output.keys(),
+                    'total_power': total_power,
+                    f'{self.name}_power': individual_power,
+                    f'{self.name}_connected_vehicles': individual_cv,
+            })
+            activity = activity.reset_index(drop=True)
+            activity.to_csv(pathlib.Path(f"{self.name}_grid_timeseries.csv"))

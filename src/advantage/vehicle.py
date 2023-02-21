@@ -212,6 +212,10 @@ class Vehicle:
                 simulation_state.update_vehicle(self)
                 simulation_state.log_data(charging_demand, charging_result, distance)
 
+            # location output update
+            if self.status == Status.CHARGING:
+                self.current_location.update_output(timestamp, event_time, charging_power)
+
     def add_task(self, task: "Task"):
         """Add a task to the self.tasks using the start_time as key."""
         if task.start_time in self.tasks:
