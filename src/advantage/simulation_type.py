@@ -110,6 +110,13 @@ class SimulationType:
                 self.simulation.time_steps,
                 vehicle,
             )
+            task.start_point.update_output(
+                task.start_time,
+                task.end_time,
+                self.simulation.step_size,
+                self.simulation.time_steps,
+                vehicle,
+            )
 
     def get_predicted_soc(self, vehicle: "Vehicle", start: int, end: int):
         """Calculates predicted SoC of given vehicle after the given timespan by running all tasks.
