@@ -134,8 +134,9 @@ class Simulation:
         distances = data_dict["distance"]
         inclines = data_dict["incline"]
         temperature = data_dict["temperature"]
+        temperature_option = cfg_dict["temperature_option"]
 
-        self.driving_sim = RideCalc(consumption, distances, inclines, temperature)
+        self.driving_sim = RideCalc(consumption, distances, inclines, temperature, temperature_option)
 
         # use other args to create objects
         self.vehicle_types: Dict[str, "VehicleType"] = {}
@@ -530,6 +531,9 @@ class Simulation:
             "column": cfg["cost_options"]["column"],
         }
 
+        # parse temperature option
+        temperature_option = cfg["temperature_options"]["column"]
+
         if no_outputs_mode:
             outputs = {key: False for key in outputs}
 
@@ -557,6 +561,7 @@ class Simulation:
             "scenario_data_path": scenario_data_path,
             "scenario_name": config_path.stem,
             "cost_options": cost_options,
+            "temperature_option": temperature_option,
             "feed_in_cost": cfg.getfloat("cost_options", "feed_in_price", fallback=0),
             "ignore_spice_ev_warnings": cfg.getboolean(
                 "sim_params", "ignore_spice_ev_warnings", fallback=True
@@ -567,7 +572,7 @@ class Simulation:
         files = ["schedule", "consumption", "distance", "incline", "temperature"]
         index_col_files = ["distance", "incline"]
         for file in files:
-            # read specificed file
+            # read specified file
             file_path = pathlib.Path(scenario_data_path, cfg["files"][file])
             if file in index_col_files:
                 file_df = pd.read_csv(file_path, index_col=0)
