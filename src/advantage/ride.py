@@ -299,7 +299,10 @@ class RideCalc:
 
         Warnings
         --------
-        bad temperature option.
+        bad csv format
+            Example column structure: hour | <optional_name> | ...
+            If csv has wrong format method returns 20 degrees.
+        bad temperature option
             If column does not exist temperature.csv option will be set to first column.
         bad format
             Parameter allows following format: '%Y-%m-%d %H:%M:%S'. Example: '2022-01-01 01:01:00'
@@ -310,9 +313,15 @@ class RideCalc:
         float
             temperature
         """
+        if self.temperature.columns[0] != "hour" or len(self.temperature.columns) < 2:
+            warnings.warn("Bad csv format: Columns should be structured and named like this: "
+                          "hour | <optional_name> | ... "
+                          "Returns temperature of 20 degrees.")
+            return 20.
         if self.temperature_option not in self.temperature.columns:
             warnings.warn(f"Bad temperature option: The column {self.temperature_option} "
-                          f"does not exist in temperature.csv.")
+                          "does not exist in temperature.csv. "
+                          "Option default is set to the second column in temperature.csv.")
             self.temperature_option = self.temperature.columns[1]
         try:
             datetime.datetime.strptime(departure_time, '%Y-%m-%d %H:%M:%S')
