@@ -4,6 +4,7 @@ import pandas as pd
 
 from advantage.util.conversions import step_to_timestamp
 from advantage.event import Status
+from advantage.spiceev_interface import get_charging_characteristic
 
 if TYPE_CHECKING:
     from advantage.simulation import Simulation
@@ -66,6 +67,9 @@ class SimulationType:
                 task.start_time,
                 task.end_time,
                 vehicle,
+            )
+            charging_result = get_charging_characteristic(
+                spiceev_scenario, self.simulation.feed_in_cost, self.simulation.emission, self.simulation.emission_options
             )
             nominal_charging_power = list(
                 spiceev_scenario.components.charging_stations.values()

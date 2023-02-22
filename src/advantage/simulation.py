@@ -128,6 +128,11 @@ class Simulation:
         self.schedule = data_dict["schedule"]
         self.cost_options = cfg_dict["cost_options"]
         self.feed_in_cost = cfg_dict["feed_in_cost"]
+        self.emission = data_dict["emission"]
+        self.emission_options = cfg_dict["emission_options"]
+        self.emission_options["start_time"] = datetime.datetime.combine(
+            date_string_to_datetime(self.emission_options["start_time"]), datetime.datetime.min.time()
+        )
 
         # driving simulation
         consumption = data_dict["consumption"]
@@ -530,6 +535,11 @@ class Simulation:
             "step_duration": int(cfg["cost_options"]["step_duration"]),
             "column": cfg["cost_options"]["column"],
         }
+        emission_options = {
+            "start_time": cfg["emission_options"]["start_time"],
+            "step_duration": int(cfg["emission_options"]["step_duration"]),
+            "column": cfg["emission_options"]["column"],
+        }
 
         # parse temperature option
         temperature_option = cfg["temperature_options"]["column"]
@@ -566,14 +576,21 @@ class Simulation:
             "ignore_spice_ev_warnings": cfg.getboolean(
                 "sim_params", "ignore_spice_ev_warnings", fallback=True
             ),
+            "emission_options": emission_options,
         }
 
         data_dict = {}
-        files = ["schedule", "consumption", "distance", "incline", "temperature"]
+        files = ["schedule", "consumption", "distance", "incline", "temperature", "emission"]
         index_col_files = ["distance", "incline"]
         for file in files:
             # read specified file
             file_path = pathlib.Path(scenario_data_path, cfg["files"][file])
+            if not file_path.is_file():
+                if file in ["temperature", "emission"]:
+                    data_dict[file] = None
+                    continue
+                else:
+                    raise FileNotFoundError(f"Specified file for {file} not found in path {file_path}")
             if file in index_col_files:
                 file_df = pd.read_csv(file_path, index_col=0)
             else:
