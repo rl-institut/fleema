@@ -151,13 +151,13 @@ class Location:
 
         return scenario_dict
 
-    def update_output(self, start_time, charging_time, charging_power, timeseries, step_size, directory):
+    def update_output(self, step, charging_time, charging_power, time_steps, step_size, directory):
         """Records newest output when it is called during the vehicle method charge().
 
         TODO: docstrings
         Parameters
         ----------
-        start_time : str
+        step : int
         charging_time : int
         charging_power : float
         timeseries : :obj: `pandas.DatetimeIndex`
@@ -167,26 +167,21 @@ class Location:
 
         """
         if not self.output:
-            self.output = {k: {
+            """self.output = {k: {
                 f'{self.name}_connected_vehicles': 0,
                 f'{self.name}_power': 0,
-                } for k, _ in timeseries.to_series().items()}
+                } for k, _ in timeseries.to_series().items()}"""
+
+            self.output = {
+                f'{self.name}_connected_vehicles': [0 for _ in time_steps],
+                f'{self.name}_power': [0 for _ in time_steps],
+            }
 
         for i in range(0, charging_time, step_size):
-            current_time = pd.Timestamp(start_time) + pd.Timedelta(minutes=i)
+            current_time = step + i
 
-            if current_time > timeseries[-1]:
+            if current_time > time_steps:   # timeseries[-1]
                 print("Charging time is out of time schedule!")
                 break
-            self.output[current_time][f'{self.name}_connected_vehicles'] += 1
-            self.output[current_time][f'{self.name}_power'] = charging_power
-
-        if self.event_csv:
-
-
-            activity = pd.DataFrame({
-                    f'{self.name}_power': individual_power,
-                    f'{self.name}_connected_vehicles': individual_cv,
-            })
-            activity = activity.reset_index(drop=True)
-            activity.to_csv(pathlib.Path(directory, "power_grid_timeseries.csv"))
+            self.output[f'{self.name}_connected_vehicles'][current_time] += 1
+            self.output[f'{self.name}_power'][current_time] = charging_power
