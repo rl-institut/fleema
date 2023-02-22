@@ -118,6 +118,7 @@ class SimulationType:
                 vehicle,
             )
 
+
     def get_predicted_soc(self, vehicle: "Vehicle", start: int, end: int):
         """Calculates predicted SoC of given vehicle after the given timespan by running all tasks.
 
