@@ -1,3 +1,5 @@
+import pandas as pd
+
 from advantage.simulation_type import SimulationType
 from typing import TYPE_CHECKING
 from operator import itemgetter
@@ -257,3 +259,13 @@ class Schedule(SimulationType):
                 veh.export(self.simulation.save_directory)
         if self.simulation.outputs["vehicle_csv"]:
             self.simulation.observer.export_log(self.simulation.save_directory)
+
+        # generate power_grid_timeseries
+        df = {
+            "timestamp": self.simulation.time_series,
+            "total_power": [0 for _ in self.simulation.time_series],
+            "total_connected_vehicles": [0 for _ in self.simulation.time_series],
+        }
+        for location in self.simulation.locations:
+            if location.output:
+                location.output
