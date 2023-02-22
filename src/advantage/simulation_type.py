@@ -83,10 +83,12 @@ class SimulationType:
                 self.simulation.observer,
             )
             vehicle.current_location.update_output(
-                step_to_timestamp(self.simulation.time_series, step),
+                step,
+                # step_to_timestamp(self.simulation.time_series, step),
                 task.end_time - task.start_time,
                 round(mean(spiceev_scenario.totalLoad["GC1"]), 4),
-                self.simulation.time_series,
+                self.simulation.time_steps,
+                # self.simulation.time_series,
                 self.simulation.step_size,
                 self.simulation.save_directory,
             )
