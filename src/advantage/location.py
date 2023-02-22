@@ -59,6 +59,7 @@ class Location:
         self.chargers = chargers if chargers else []
         self.grid_info = grid_info
         self.output = None
+        self.event_csv = event_csv
         self.generator_exists = False
 
     @property
@@ -150,33 +151,39 @@ class Location:
 
         return scenario_dict
 
-    def update_output(self, start_time, charging_time, charging_power):
+    def update_output(self, start_time, charging_time, charging_power, timeseries, step_size, directory):
         """Records newest output when it is called during the vehicle method charge().
 
-        TODO
+        TODO: docstrings
         Parameters
         ----------
         start_time : str
         charging_time : int
         charging_power : float
+        timeseries : :obj: `pandas.DatetimeIndex`
+        step_size : int
         directory : :obj:`pathlib.Path`
             Save directory
 
         """
-        current_time = pd.Timestamp(start_time)
-        for i in range(charging_time):
-            x = pd.Timedelta(hours=i)
-            current_time = current_time - x
+        if not self.output:
+            self.output = {k: {
+                'total_power': 0,
+                'total_connected_vehicles': 0,
+                f'{self.name}_connected_vehicles': 0,
+                f'{self.name}_power': 0,
+            } for k, _ in timeseries.to_series().items()}
 
-            if current_time not in self.output:
-                self.output[current_time] = {}
-                self.output[current_time]['total_power'] = charging_power
-                self.output[current_time]['total_connected_vehicles'] = 1
-                self.output[current_time][f'{self.name}_connected_vehicles'] = 1
-            else:
-                self.output[current_time]['total_power'] += charging_power
-                self.output[current_time]['total_connected_vehicles'] += 1
-                self.output[current_time][f'{self.name}_connected_vehicles'] += 1
+        for i in range(0, charging_time, step_size):
+            current_time = pd.Timestamp(start_time) + pd.Timedelta(minutes=i)
+
+            if current_time > timeseries[-1]:
+                print("== Charging time is out of time schedule ==")
+                break
+
+            self.output[current_time]['total_power'] += charging_power
+            self.output[current_time]['total_connected_vehicles'] += 1
+            self.output[current_time][f'{self.name}_connected_vehicles'] += 1
             self.output[current_time][f'{self.name}_power'] = charging_power
 
         if self.event_csv:
@@ -194,8 +201,9 @@ class Location:
             activity = pd.DataFrame({
                     'timestamp': self.output.keys(),
                     'total_power': total_power,
+                    'total_connected_vehicles': total_connected_vehicles,
                     f'{self.name}_power': individual_power,
                     f'{self.name}_connected_vehicles': individual_cv,
             })
             activity = activity.reset_index(drop=True)
-            activity.to_csv(pathlib.Path(f"{self.name}_grid_timeseries.csv"))
+            activity.to_csv(pathlib.Path(directory, f"{self.name}_grid_timeseries.csv"))
