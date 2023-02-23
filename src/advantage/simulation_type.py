@@ -4,6 +4,7 @@ import pandas as pd
 
 from advantage.util.conversions import step_to_timestamp
 from advantage.event import Status
+from advantage.spiceev_interface import get_charging_characteristic
 
 if TYPE_CHECKING:
     from advantage.simulation import Simulation
@@ -47,16 +48,20 @@ class SimulationType:
                     task.start_point,
                     task.end_point,
                     vehicle.vehicle_type,
-                    self.simulation.time_series[task.start_time]
+                    self.simulation.time_series[task.start_time],
                 )
                 task.delta_soc = trip["soc_delta"]
                 task.float_time = trip["trip_time"]
+            distance, _ = self.simulation.driving_sim.get_location_values(
+                task.start_point, task.end_point
+            )
             vehicle.drive(
                 step_to_timestamp(self.simulation.time_series, task.start_time),
                 task.start_time,
                 task.end_time - task.start_time,
                 task.end_point,
                 vehicle.soc + task.delta_soc,
+                distance,
                 self.simulation.observer,
             )
         elif task.task == Status.CHARGING:
@@ -66,6 +71,16 @@ class SimulationType:
                 task.start_time,
                 task.end_time,
                 vehicle,
+            )
+            # charged_soc = spiceev_scenario.socs[-1][0] - vehicle.soc
+            # print(task.delta_soc, charged_soc, vehicle.soc)
+            # TODO fix issue with expected delta_soc and actual charged
+            # soc being off when actual starting soc is higher
+            charging_result = get_charging_characteristic(
+                spiceev_scenario,
+                self.simulation.feed_in_cost,
+                self.simulation.emission,
+                self.simulation.emission_options,
             )
             nominal_charging_power = list(
                 spiceev_scenario.components.charging_stations.values()
@@ -79,6 +94,7 @@ class SimulationType:
                 nominal_charging_power,  # mean(spiceev_scenario.totalLoad["GC1"]), TODO find actual power
                 spiceev_scenario.socs[-1][0],
                 nominal_charging_power,
+                charging_result,
                 self.simulation.observer,
             )
 

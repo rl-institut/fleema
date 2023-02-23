@@ -33,7 +33,7 @@ from advantage.util.conversions import (
     datetime_string_to_datetime,
     step_to_timestamp,
 )
-from advantage.util.helpers import block_printing
+from advantage.util.helpers import block_printing, read_input_data
 
 
 class Simulation:
@@ -128,6 +128,12 @@ class Simulation:
         self.schedule = data_dict["schedule"]
         self.cost_options = cfg_dict["cost_options"]
         self.feed_in_cost = cfg_dict["feed_in_cost"]
+        self.emission = data_dict["emission"]
+        self.emission_options = cfg_dict["emission_options"]
+        self.emission_options["start_time"] = datetime.datetime.combine(
+            date_string_to_datetime(self.emission_options["start_time"]),
+            datetime.datetime.min.time(),
+        )
 
         # driving simulation
         consumption = data_dict["consumption"]
@@ -136,7 +142,9 @@ class Simulation:
         temperature = data_dict["temperature"]
         temperature_option = cfg_dict["temperature_option"]
 
-        self.driving_sim = RideCalc(consumption, distances, inclines, temperature, temperature_option)
+        self.driving_sim = RideCalc(
+            consumption, distances, inclines, temperature, temperature_option
+        )
 
         # use other args to create objects
         self.vehicle_types: Dict[str, "VehicleType"] = {}
@@ -233,7 +241,7 @@ class Simulation:
             self.locations[row.departure_name],
             self.locations[row.arrival_name],
             vehicle.vehicle_type,
-            row.departure_time
+            row.departure_time,
         )
         dep_time = self.datetime_to_timesteps(row.departure_time)
         arr_time = self.datetime_to_timesteps(row.arrival_time)
@@ -374,7 +382,7 @@ class Simulation:
         # call spiceev to calculate charging
         charging_start = int(start_time + round(trip_to["trip_time"], 0))
         charging_time = time_window - driving_time
-        mock_vehicle = Vehicle("vehicle", vehicle_type, soc=current_soc)
+        mock_vehicle = Vehicle("vehicle", vehicle_type, soc=current_soc + trip_to["soc_delta"])
 
         spiceev_scenario = self.call_spiceev(
             charging_location,
@@ -415,6 +423,7 @@ class Simulation:
             charging_location,
             charging_location,
             Status.CHARGING,
+            delta_soc=charged_soc,
         )
         result_dict = {
             "timestep": start_time,
@@ -530,6 +539,11 @@ class Simulation:
             "step_duration": int(cfg["cost_options"]["step_duration"]),
             "column": cfg["cost_options"]["column"],
         }
+        emission_options = {
+            "start_time": cfg["emission_options"]["start_time"],
+            "step_duration": int(cfg["emission_options"]["step_duration"]),
+            "column": cfg["emission_options"]["column"],
+        }
 
         # parse temperature option
         temperature_option = cfg["temperature_options"]["column"]
@@ -566,19 +580,10 @@ class Simulation:
             "ignore_spice_ev_warnings": cfg.getboolean(
                 "sim_params", "ignore_spice_ev_warnings", fallback=True
             ),
+            "emission_options": emission_options,
         }
 
-        data_dict = {}
-        files = ["schedule", "consumption", "distance", "incline", "temperature"]
-        index_col_files = ["distance", "incline"]
-        for file in files:
-            # read specified file
-            file_path = pathlib.Path(scenario_data_path, cfg["files"][file])
-            if file in index_col_files:
-                file_df = pd.read_csv(file_path, index_col=0)
-            else:
-                file_df = pd.read_csv(file_path)
-            data_dict[file] = file_df
+        data_dict = read_input_data(scenario_data_path, cfg)
 
         return Simulation(
             vehicle_types,

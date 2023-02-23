@@ -12,4 +12,4 @@ _build
 /venv
 results/*/
 scenario_setting/
-scenario_data/
+*_data/

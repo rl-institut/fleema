@@ -44,7 +44,7 @@ class Schedule(SimulationType):
                 soc_df_slice = soc_df.loc[soc_df["timestep"] >= task.start_time]
                 if len(soc_df_slice.index):
                     # get lowest possible soc at this point in time (if no charging has happened)
-                    lowest_current_soc = soc_df_slice.iat[0, -1]
+                    lowest_current_soc = max(soc_df_slice.iat[0, -1], self.simulation.soc_min)
                 charging_list_temp.append(
                     self.simulation.evaluate_charging_location(
                         vehicle.vehicle_type,
@@ -152,9 +152,17 @@ class Schedule(SimulationType):
                 charge_index = soc_df_slice.loc[
                     soc_df_slice["timestep"] >= charge_option["timestep"]
                 ].index
-                soc_df_slice.loc[charge_index, "necessary_charging"] -= charge_option[
-                    "delta_soc"
-                ]
+
+                # apply delta soc to timeseries
+                delta_soc = charge_option["delta_soc"]
+                for i in charge_index:
+                    new_soc = min(
+                        soc_df_slice.at[i, 'soc'] + delta_soc, 1.0)
+                    soc_df_slice.at[i, 'soc'] = new_soc
+                    if new_soc == 1.0:
+                        delta_soc = new_soc - soc_df_slice.at[i, 'soc']
+                    soc_df_slice.at[i, 'necessary_charging'] -= delta_soc
+
                 min_soc_bool = soc_df_slice["necessary_charging"] <= 0
                 min_soc_satisfied = min_soc_bool.all()
                 total_charge += charge_option["delta_soc"]
@@ -176,7 +184,6 @@ class Schedule(SimulationType):
             else:
                 if min_soc_satisfied:
                     if not end_soc_satisfied:
-                        print(soc_df_slice)
                         print(
                             f"Desired SoC {end_soc} for the last time step couldn't be met for vehicle {vehicle.id}"
                         )
@@ -204,9 +211,10 @@ class Schedule(SimulationType):
                 print(
                     f"Not enough charging possible for vehicle {vehicle.id},",
                     f"ride starting at timestep {first_impossible_task_start} had to be removed!",
-                )  # TODO log this in output file
+                )
+                self.simulation.observer.add_to_accumulated_results(f"deleted_rides_vehicle_{vehicle.id}", 1)
                 return None
-                # TODO save the removal for output information
+                # TODO optional Value Error instead of removing rides as config option
                 # raise ValueError(
                 #     f"Not enough charging possible for vehicle {veh.id}!"
                 # )
@@ -241,3 +249,5 @@ class Schedule(SimulationType):
                     self.execute_task(veh, task)
 
                 veh.export(self.simulation.save_directory)
+        if self.simulation.outputs["vehicle_csv"]:
+            self.simulation.observer.export_log(self.simulation.save_directory)

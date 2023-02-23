@@ -39,7 +39,7 @@ def test_constructor(sim_state):
 def test_drive_result(car, time_series, sim_state):
     start_step = 5
     time_stamp = step_to_timestamp(time_series, start_step)
-    car.drive(time_stamp, start_step, 10, Location(), 0.45, sim_state)
+    car.drive(time_stamp, start_step, 10, Location(), 0.45, 1, observer=sim_state)
     assert sim_state.driving_vehicles[0] == car
 
 
@@ -47,7 +47,7 @@ def test_multi_drive(car, time_series, sim_state):
     for i in range(1, 5):
         start_step = 5 * i
         time_stamp = step_to_timestamp(time_series, start_step)
-        car.drive(time_stamp, start_step, 10, Location(), 0.45, sim_state)
+        car.drive(time_stamp, start_step, 10, Location(), 0.45, 1, observer=sim_state)
     assert len(sim_state.driving_vehicles) == 1
 
 
@@ -92,8 +92,20 @@ def test_update_vehicle_park(car, sim_state):
     assert car in sim_state.parking_vehicles
 
 
-"""
-Possible other tests:
-- vehicle is from the wrong data type
-- vehicle should be only in one list
-"""
+def test_add_to_accumulated_results(sim_state):
+
+    # test adding a new key-value pair to the accumulated results
+    sim_state.add_to_accumulated_results("key1", 10.5)
+    assert sim_state.accumulated_results == {"key1": 10.5}
+
+    # test adding a value to an existing key
+    sim_state.add_to_accumulated_results("key1", 3.5)
+    assert sim_state.accumulated_results == {"key1": 14.0}
+
+    # test rounding of the accumulated value to 4 decimal places
+    sim_state.add_to_accumulated_results("key1", 1.23456789)
+    assert sim_state.accumulated_results == {"key1": 15.2346}
+
+    # test adding a new key-value pair with a negative value
+    sim_state.add_to_accumulated_results("key2", -5.5)
+    assert sim_state.accumulated_results == {"key1": 15.2346, "key2": -5.5}
