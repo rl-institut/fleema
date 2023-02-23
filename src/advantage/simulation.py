@@ -423,6 +423,7 @@ class Simulation:
             charging_location,
             charging_location,
             Status.CHARGING,
+            delta_soc=charged_soc,
         )
         result_dict = {
             "timestep": start_time,
