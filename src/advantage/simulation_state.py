@@ -44,6 +44,7 @@ class SimulationState:
             self.charging_vehicles.append(vehicle)
 
     def log_data(self, charging_demand, charging_result, distance):
+        """Accumulates specified event data and save it in self.accumulated_results."""
         self.add_to_accumulated_results("distance", distance)
         self.add_to_accumulated_results("charging_demand", charging_demand)
         if charging_result is not None:
@@ -57,6 +58,7 @@ class SimulationState:
             self.add_to_accumulated_results("energy_from_grid", energy_from_grid)
 
     def calculate_key_log_parameters(self):
+        """Calculates values for the log files."""
         self_sufficiency = min(
             round(
                 self.accumulated_results["energy_from_feed_in"]
@@ -68,6 +70,7 @@ class SimulationState:
         self.accumulated_results["self_sufficiency"] = self_sufficiency
 
     def export_log(self, save_directory):
+        """Exports accumulated data to a JSON file."""
         self.calculate_key_log_parameters()
         if not save_directory.exists():
             save_directory.mkdir(parents=True, exist_ok=True)
@@ -78,6 +81,7 @@ class SimulationState:
             json.dump(self.accumulated_results, f, indent=4)
 
     def add_to_accumulated_results(self, key, value):
+        """Adds a value to the accumulated data."""
         if key not in self.accumulated_results:
             self.accumulated_results[key] = value
         else:

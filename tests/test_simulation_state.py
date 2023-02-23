@@ -91,9 +91,20 @@ def test_update_vehicle_park(car, sim_state):
     sim_state.update_vehicle(car)
     assert car in sim_state.parking_vehicles
 
+def test_add_to_accumulated_results(sim_state):
 
-"""
-Possible other tests:
-- vehicle is from the wrong data type
-- vehicle should be only in one list
-"""
+    # test adding a new key-value pair to the accumulated results
+    sim_state.add_to_accumulated_results("key1", 10.5)
+    assert sim_state.accumulated_results == {"key1": 10.5}
+
+    # test adding a value to an existing key
+    sim_state.add_to_accumulated_results("key1", 3.5)
+    assert sim_state.accumulated_results == {"key1": 14.0}
+
+    # test rounding of the accumulated value to 4 decimal places
+    sim_state.add_to_accumulated_results("key1", 1.23456789)
+    assert sim_state.accumulated_results == {"key1": 15.2346}
+
+    # test adding a new key-value pair with a negative value
+    sim_state.add_to_accumulated_results("key2", -5.5)
+    assert sim_state.accumulated_results == {"key1": 15.2346, "key2": -5.5}
