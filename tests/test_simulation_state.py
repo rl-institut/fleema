@@ -91,6 +91,7 @@ def test_update_vehicle_park(car, sim_state):
     sim_state.update_vehicle(car)
     assert car in sim_state.parking_vehicles
 
+
 def test_add_to_accumulated_results(sim_state):
 
     # test adding a new key-value pair to the accumulated results
