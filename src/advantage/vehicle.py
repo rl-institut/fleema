@@ -187,10 +187,10 @@ class Vehicle:
             self.output["average_charging_power"].append(round(charging_power, 4))
             self.output["distance"].append(distance)
             if charging_result is not None:
-                energy_from_feed_in = charging_demand * charging_result["feed_in"]
+                energy_from_feed_in = round(charging_demand * charging_result["feed_in"], 4)
                 self.output["energy_from_feed_in"].append(energy_from_feed_in)
                 self.output["energy_from_grid"].append(charging_demand - energy_from_feed_in)
-                self.output["energy_cost"].append(charging_demand * charging_result["cost"])
+                self.output["energy_cost"].append(round(charging_demand * charging_result["cost"], 4))
                 self.output["emission"].append(charging_result["emission"])
             else:
                 self.output["energy_from_feed_in"].append(0)
