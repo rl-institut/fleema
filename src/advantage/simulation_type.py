@@ -48,11 +48,13 @@ class SimulationType:
                     task.start_point,
                     task.end_point,
                     vehicle.vehicle_type,
-                    self.simulation.time_series[task.start_time]
+                    self.simulation.time_series[task.start_time],
                 )
                 task.delta_soc = trip["soc_delta"]
                 task.float_time = trip["trip_time"]
-            distance, _ = self.simulation.driving_sim.get_location_values(task.start_point, task.end_point)
+            distance, _ = self.simulation.driving_sim.get_location_values(
+                task.start_point, task.end_point
+            )
             vehicle.drive(
                 step_to_timestamp(self.simulation.time_series, task.start_time),
                 task.start_time,
@@ -71,7 +73,10 @@ class SimulationType:
                 vehicle,
             )
             charging_result = get_charging_characteristic(
-                spiceev_scenario, self.simulation.feed_in_cost, self.simulation.emission, self.simulation.emission_options
+                spiceev_scenario,
+                self.simulation.feed_in_cost,
+                self.simulation.emission,
+                self.simulation.emission_options,
             )
             nominal_charging_power = list(
                 spiceev_scenario.components.charging_stations.values()

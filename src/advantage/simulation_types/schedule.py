@@ -241,3 +241,4 @@ class Schedule(SimulationType):
                     self.execute_task(veh, task)
 
                 veh.export(self.simulation.save_directory)
+        self.simulation.observer.export_log(self.simulation.save_directory)

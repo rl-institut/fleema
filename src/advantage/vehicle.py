@@ -141,10 +141,10 @@ class Vehicle:
         timestamp,
         event_start,
         event_time,
-        simulation_state=None,
+        simulation_state,
         charging_power=0,
         nominal_charging_capacity=0,
-        distance=0.,
+        distance=0.0,
         charging_result=None,
     ):
         """Records newest energy and activity in the attributes soc and output.
@@ -187,23 +187,29 @@ class Vehicle:
             self.output["average_charging_power"].append(round(charging_power, 4))
             self.output["distance"].append(distance)
             if charging_result is not None:
-                energy_from_feed_in = round(charging_demand * charging_result["feed_in"], 4)
+                energy_from_feed_in = round(
+                    charging_demand * charging_result["feed_in"], 4
+                )
                 self.output["energy_from_feed_in"].append(energy_from_feed_in)
-                self.output["energy_from_grid"].append(charging_demand - energy_from_feed_in)
-                self.output["energy_cost"].append(round(charging_demand * charging_result["cost"], 4))
+                self.output["energy_from_grid"].append(
+                    charging_demand - energy_from_feed_in
+                )
+                self.output["energy_cost"].append(
+                    round(charging_demand * charging_result["cost"], 4)
+                )
                 self.output["emission"].append(charging_result["emission"])
             else:
                 self.output["energy_from_feed_in"].append(0)
                 self.output["energy_from_grid"].append(0)
                 self.output["energy_cost"].append(0)
                 self.output["emission"].append(0)
-            
+
             if self.current_location is not None:
                 self.output["end_location"].append(self.current_location.name)
             else:
                 self.output["end_location"].append("")
-            if simulation_state is not None:
-                simulation_state.update_vehicle(self)
+            simulation_state.update_vehicle(self)
+            simulation_state.log_data(charging_demand, charging_result, distance)
 
     def add_task(self, task: "Task"):
         """Add a task to the self.tasks using the start_time as key."""
@@ -314,7 +320,15 @@ class Vehicle:
         return breaks
 
     def charge(
-        self, timestamp, start, time, power, new_soc, charging_capacity, charging_result, observer=None
+        self,
+        timestamp,
+        start,
+        time,
+        power,
+        new_soc,
+        charging_capacity,
+        charging_result,
+        observer=None,
     ):
         """This method updates the vehicle with charging results.
 

@@ -1,6 +1,8 @@
 from advantage.vehicle import Vehicle
 from advantage.event import Status
 
+import json
+
 
 class SimulationState:
     """
@@ -22,6 +24,8 @@ class SimulationState:
 
         self.events = {}  # TODO dict of timestamp > vehicle, based on task start time
 
+        self.accumulated_results = {}
+
         # charging_schedule = pd.DataFrame(columns=["start", "end", "vehicle", "location", "demand"])
 
     def remove_vehicle(self, vehicle: "Vehicle"):
@@ -38,3 +42,45 @@ class SimulationState:
             self.parking_vehicles.append(vehicle)
         elif vehicle.status == Status.CHARGING:
             self.charging_vehicles.append(vehicle)
+
+    def log_data(self, charging_demand, charging_result, distance):
+        self.add_to_accumulated_results("distance", distance)
+        self.add_to_accumulated_results("charging_demand", charging_demand)
+        if charging_result is not None:
+            cost = round(charging_demand * charging_result["cost"], 4)
+            emission = charging_result["emission"]
+            energy_from_feed_in = round(charging_demand * charging_result["feed_in"], 4)
+            energy_from_grid = charging_demand - energy_from_feed_in
+            self.add_to_accumulated_results("cost", cost)
+            self.add_to_accumulated_results("emission", emission)
+            self.add_to_accumulated_results("energy_from_feed_in", energy_from_feed_in)
+            self.add_to_accumulated_results("energy_from_grid", energy_from_grid)
+
+    def calculate_key_log_parameters(self):
+        self_sufficiency = min(
+            round(
+                self.accumulated_results["energy_from_feed_in"]
+                / self.accumulated_results["charging_demand"],
+                4,
+            ),
+            1,
+        )
+        self.accumulated_results["self_sufficiency"] = self_sufficiency
+
+    def export_log(self, save_directory):
+        self.calculate_key_log_parameters()
+        if not save_directory.exists():
+            save_directory.mkdir(parents=True, exist_ok=True)
+
+        file_path = save_directory / "accumulated_results.json"
+
+        with open(file_path, "w") as f:
+            json.dump(self.accumulated_results, f, indent=4)
+
+    def add_to_accumulated_results(self, key, value):
+        if key not in self.accumulated_results:
+            self.accumulated_results[key] = value
+        else:
+            self.accumulated_results[key] = round(
+                self.accumulated_results[key] + value, 4
+            )

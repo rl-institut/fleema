@@ -91,7 +91,9 @@ def run_spice_ev(spice_ev_dict, strategy, ignore_warnings=True) -> "Scenario":
     return scenario
 
 
-def get_charging_characteristic(scenario, feed_in_cost, emission_df = None, emission_options = None):
+def get_charging_characteristic(
+    scenario, feed_in_cost, emission_df=None, emission_options=None
+):
     """Calculate average cost and part of charging from feed-in in a spice_ev scenario.
 
     Parameters
@@ -112,7 +114,7 @@ def get_charging_characteristic(scenario, feed_in_cost, emission_df = None, emis
     total_charge_from_feed_in = 0
     total_emission = 0
     timestamp = scenario.start_time
-    spice_ev_timestep = int(60/scenario.stepsPerHour)
+    spice_ev_timestep = int(60 / scenario.stepsPerHour)
     for i in range(scenario.n_intervals):
         charge = list(scenario.connChargeByTS["GC1"][i].values())[0]
         feed_in = scenario.feedInPower["GC1"][i]
@@ -125,7 +127,9 @@ def get_charging_characteristic(scenario, feed_in_cost, emission_df = None, emis
 
         # TODO call function that gets emission at timestamp
         if emission_df is not None:
-            current_emission = get_current_emission(timestamp, emission_df, emission_options)
+            current_emission = get_current_emission(
+                timestamp, emission_df, emission_options
+            )
             total_emission += max(charge - feed_in, 0) * current_emission
         # set new timestamp
         timestamp += datetime.timedelta(minutes=spice_ev_timestep)
@@ -141,7 +145,9 @@ def get_charging_characteristic(scenario, feed_in_cost, emission_df = None, emis
     return result_dict
 
 
-def get_current_emission(timestamp: datetime.datetime, emission_df, emission_options: dict):
+def get_current_emission(
+    timestamp: datetime.datetime, emission_df, emission_options: dict
+):
     """
     Gets the current emission value for a given timestamp and set of emission options.
 
@@ -174,7 +180,9 @@ def get_current_emission(timestamp: datetime.datetime, emission_df, emission_opt
         If the timestep calculated based on the given timestamp is outside the range of `emission_df`.
     """
     time_delta = timestamp - emission_options["start_time"]
-    timestep = math.floor(time_delta.total_seconds() / emission_options["step_duration"])
+    timestep = math.floor(
+        time_delta.total_seconds() / emission_options["step_duration"]
+    )
     try:
         return emission_df[emission_options["column"]].iat[timestep]
     except KeyError as ke:

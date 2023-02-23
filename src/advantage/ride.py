@@ -314,20 +314,26 @@ class RideCalc:
             temperature
         """
         if self.temperature.columns[0] != "hour" or len(self.temperature.columns) < 2:
-            warnings.warn("Bad csv format: Columns should be structured and named like this: "
-                          "hour | <optional_name> | ... "
-                          "Returns temperature of 20 degrees.")
-            return 20.
+            warnings.warn(
+                "Bad csv format: Columns should be structured and named like this: "
+                "hour | <optional_name> | ... "
+                "Returns temperature of 20 degrees."
+            )
+            return 20.0
         if self.temperature_option not in self.temperature.columns:
-            warnings.warn(f"Bad temperature option: The column {self.temperature_option} "
-                          "does not exist in temperature.csv. "
-                          "Option default is set to the second column in temperature.csv.")
+            warnings.warn(
+                f"Bad temperature option: The column {self.temperature_option} "
+                "does not exist in temperature.csv. "
+                "Option default is set to the second column in temperature.csv."
+            )
             self.temperature_option = self.temperature.columns[1]
         try:
-            datetime.datetime.strptime(departure_time, '%Y-%m-%d %H:%M:%S')
+            datetime.datetime.strptime(departure_time, "%Y-%m-%d %H:%M:%S")
         except ValueError:
-            warnings.warn("Bad format: Wrong datetime string format. Example: '2022-01-01 01:01:00'")
-            departure_time = '2022-01-01 12:00:00'
-        step = datetime.datetime.strptime(departure_time, '%Y-%m-%d %H:%M:%S').hour
+            warnings.warn(
+                "Bad format: Wrong datetime string format. Example: '2022-01-01 01:01:00'"
+            )
+            departure_time = "2022-01-01 12:00:00"
+        step = datetime.datetime.strptime(departure_time, "%Y-%m-%d %H:%M:%S").hour
         row = self.temperature.loc[self.temperature["hour"] == step]
         return row[self.temperature_option].values[0]

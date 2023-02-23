@@ -131,7 +131,8 @@ class Simulation:
         self.emission = data_dict["emission"]
         self.emission_options = cfg_dict["emission_options"]
         self.emission_options["start_time"] = datetime.datetime.combine(
-            date_string_to_datetime(self.emission_options["start_time"]), datetime.datetime.min.time()
+            date_string_to_datetime(self.emission_options["start_time"]),
+            datetime.datetime.min.time(),
         )
 
         # driving simulation
@@ -141,7 +142,9 @@ class Simulation:
         temperature = data_dict["temperature"]
         temperature_option = cfg_dict["temperature_option"]
 
-        self.driving_sim = RideCalc(consumption, distances, inclines, temperature, temperature_option)
+        self.driving_sim = RideCalc(
+            consumption, distances, inclines, temperature, temperature_option
+        )
 
         # use other args to create objects
         self.vehicle_types: Dict[str, "VehicleType"] = {}
@@ -238,7 +241,7 @@ class Simulation:
             self.locations[row.departure_name],
             self.locations[row.arrival_name],
             vehicle.vehicle_type,
-            row.departure_time
+            row.departure_time,
         )
         dep_time = self.datetime_to_timesteps(row.departure_time)
         arr_time = self.datetime_to_timesteps(row.arrival_time)
@@ -580,7 +583,14 @@ class Simulation:
         }
 
         data_dict = {}
-        files = ["schedule", "consumption", "distance", "incline", "temperature", "emission"]
+        files = [
+            "schedule",
+            "consumption",
+            "distance",
+            "incline",
+            "temperature",
+            "emission",
+        ]
         index_col_files = ["distance", "incline"]
         for file in files:
             # read specified file
@@ -590,7 +600,9 @@ class Simulation:
                     data_dict[file] = None
                     continue
                 else:
-                    raise FileNotFoundError(f"Specified file for {file} not found in path {file_path}")
+                    raise FileNotFoundError(
+                        f"Specified file for {file} not found in path {file_path}"
+                    )
             if file in index_col_files:
                 file_df = pd.read_csv(file_path, index_col=0)
             else:
