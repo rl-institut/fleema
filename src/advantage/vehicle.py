@@ -129,6 +129,11 @@ class Vehicle:
             "energy": [],
             "station_charging_capacity": [],
             "average_charging_power": [],
+            "distance": [],
+            "energy_from_feed_in": [],
+            "energy_from_grid": [],
+            "energy_cost": [],
+            "emission": [],
         }
 
     def _update_activity(
@@ -139,6 +144,8 @@ class Vehicle:
         simulation_state=None,
         charging_power=0,
         nominal_charging_capacity=0,
+        distance=0.,
+        charging_result=None,
     ):
         """Records newest energy and activity in the attributes soc and output.
 
@@ -178,6 +185,19 @@ class Vehicle:
             self.output["energy"].append(charging_demand + consumption)
             self.output["station_charging_capacity"].append(nominal_charging_capacity)
             self.output["average_charging_power"].append(round(charging_power, 4))
+            self.output["distance"].append(distance)
+            if charging_result is not None:
+                energy_from_feed_in = charging_demand * charging_result["feed_in"]
+                self.output["energy_from_feed_in"].append(energy_from_feed_in)
+                self.output["energy_from_grid"].append(charging_demand - energy_from_feed_in)
+                self.output["energy_cost"].append(charging_demand * charging_result["cost"])
+                self.output["emission"].append(charging_result["emission"])
+            else:
+                self.output["energy_from_feed_in"].append(0)
+                self.output["energy_from_grid"].append(0)
+                self.output["energy_cost"].append(0)
+                self.output["emission"].append(0)
+            
             if self.current_location is not None:
                 self.output["end_location"].append(self.current_location.name)
             else:
@@ -294,7 +314,7 @@ class Vehicle:
         return breaks
 
     def charge(
-        self, timestamp, start, time, power, new_soc, charging_capacity, observer=None
+        self, timestamp, start, time, power, new_soc, charging_capacity, charging_result, observer=None
     ):
         """This method updates the vehicle with charging results.
 
@@ -330,6 +350,7 @@ class Vehicle:
             observer,
             charging_power=power,
             nominal_charging_capacity=charging_capacity,
+            charging_result=charging_result,
         )
 
     def drive(
@@ -339,6 +360,7 @@ class Vehicle:
         time: int,
         destination: "Location",
         new_soc: float,
+        distance: float,
         observer=None,
     ):
         """This method updates the vehicle with driving results.
@@ -378,7 +400,7 @@ class Vehicle:
         self.status = Status.DRIVING
         self.soc = new_soc
         self.current_location = destination
-        self._update_activity(timestamp, start, time, observer)
+        self._update_activity(timestamp, start, time, observer, distance=distance)
 
     def park(self, timestamp, start, time, observer=None):
         """This method updates the vehicle after a parking event."""

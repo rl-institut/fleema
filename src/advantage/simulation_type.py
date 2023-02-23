@@ -52,12 +52,14 @@ class SimulationType:
                 )
                 task.delta_soc = trip["soc_delta"]
                 task.float_time = trip["trip_time"]
+            distance, _ = self.simulation.driving_sim.get_location_values(task.start_point, task.end_point)
             vehicle.drive(
                 step_to_timestamp(self.simulation.time_series, task.start_time),
                 task.start_time,
                 task.end_time - task.start_time,
                 task.end_point,
                 vehicle.soc + task.delta_soc,
+                distance,
                 self.simulation.observer,
             )
         elif task.task == Status.CHARGING:
@@ -83,6 +85,7 @@ class SimulationType:
                 nominal_charging_power,  # mean(spiceev_scenario.totalLoad["GC1"]), TODO find actual power
                 spiceev_scenario.socs[-1][0],
                 nominal_charging_power,
+                charging_result,
                 self.simulation.observer,
             )
 

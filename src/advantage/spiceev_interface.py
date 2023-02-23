@@ -104,7 +104,7 @@ def get_charging_characteristic(scenario, feed_in_cost, emission_df = None, emis
     Returns
     -------
     dict[string, float]
-        Keys: "cost" contains average cost in €/kWh, "feed_in": renewable part of charging energy [0-1]
+        Keys: "cost" contains average cost in €/kWh, "feed_in": renewable part of charging energy [0-1], "emission": total CO2-emission in g
 
     """
     total_cost = 0
