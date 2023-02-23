@@ -106,7 +106,9 @@ def get_charging_characteristic(
     Returns
     -------
     dict[string, float]
-        Keys: "cost" contains average cost in €/kWh, "feed_in": renewable part of charging energy [0-1], "emission": total CO2-emission in g
+        Keys: "cost" contains average cost in €/kWh,
+        "feed_in": renewable part of charging energy [0-1],
+        "emission": total CO2-emission in g
 
     """
     total_cost = 0
@@ -188,4 +190,4 @@ def get_current_emission(
     except KeyError as ke:
         raise KeyError(f"Missing required key in emission_options: {ke}")
     except IndexError:
-        raise IndexError(f"Timestamp is outside the range of emission_df.")
+        raise IndexError("Timestamp is outside the range of emission_df.")

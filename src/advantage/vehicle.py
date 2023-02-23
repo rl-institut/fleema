@@ -208,8 +208,9 @@ class Vehicle:
                 self.output["end_location"].append(self.current_location.name)
             else:
                 self.output["end_location"].append("")
-            simulation_state.update_vehicle(self)
-            simulation_state.log_data(charging_demand, charging_result, distance)
+            if simulation_state is not None:
+                simulation_state.update_vehicle(self)
+                simulation_state.log_data(charging_demand, charging_result, distance)
 
     def add_task(self, task: "Task"):
         """Add a task to the self.tasks using the start_time as key."""
@@ -327,7 +328,7 @@ class Vehicle:
         power,
         new_soc,
         charging_capacity,
-        charging_result,
+        charging_result=None,
         observer=None,
     ):
         """This method updates the vehicle with charging results.

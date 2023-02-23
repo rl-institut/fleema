@@ -33,7 +33,7 @@ from advantage.util.conversions import (
     datetime_string_to_datetime,
     step_to_timestamp,
 )
-from advantage.util.helpers import block_printing
+from advantage.util.helpers import block_printing, read_input_data
 
 
 class Simulation:
@@ -582,32 +582,7 @@ class Simulation:
             "emission_options": emission_options,
         }
 
-        data_dict = {}
-        files = [
-            "schedule",
-            "consumption",
-            "distance",
-            "incline",
-            "temperature",
-            "emission",
-        ]
-        index_col_files = ["distance", "incline"]
-        for file in files:
-            # read specified file
-            file_path = pathlib.Path(scenario_data_path, cfg["files"][file])
-            if not file_path.is_file():
-                if file in ["temperature", "emission"]:
-                    data_dict[file] = None
-                    continue
-                else:
-                    raise FileNotFoundError(
-                        f"Specified file for {file} not found in path {file_path}"
-                    )
-            if file in index_col_files:
-                file_df = pd.read_csv(file_path, index_col=0)
-            else:
-                file_df = pd.read_csv(file_path)
-            data_dict[file] = file_df
+        data_dict = read_input_data(scenario_data_path, cfg)
 
         return Simulation(
             vehicle_types,
