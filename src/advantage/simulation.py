@@ -382,7 +382,7 @@ class Simulation:
         # call spiceev to calculate charging
         charging_start = int(start_time + round(trip_to["trip_time"], 0))
         charging_time = time_window - driving_time
-        mock_vehicle = Vehicle("vehicle", vehicle_type, soc=current_soc)
+        mock_vehicle = Vehicle("vehicle", vehicle_type, soc=current_soc + trip_to["soc_delta"])
 
         spiceev_scenario = self.call_spiceev(
             charging_location,
