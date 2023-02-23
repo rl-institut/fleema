@@ -74,7 +74,7 @@ class SimulationType:
             )
             # charged_soc = spiceev_scenario.socs[-1][0] - vehicle.soc
             # print(task.delta_soc, charged_soc, vehicle.soc)
-            # TODO fix issue with expected delta_soc and actual charged 
+            # TODO fix issue with expected delta_soc and actual charged
             # soc being off when actual starting soc is higher
             charging_result = get_charging_characteristic(
                 spiceev_scenario,

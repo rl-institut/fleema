@@ -184,7 +184,6 @@ class Schedule(SimulationType):
             else:
                 if min_soc_satisfied:
                     if not end_soc_satisfied:
-                        print(soc_df_slice)
                         print(
                             f"Desired SoC {end_soc} for the last time step couldn't be met for vehicle {vehicle.id}"
                         )
