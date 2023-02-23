@@ -10,7 +10,16 @@ def driving_sim():
     cons = pd.read_csv(cons_path)
     temp_path = pathlib.Path("scenario_data", "bad_birnbach", "temperature.csv")
     temp = pd.read_csv(temp_path)
-    return RideCalc(cons, cons, cons, temp)  # TODO add inclines/distances
+    return RideCalc(cons, cons, cons, temp, "median")  # TODO add inclines/distances
+
+
+@pytest.fixture()
+def driving_sim_bad_temperature_option():
+    cons_path = pathlib.Path("scenario_data", "bad_birnbach", "consumption.csv")
+    cons = pd.read_csv(cons_path)
+    temp_path = pathlib.Path("scenario_data", "bad_birnbach", "temperature.csv")
+    temp = pd.read_csv(temp_path)
+    return RideCalc(cons, cons, cons, temp, "bad_column")
 
 
 def test_get_consumption(driving_sim):
@@ -32,16 +41,17 @@ def test_get_consumption(driving_sim):
 
 def test_get_temperature_basic(driving_sim):
     assert driving_sim.get_temperature("2022-01-01 01:01:00") == 12.9
-    assert driving_sim.get_temperature("1999-01-01 00:01:00", option="lowest") == 2.4
-    assert driving_sim.get_temperature("2022-01-01 13:30:00", option="highest") == 24.2
-
-
-def test_get_temperature_bad_option(driving_sim):
-    assert driving_sim.get_temperature("2022-01-01 16:30:00", option="bad option") == 20.2
+    assert driving_sim.get_temperature("1999-01-01 00:01:00") == 13.3
+    assert driving_sim.get_temperature("2022-01-01 13:30:00") == 20.5
 
 
 def test_get_temperature_wrong_string_format(driving_sim):
     assert driving_sim.get_temperature("2022-01-01T16:30:00") == 19.6
-    assert driving_sim.get_temperature("2022-01-01T16:30:00", option="lowest") == 6.3
-    assert driving_sim.get_temperature("2022-01-01T16:30:00", option="highest") == 24.2
-    assert driving_sim.get_temperature("2022-01-01T16:30:00", option="bad option") == 19.6
+
+
+def test_get_temperature_bad_option(driving_sim_bad_temperature_option):
+    assert driving_sim_bad_temperature_option.get_temperature("2022-01-01 16:30:00") == 5.2
+
+
+def test_get_temperature_bad_option_wrong_string_format(driving_sim_bad_temperature_option):
+    assert driving_sim_bad_temperature_option.get_temperature("2022-01-01T16:30:00") == 6.3

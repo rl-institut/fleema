@@ -17,6 +17,7 @@ class RideCalc:
         distances: pd.DataFrame,
         inclines: pd.DataFrame,
         temperature: pd.DataFrame,
+        temperature_option,
     ) -> None:
         """RideCalc constructor.
 
@@ -30,11 +31,14 @@ class RideCalc:
             Incline matrix between all Locations
         temperature : Dataframe
             Highest, lowest and median temperature for a day
+        temperature_option : str
+            Contains string of column that is used in temperature dataframe.
         """
         self.consumption_table = consumption_table
         self.distances = distances
         self.inclines = inclines
         self.temperature = temperature
+        self.temperature_option = temperature_option
 
         self.uniques = [
             sorted(self.consumption_table[col].unique())
@@ -285,21 +289,21 @@ class RideCalc:
 
         return distance, incline
 
-    def get_temperature(self, departure_time, option: str = "median"):
+    def get_temperature(self, departure_time):
         """Returns temperature according to the given timestep parameter.
 
         Parameters
         ----------
         departure_time : str
             Departure time represented by a string.
-        option : string
-            Option: "median", "highest" or "lowest"
 
         Warnings
         --------
-        bad option
-            Parameter option allows 'median' (default), 'lowest' and 'highest'.
-            Sets option to 'median'.
+        bad csv format
+            Example column structure: hour | <optional_name> | ...
+            If csv has wrong format method returns 20 degrees.
+        bad temperature option
+            If column does not exist temperature.csv option will be set to first column.
         bad format
             Parameter allows following format: '%Y-%m-%d %H:%M:%S'. Example: '2022-01-01 01:01:00'
             Sets departure_time to '2022-01-01 12:00:00'.
@@ -309,11 +313,16 @@ class RideCalc:
         float
             temperature
         """
-        if option not in ["median", "lowest", "highest"]:
-            warnings.warn("Bad option: Wrong value for temperature option parameter."
-                          "Options include 'median', 'lowest' and 'highest'."
-                          "The default value is 'median'.")
-            option = "median"
+        if self.temperature.columns[0] != "hour" or len(self.temperature.columns) < 2:
+            warnings.warn("Bad csv format: Columns should be structured and named like this: "
+                          "hour | <optional_name> | ... "
+                          "Returns temperature of 20 degrees.")
+            return 20.
+        if self.temperature_option not in self.temperature.columns:
+            warnings.warn(f"Bad temperature option: The column {self.temperature_option} "
+                          "does not exist in temperature.csv. "
+                          "Option default is set to the second column in temperature.csv.")
+            self.temperature_option = self.temperature.columns[1]
         try:
             datetime.datetime.strptime(departure_time, '%Y-%m-%d %H:%M:%S')
         except ValueError:
@@ -321,4 +330,4 @@ class RideCalc:
             departure_time = '2022-01-01 12:00:00'
         step = datetime.datetime.strptime(departure_time, '%Y-%m-%d %H:%M:%S').hour
         row = self.temperature.loc[self.temperature["hour"] == step]
-        return row[option].values[0]
+        return row[self.temperature_option].values[0]
