@@ -104,6 +104,12 @@ def get_charging_characteristic(
         SpiceEV Scenario object.
     feed_in_cost : float
         Cost of feed in energy in €/kWh
+    emission_df : pandas.DataFrame
+        Time series of emission values in g/kWh
+    emission_options : dict
+        "column": Column name of emission values in emission_df
+        "start_time": Iso string of first entry in time series
+        "step_duration": Duration covered by one time step in seconds
 
     Returns
     -------
