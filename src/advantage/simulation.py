@@ -382,7 +382,9 @@ class Simulation:
         # call spiceev to calculate charging
         charging_start = int(start_time + round(trip_to["trip_time"], 0))
         charging_time = time_window - driving_time
-        mock_vehicle = Vehicle("vehicle", vehicle_type, soc=current_soc + trip_to["soc_delta"])
+        mock_vehicle = Vehicle(
+            "vehicle", vehicle_type, soc=current_soc + trip_to["soc_delta"]
+        )
 
         spiceev_scenario = self.call_spiceev(
             charging_location,
@@ -565,7 +567,9 @@ class Simulation:
         cfg_dict = {
             "soc_min": cfg.getfloat("charging", "soc_min"),
             "end_of_day_soc": cfg.getfloat("charging", "end_of_day_soc", fallback=0.8),
-            "min_charging_power": cfg.getfloat("charging", "min_charging_power", fallback=0),
+            "min_charging_power": cfg.getfloat(
+                "charging", "min_charging_power", fallback=0
+            ),
             "rng_seed": cfg["sim_params"].getint("seed", None),
             "start_date": start_date,
             "end_date": end_date,

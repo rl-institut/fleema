@@ -397,7 +397,9 @@ class Vehicle:
         if not all(i >= 0 for i in [start, time]):
             raise ValueError("Arguments can't be negative.")
         if new_soc <= 0:
-            raise ValueError(f"SoC of vehicle {self.id} became negative at {timestamp}!")
+            raise ValueError(
+                f"SoC of vehicle {self.id} became negative at {timestamp}!"
+            )
         if new_soc > self.soc:
             raise ValueError("SoC of vehicle can't be higher after driving.")
         # if (

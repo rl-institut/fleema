@@ -44,7 +44,9 @@ class Schedule(SimulationType):
                 soc_df_slice = soc_df.loc[soc_df["timestep"] >= task.start_time]
                 if len(soc_df_slice.index):
                     # get lowest possible soc at this point in time (if no charging has happened)
-                    lowest_current_soc = max(soc_df_slice.iat[0, -1], self.simulation.soc_min)
+                    lowest_current_soc = max(
+                        soc_df_slice.iat[0, -1], self.simulation.soc_min
+                    )
                 charging_list_temp.append(
                     self.simulation.evaluate_charging_location(
                         vehicle.vehicle_type,
@@ -156,12 +158,11 @@ class Schedule(SimulationType):
                 # apply delta soc to timeseries
                 delta_soc = charge_option["delta_soc"]
                 for i in charge_index:
-                    new_soc = min(
-                        soc_df_slice.at[i, 'soc'] + delta_soc, 1.0)
-                    soc_df_slice.at[i, 'soc'] = new_soc
+                    new_soc = min(soc_df_slice.at[i, "soc"] + delta_soc, 1.0)
+                    soc_df_slice.at[i, "soc"] = new_soc
                     if new_soc == 1.0:
-                        delta_soc = new_soc - soc_df_slice.at[i, 'soc']
-                    soc_df_slice.at[i, 'necessary_charging'] -= delta_soc
+                        delta_soc = new_soc - soc_df_slice.at[i, "soc"]
+                    soc_df_slice.at[i, "necessary_charging"] -= delta_soc
 
                 min_soc_bool = soc_df_slice["necessary_charging"] <= 0
                 min_soc_satisfied = min_soc_bool.all()
@@ -199,9 +200,7 @@ class Schedule(SimulationType):
 
     def delete_ride(self, soc_df, vehicle):
         # get all tasks that still need charging to be possible
-        impossible_tasks = soc_df.loc[
-            soc_df["necessary_charging"] > 0
-        ]
+        impossible_tasks = soc_df.loc[soc_df["necessary_charging"] > 0]
         # get starting time of first impossible task (row 0, column 0: "timestep")
         first_impossible_task_start = impossible_tasks.iat[0, 0]
         # cancel the impossible task. not setting the valid_schedule flag results in
@@ -222,7 +221,9 @@ class Schedule(SimulationType):
             f"Not enough charging possible for vehicle {vehicle.id},",
             f"ride starting at timestep {first_impossible_task_start} had to be removed!",
         )
-        self.simulation.observer.add_to_accumulated_results(f"deleted_rides_vehicle_{vehicle.id}", 1)
+        self.simulation.observer.add_to_accumulated_results(
+            f"deleted_rides_vehicle_{vehicle.id}", 1
+        )
 
     def _add_chosen_events(self, vehicle, chosen_events):
         for charge_option in chosen_events:
