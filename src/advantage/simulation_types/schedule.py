@@ -246,18 +246,6 @@ class Schedule(SimulationType):
 
                 veh.export(self.simulation.save_directory)
 
-        # generate power_grid_timeseries
-        df = {
-            "timestamp": self.simulation.time_series,
-            "total_power": [0 for _ in self.simulation.time_series],
-            "total_connected_vehicles": [0 for _ in self.simulation.time_series],
-        }
-        for location_name in self.simulation.locations:
-            location = self.simulation.locations[location_name]
-            if location.output:
-                new_row = location.output[0]
-                df.append(new_row, ignore_index=True)
-
-        activity = pd.DataFrame(df)
-        activity = activity.reset_index(drop=True)
-        activity.to_csv(pathlib.Path(self.simulation.save_directory, "power_grid_timeseries.csv"))
+        # generate power prid timeseries for locations
+        for location in self.simulation.charging_locations:
+            location.export(self.simulation.time_series, self.simulation.save_directory)

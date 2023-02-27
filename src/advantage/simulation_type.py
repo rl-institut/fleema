@@ -82,17 +82,13 @@ class SimulationType:
                 nominal_charging_power,
                 self.simulation.observer,
             )
-            vehicle.current_location.update_output(
-                step,
-                # step_to_timestamp(self.simulation.time_series, step),
-                task.end_time - task.start_time,
-                round(mean(spiceev_scenario.totalLoad["GC1"]), 4),
-                self.simulation.time_steps,
-                # self.simulation.time_series,
+            task.start_point.update_output(
+                task.start_time,
+                task.end_time,
                 self.simulation.step_size,
-                self.simulation.save_directory,
+                self.simulation.time_steps,
+                vehicle,
             )
-
 
     def get_predicted_soc(self, vehicle: "Vehicle", start: int, end: int):
         """Calculates predicted SoC of given vehicle after the given timespan by running all tasks.
