@@ -1,7 +1,3 @@
-import pathlib
-
-import pandas as pd
-
 from advantage.simulation_type import SimulationType
 from typing import TYPE_CHECKING
 from operator import itemgetter
@@ -246,6 +242,6 @@ class Schedule(SimulationType):
 
                 veh.export(self.simulation.save_directory)
 
-        # generate power prid timeseries for locations
+        # generate power grid timeseries for locations
         for location in self.simulation.charging_locations:
             location.export(self.simulation.time_series, self.simulation.save_directory)
