@@ -88,7 +88,9 @@ class SimulationType:
             # report = aggregate_local_results(spiceev_scenario, "GC1")
 
             # calculate average charging power
-            charging_power_list = [list(d.values())[0] for d in spiceev_scenario.connChargeByTS["GC1"]]
+            charging_power_list = [
+                list(d.values())[0] for d in spiceev_scenario.connChargeByTS["GC1"]
+            ]
             average_charging_power = sum(charging_power_list) / len(charging_power_list)
             # execute charging event
             vehicle.charge(
