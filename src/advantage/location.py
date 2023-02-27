@@ -158,15 +158,17 @@ class Location:
             }
             for charger in self.chargers:
                 self.output[f"{charger.name}_power"] = [0 for _ in range(time_steps)]
-                self.output[f"{charger.name}_connected_vehicle"] = [0 for _ in range(time_steps)]
+                self.output[f"{charger.name}_connected_vehicle"] = [
+                    0 for _ in range(time_steps)
+                ]
 
         for i in range(start_time, end_time, step_size):
             if i > time_steps:
                 print("Charging time is out of time schedule!")
                 break
 
-            self.output[f'{self.chargers[0].name}_power'][i] += charging_power
-            self.output[f'{self.chargers[0].name}_connected_vehicle'][i] += 1
+            self.output[f"{self.chargers[0].name}_power"][i] += charging_power
+            self.output[f"{self.chargers[0].name}_connected_vehicle"][i] += 1
             self.output["total_power"][i] += charging_power
             self.output["total_connected_vehicles"][i] += 1
 
@@ -183,4 +185,6 @@ class Location:
             df[k] = v
         activity = pd.DataFrame(df)
         activity = activity.reset_index(drop=True)
-        activity.to_csv(pathlib.Path(directory, f"{self.name}_power_grid_timeseries.csv"))
+        activity.to_csv(
+            pathlib.Path(directory, f"{self.name}_power_grid_timeseries.csv")
+        )
