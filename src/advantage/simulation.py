@@ -127,6 +127,9 @@ class Simulation:
         # scenario data
         self.schedule = data_dict["schedule"]
         self.cost_options = cfg_dict["cost_options"]
+        self.cost_time_series = pd.read_csv(self.cost_options["csv_path"], index_col=0)
+        self.max_cost = self.cost_time_series[self.cost_options["column"]].max()
+        self.min_cost = self.cost_time_series[self.cost_options["column"]].min()
         self.feed_in_cost = cfg_dict["feed_in_cost"]
         self.emission = data_dict["emission"]
         self.emission_options = cfg_dict["emission_options"]
@@ -400,13 +403,13 @@ class Simulation:
             return empty_dict
 
         charging_result = get_charging_characteristic(
-            spiceev_scenario, self.feed_in_cost
+            spiceev_scenario, self.feed_in_cost,
         )
 
-        max_cost = 1  # TODO get this from somewhere
+        max_cost_score = self.max_cost - self.min_cost
         cost_score = (
-            max_cost - charging_result["cost"]
-        ) / max_cost  # TODO properly evaluate this score
+            self.max_cost - charging_result["cost"]
+        ) / max_cost_score
         local_feed_in_score = charging_result["feed_in"]
         soc_score = 0.1 if current_soc < 0.8 else 0  # TODO improve this formula
         score = (
