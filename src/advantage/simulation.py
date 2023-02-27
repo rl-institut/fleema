@@ -524,8 +524,8 @@ class Simulation:
         ) as f:
             charging_points = json.load(f)
 
-        start_date = cfg.get("basic", "start_date")
-        start_date = date_string_to_datetime(start_date)
+        start_date_string = cfg.get("basic", "start_date")
+        start_date = date_string_to_datetime(start_date_string)
         end_date = cfg.get("basic", "end_date")
         end_date = date_string_to_datetime(end_date) + datetime.timedelta(1)
 
@@ -544,9 +544,9 @@ class Simulation:
             "column": cfg["cost_options"]["column"],
         }
         emission_options = {
-            "start_time": cfg["emission_options"]["start_time"],
-            "step_duration": int(cfg["emission_options"]["step_duration"]),
-            "column": cfg["emission_options"]["column"],
+            "start_time": cfg.get("emission_options", "start_time", fallback=start_date_string),
+            "step_duration": cfg.getint("emission_options", "step_duration", fallback=3600),
+            "column": cfg.get("emission_options", "column", fallback="emission"),
         }
 
         # parse temperature option
