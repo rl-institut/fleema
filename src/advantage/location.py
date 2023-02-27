@@ -168,9 +168,14 @@ class Location:
 
         """
         if not self.output:
+            """self.output = {k: {
+                f'{self.name}_connected_vehicles': 0,
+                f'{self.name}_power': 0,
+                } for k, _ in timeseries.to_series().items()}"""
+
             self.output = {
-                "total_power": [0 for _ in range(time_steps)],
-                "total_connected_vehicles": [0 for _ in range(time_steps)],
+                f'{self.name}_connected_vehicles': [0 for _ in time_steps],
+                f'{self.name}_power': [0 for _ in time_steps],
             }
             for charger in self.chargers:
                 self.output[f"{charger.name}_power"] = [0 for _ in range(time_steps)]
