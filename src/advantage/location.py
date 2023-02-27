@@ -151,37 +151,51 @@ class Location:
 
         return scenario_dict
 
-    def update_output(self, step, charging_time, charging_power, time_steps, step_size, directory):
+    def update_output(self, start_time, end_time, step_size, time_steps, vehicle):
         """Records newest output when it is called during the vehicle method charge().
 
         TODO: docstrings
         Parameters
         ----------
-        step : int
-        charging_time : int
-        charging_power : float
-        timeseries : :obj: `pandas.DatetimeIndex`
+        start_time : int
+        end_time : int
         step_size : int
+        time_steps : int
+        vehicle : :obj: `advantage.Vehicle`
+
+        """
+        charging_power = vehicle.vehicle_type.charging_capacity["inductive"]
+
+        if not self.output:
+            self.output = {
+                "total_power": [0 for _ in range(time_steps)],
+                "total_connected_vehicles": [0 for _ in range(time_steps)],
+            }
+            for charger in self.chargers:
+                self.output[f"{charger.name}_power"] = [0 for _ in range(time_steps)]
+                self.output[f"{charger.name}_connected_vehicle"] = [0 for _ in range(time_steps)]
+
+        for i in range(start_time, end_time, step_size):
+            if i > time_steps:
+                print("Charging time is out of time schedule!")
+                break
+
+            self.output[f'{self.chargers[0].name}_power'][i] += charging_power
+            self.output[f'{self.chargers[0].name}_connected_vehicle'][i] += 1
+            self.output["total_power"][i] += charging_power
+            self.output["total_connected_vehicles"][i] += 1
+
+    def export(self, timeseries, directory):
+        """Generates csv file of the output as power_grid_timeseries.
+
+        timeseries : :obj: `pandas.DatetimeIndex`
         directory : :obj:`pathlib.Path`
             Save directory
 
         """
-        if not self.output:
-            """self.output = {k: {
-                f'{self.name}_connected_vehicles': 0,
-                f'{self.name}_power': 0,
-                } for k, _ in timeseries.to_series().items()}"""
-
-            self.output = {
-                f'{self.name}_connected_vehicles': [0 for _ in time_steps],
-                f'{self.name}_power': [0 for _ in time_steps],
-            }
-
-        for i in range(0, charging_time, step_size):
-            current_time = step + i
-
-            if current_time > time_steps:   # timeseries[-1]
-                print("Charging time is out of time schedule!")
-                break
-            self.output[f'{self.name}_connected_vehicles'][current_time] += 1
-            self.output[f'{self.name}_power'][current_time] = charging_power
+        df = {"timestamp": timeseries}
+        for k, v in self.output.items():
+            df[k] = v
+        activity = pd.DataFrame(df)
+        activity = activity.reset_index(drop=True)
+        activity.to_csv(pathlib.Path(directory, f"{self.name}_power_grid_timeseries.csv"))
