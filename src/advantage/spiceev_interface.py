@@ -91,7 +91,10 @@ def run_spice_ev(spice_ev_dict, strategy, ignore_warnings=True) -> "Scenario":
 
 
 def get_charging_characteristic(
-    scenario, feed_in_cost, emission_df=None, emission_options=None
+    scenario,
+    feed_in_cost,
+    emission_df=None,
+    emission_options=None,
 ):
     """Calculate average cost and part of charging from feed-in in a spice_ev scenario.
 
@@ -101,6 +104,12 @@ def get_charging_characteristic(
         SpiceEV Scenario object.
     feed_in_cost : float
         Cost of feed in energy in €/kWh
+    emission_df : pandas.DataFrame
+        Time series of emission values in g/kWh
+    emission_options : dict
+        "column": Column name of emission values in emission_df
+        "start_time": Iso string of first entry in time series
+        "step_duration": Duration covered by one time step in seconds
 
     Returns
     -------
@@ -129,7 +138,7 @@ def get_charging_characteristic(
         total_cost += max(charge - feed_in, 0) * cost + feed_in * feed_in_cost
 
         if emission_df is not None:
-            current_emission = get_current_emission(
+            current_emission = get_current_time_series_value(
                 timestamp, emission_df, emission_options
             )
             total_emission += (
@@ -142,15 +151,15 @@ def get_charging_characteristic(
 
     feed_in_factor = min(total_charge_from_feed_in / total_charge, 1)
     result_dict = {
-        "cost": round(average_cost, 4),
-        "feed_in": round(feed_in_factor, 4),
-        "emission": round(total_emission, 4),
+        "cost": round(max(average_cost, 0), 4),
+        "feed_in": round(max(feed_in_factor, 0), 4),
+        "emission": round(max(total_emission, 0), 4),
     }
     return result_dict
 
 
-def get_current_emission(
-    timestamp: datetime.datetime, emission_df, emission_options: dict
+def get_current_time_series_value(
+    timestamp: datetime.datetime, dataframe, dataframe_options: dict
 ):
     """
     Gets the current emission value for a given timestamp and set of emission options.
@@ -158,18 +167,18 @@ def get_current_emission(
     Parameters
     ----------
     timestamp : datetime.datetime
-        The timestamp to get the emission value for.
-    emission_df : pandas.DataFrame
-        A DataFrame containing the emission data.
-    emission_options : dict
-        A dictionary containing the emission options.
+        The timestamp to get the value for.
+    dataframe : pandas.DataFrame
+        A DataFrame containing the time series data.
+    dataframe_options : dict
+        A dictionary containing the dataframe options.
         Required keys:
         - "start_time" : datetime.datetime
-            The start time of the emission data.
+            The start time of the time series.
         - "step_duration" : int
-            The duration of each emission step in seconds.
+            The duration of each time step in seconds.
         - "column" : str
-            The name of the column containing the emission data in `emission_df`.
+            The name of the column containing the data in `dataframe`.
 
     Returns
     -------
@@ -183,12 +192,12 @@ def get_current_emission(
     IndexError
         If the timestep calculated based on the given timestamp is outside the range of `emission_df`.
     """
-    time_delta = timestamp - emission_options["start_time"]
+    time_delta = timestamp - dataframe_options["start_time"]
     timestep = math.floor(
-        time_delta.total_seconds() / emission_options["step_duration"]
+        time_delta.total_seconds() / dataframe_options["step_duration"]
     )
     try:
-        return emission_df[emission_options["column"]].iat[timestep]
+        return dataframe[dataframe_options["column"]].iat[timestep]
     except KeyError as ke:
         raise KeyError(f"Missing required key in emission_options: {ke}")
     except IndexError:

@@ -86,12 +86,18 @@ class SimulationType:
                 spiceev_scenario.components.charging_stations.values()
             )[0].max_power
             # report = aggregate_local_results(spiceev_scenario, "GC1")
+
+            # calculate average charging power
+            charging_power_list = [
+                list(d.values())[0] for d in spiceev_scenario.connChargeByTS["GC1"]
+            ]
+            average_charging_power = sum(charging_power_list) / len(charging_power_list)
             # execute charging event
             vehicle.charge(
                 step_to_timestamp(self.simulation.time_series, task.start_time),
                 task.start_time,
                 task.end_time - task.start_time,
-                nominal_charging_power,  # mean(spiceev_scenario.totalLoad["GC1"]), TODO find actual power
+                average_charging_power,
                 spiceev_scenario.socs[-1][0],
                 nominal_charging_power,
                 charging_result,

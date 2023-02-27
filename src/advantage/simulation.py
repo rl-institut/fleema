@@ -127,6 +127,9 @@ class Simulation:
         # scenario data
         self.schedule = data_dict["schedule"]
         self.cost_options = cfg_dict["cost_options"]
+        self.cost_time_series = pd.read_csv(self.cost_options["csv_path"], index_col=0)
+        self.max_cost = self.cost_time_series[self.cost_options["column"]].max()
+        self.min_cost = self.cost_time_series[self.cost_options["column"]].min()
         self.feed_in_cost = cfg_dict["feed_in_cost"]
         self.emission = data_dict["emission"]
         self.emission_options = cfg_dict["emission_options"]
@@ -400,13 +403,12 @@ class Simulation:
             return empty_dict
 
         charging_result = get_charging_characteristic(
-            spiceev_scenario, self.feed_in_cost
+            spiceev_scenario,
+            self.feed_in_cost,
         )
 
-        max_cost = 1  # TODO get this from somewhere
-        cost_score = (
-            max_cost - charging_result["cost"]
-        ) / max_cost  # TODO properly evaluate this score
+        max_cost_score = self.max_cost - self.min_cost
+        cost_score = (self.max_cost - charging_result["cost"]) / max_cost_score
         local_feed_in_score = charging_result["feed_in"]
         soc_score = 0.1 if current_soc < 0.8 else 0  # TODO improve this formula
         score = (
@@ -522,8 +524,8 @@ class Simulation:
         ) as f:
             charging_points = json.load(f)
 
-        start_date = cfg.get("basic", "start_date")
-        start_date = date_string_to_datetime(start_date)
+        start_date_string = cfg.get("basic", "start_date")
+        start_date = date_string_to_datetime(start_date_string)
         end_date = cfg.get("basic", "end_date")
         end_date = date_string_to_datetime(end_date) + datetime.timedelta(1)
 
@@ -542,9 +544,9 @@ class Simulation:
             "column": cfg["cost_options"]["column"],
         }
         emission_options = {
-            "start_time": cfg["emission_options"]["start_time"],
-            "step_duration": int(cfg["emission_options"]["step_duration"]),
-            "column": cfg["emission_options"]["column"],
+            "start_time": cfg.get("emission_options", "start_time", fallback=start_date_string),
+            "step_duration": cfg.getint("emission_options", "step_duration", fallback=3600),
+            "column": cfg.get("emission_options", "column", fallback="emission"),
         }
 
         # parse temperature option

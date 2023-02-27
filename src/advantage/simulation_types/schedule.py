@@ -159,9 +159,9 @@ class Schedule(SimulationType):
                 delta_soc = charge_option["delta_soc"]
                 for i in charge_index:
                     new_soc = min(soc_df_slice.at[i, "soc"] + delta_soc, 1.0)
-                    soc_df_slice.at[i, "soc"] = new_soc
                     if new_soc == 1.0:
                         delta_soc = new_soc - soc_df_slice.at[i, "soc"]
+                    soc_df_slice.at[i, "soc"] = new_soc
                     soc_df_slice.at[i, "necessary_charging"] -= delta_soc
 
                 min_soc_bool = soc_df_slice["necessary_charging"] <= 0

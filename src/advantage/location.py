@@ -120,7 +120,7 @@ class Location:
                 "grid_connectors": {
                     "GC1": {
                         "max_power": power,
-                        "cost": {"type": "fixed", "value": 0.3},
+                        # "cost": {"type": "fixed", "value": 0.3},
                     }  # TODO change cost params
                 },
             },
