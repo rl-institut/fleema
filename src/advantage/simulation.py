@@ -113,8 +113,8 @@ class Simulation:
         self.weights = cfg_dict["weights"]
         self.outputs = cfg_dict["outputs"]
         self.ignore_spice_ev_warnings = cfg_dict["ignore_spice_ev_warnings"]
+        self.average_speed = cfg_dict["average_speed"]
 
-        # TODO use scenario name in save_directory once scenario files have been reorganized
         save_directory_name = "{}_{}_{}".format(
             cfg_dict["scenario_name"],
             self.simulation_type,
@@ -183,7 +183,6 @@ class Simulation:
                 self.locations[name].set_generator(info["energy_feed_in"])
             else:
                 self.locations[name].set_power(50.0)
-            # TODO add grid info to location here?
             if not self.locations[name] in self.charging_locations:
                 self.charging_locations.append(self.locations[name])
 
@@ -241,6 +240,7 @@ class Simulation:
             self.locations[row.departure_name],
             self.locations[row.arrival_name],
             vehicle.vehicle_type,
+            self.average_speed,
             row.departure_time,
         )
         dep_time = self.datetime_to_timesteps(row.departure_time)
@@ -368,10 +368,10 @@ class Simulation:
         # run pre calculations
         time_window = end_time - start_time
         trip_to = self.driving_sim.calculate_trip(
-            current_location, charging_location, vehicle_type
+            current_location, charging_location, vehicle_type, self.average_speed
         )
         trip_from = self.driving_sim.calculate_trip(
-            charging_location, next_location, vehicle_type
+            charging_location, next_location, vehicle_type, self.average_speed
         )
         driving_time = int(trip_to["trip_time"] + trip_from["trip_time"])
         drive_soc = trip_to["soc_delta"] + trip_from["soc_delta"]
@@ -584,6 +584,7 @@ class Simulation:
             ),
             "emission_options": emission_options,
             "delete_rides": cfg.getboolean("sim_params", "delete_rides", fallback=True),
+            "average_speed": cfg.getfloat("charging", "average_speed", fallback=8.65),
         }
 
         data_dict = read_input_data(scenario_data_path, cfg)

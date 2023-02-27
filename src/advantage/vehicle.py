@@ -254,7 +254,6 @@ class Vehicle:
 
     @property
     def has_valid_task_list(self):
-        # TODO rewrite based on dict
         previous_task = None
         for timestep, task in sorted(self.tasks.items()):
             if previous_task is not None:

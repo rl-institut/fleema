@@ -52,7 +52,6 @@ def get_spice_ev_scenario_dict(
             "vehicle_events": {},
         },
     }
-    # TODO photovoltaics is only relevant for Einspeisevergütung
     spice_ev_dict = dict(scenario_dict, **vehicle.scenario_info)
     deep_update(
         spice_ev_dict, location.get_scenario_info(vehicle.vehicle_type.plugs, point_id)

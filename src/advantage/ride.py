@@ -50,6 +50,7 @@ class RideCalc:
         origin: "Location",
         destination: "Location",
         vehicle_type: "VehicleType",
+        speed: float,
         departure_time: str = "2022-01-01 01:01:00",
     ):
         """Calculate consumption as a part of total SoC.
@@ -71,9 +72,8 @@ class RideCalc:
             Returns dict with the keys "consumption", "soc_delta", "trip_time"
 
         """
-        # TODO add speed as scenario input, load level somewhere?
+        # TODO add load level somewhere?
         temperature = self.get_temperature(departure_time)
-        speed = 8.65
         load_level = 0
         distance, incline = self.get_location_values(origin, destination)
         trip_time = distance / speed * 60
