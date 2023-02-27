@@ -1,7 +1,3 @@
-import pathlib
-
-import pandas as pd
-
 from advantage.simulation_type import SimulationType
 from typing import TYPE_CHECKING
 from operator import itemgetter
