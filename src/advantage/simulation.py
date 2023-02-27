@@ -91,6 +91,8 @@ class Simulation:
 
         """
         self.soc_min = cfg_dict["soc_min"]
+        self.end_of_day_soc = cfg_dict["end_of_day_soc"]
+        self.delete_rides = cfg_dict["delete_rides"]
         # TODO check if it's enough to have min_charging_power in vehicle, else add to charger
         self.rng_seed = cfg_dict["rng_seed"]
         self.min_charging_power = cfg_dict["min_charging_power"]
@@ -107,9 +109,7 @@ class Simulation:
         )
         self.end_of_day_steps = None
         self.num_threads = cfg_dict["num_threads"]
-        self.simulation_type = (
-            "schedule"  # TODO implement in config (schedule vs ondemand)
-        )
+        self.simulation_type = cfg_dict["simulation_type"]
         self.weights = cfg_dict["weights"]
         self.outputs = cfg_dict["outputs"]
         self.ignore_spice_ev_warnings = cfg_dict["ignore_spice_ev_warnings"]
@@ -564,12 +564,14 @@ class Simulation:
 
         cfg_dict = {
             "soc_min": cfg.getfloat("charging", "soc_min"),
-            "min_charging_power": cfg.getfloat("charging", "min_charging_power"),
+            "end_of_day_soc": cfg.getfloat("charging", "end_of_day_soc", fallback=0.8),
+            "min_charging_power": cfg.getfloat("charging", "min_charging_power", fallback=0),
             "rng_seed": cfg["sim_params"].getint("seed", None),
             "start_date": start_date,
             "end_date": end_date,
-            "num_threads": cfg.getint("sim_params", "num_threads"),
-            "step_size": cfg.getint("basic", "step_size"),
+            "num_threads": cfg.getint("sim_params", "num_threads", fallback=1),
+            "step_size": cfg.getint("basic", "step_size", fallback=1),
+            "simulation_type": cfg.get("basic", "simulation_type", fallback="schedule"),
             "weights": weights_dict,
             "outputs": outputs,
             "scenario_data_path": scenario_data_path,
@@ -581,6 +583,7 @@ class Simulation:
                 "sim_params", "ignore_spice_ev_warnings", fallback=True
             ),
             "emission_options": emission_options,
+            "delete_rides": cfg.getboolean("sim_params", "delete_rides", fallback=True),
         }
 
         data_dict = read_input_data(scenario_data_path, cfg)

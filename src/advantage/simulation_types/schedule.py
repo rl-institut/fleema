@@ -182,6 +182,10 @@ class Schedule(SimulationType):
                     return chosen_events
 
             else:
+                if not self.simulation.delete_rides:
+                    raise ValueError(
+                        f"Not enough charging possible for vehicle {vehicle.id}!"
+                    )
                 if min_soc_satisfied:
                     if not end_soc_satisfied:
                         print(
@@ -214,10 +218,6 @@ class Schedule(SimulationType):
                 )
                 self.simulation.observer.add_to_accumulated_results(f"deleted_rides_vehicle_{vehicle.id}", 1)
                 return None
-                # TODO optional Value Error instead of removing rides as config option
-                # raise ValueError(
-                #     f"Not enough charging possible for vehicle {veh.id}!"
-                # )
 
     def _add_chosen_events(self, vehicle, chosen_events):
         for charge_option in chosen_events:
@@ -232,8 +232,8 @@ class Schedule(SimulationType):
         # create tasks for all vehicles from input schedule
         self._create_initial_schedule()
         # create charging tasks based on rating
-        end_soc = 0.8  # TODO add to config
-        self._distribute_charging_slots(0, self.simulation.time_steps, end_soc)
+        end_of_day_soc = self.simulation.end_of_day_soc
+        self._distribute_charging_slots(0, self.simulation.time_steps, end_of_day_soc)
         # create save directory
         if True in self.simulation.outputs.values():
             self.simulation.save_directory.mkdir(parents=True, exist_ok=True)
