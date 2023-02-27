@@ -41,13 +41,13 @@ class SimulationType:
         task : Task
             Task to be executed
         """
-        # TODO replace step with start_time of task? or double check if task is called at the correct time
         if task.task == Status.DRIVING:
             if not task.is_calculated:
                 trip = self.simulation.driving_sim.calculate_trip(
                     task.start_point,
                     task.end_point,
                     vehicle.vehicle_type,
+                    self.simulation.average_speed,
                     self.simulation.time_series[task.start_time],
                 )
                 task.delta_soc = trip["soc_delta"]
@@ -125,7 +125,7 @@ class SimulationType:
                         (task.start_time, task.end_time, vehicle.soc + consumption)
                     )
                 if task.task == Status.CHARGING:
-                    # TODO check how much this would charge
+                    # TODO check how much this would charge, relevant for ondemand
                     pass
         return pd.DataFrame(
             consumption_list, columns=["drive_start", "timestep", "soc"]

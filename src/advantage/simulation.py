@@ -91,6 +91,8 @@ class Simulation:
 
         """
         self.soc_min = cfg_dict["soc_min"]
+        self.end_of_day_soc = cfg_dict["end_of_day_soc"]
+        self.delete_rides = cfg_dict["delete_rides"]
         # TODO check if it's enough to have min_charging_power in vehicle, else add to charger
         self.rng_seed = cfg_dict["rng_seed"]
         self.min_charging_power = cfg_dict["min_charging_power"]
@@ -107,14 +109,12 @@ class Simulation:
         )
         self.end_of_day_steps = None
         self.num_threads = cfg_dict["num_threads"]
-        self.simulation_type = (
-            "schedule"  # TODO implement in config (schedule vs ondemand)
-        )
+        self.simulation_type = cfg_dict["simulation_type"]
         self.weights = cfg_dict["weights"]
         self.outputs = cfg_dict["outputs"]
         self.ignore_spice_ev_warnings = cfg_dict["ignore_spice_ev_warnings"]
+        self.average_speed = cfg_dict["average_speed"]
 
-        # TODO use scenario name in save_directory once scenario files have been reorganized
         save_directory_name = "{}_{}_{}".format(
             cfg_dict["scenario_name"],
             self.simulation_type,
@@ -183,7 +183,6 @@ class Simulation:
                 self.locations[name].set_generator(info["energy_feed_in"])
             else:
                 self.locations[name].set_power(50.0)
-            # TODO add grid info to location here?
             if not self.locations[name] in self.charging_locations:
                 self.charging_locations.append(self.locations[name])
 
@@ -241,6 +240,7 @@ class Simulation:
             self.locations[row.departure_name],
             self.locations[row.arrival_name],
             vehicle.vehicle_type,
+            self.average_speed,
             row.departure_time,
         )
         dep_time = self.datetime_to_timesteps(row.departure_time)
@@ -368,10 +368,10 @@ class Simulation:
         # run pre calculations
         time_window = end_time - start_time
         trip_to = self.driving_sim.calculate_trip(
-            current_location, charging_location, vehicle_type
+            current_location, charging_location, vehicle_type, self.average_speed
         )
         trip_from = self.driving_sim.calculate_trip(
-            charging_location, next_location, vehicle_type
+            charging_location, next_location, vehicle_type, self.average_speed
         )
         driving_time = int(trip_to["trip_time"] + trip_from["trip_time"])
         drive_soc = trip_to["soc_delta"] + trip_from["soc_delta"]
@@ -382,7 +382,9 @@ class Simulation:
         # call spiceev to calculate charging
         charging_start = int(start_time + round(trip_to["trip_time"], 0))
         charging_time = time_window - driving_time
-        mock_vehicle = Vehicle("vehicle", vehicle_type, soc=current_soc + trip_to["soc_delta"])
+        mock_vehicle = Vehicle(
+            "vehicle", vehicle_type, soc=current_soc + trip_to["soc_delta"]
+        )
 
         spiceev_scenario = self.call_spiceev(
             charging_location,
@@ -564,12 +566,16 @@ class Simulation:
 
         cfg_dict = {
             "soc_min": cfg.getfloat("charging", "soc_min"),
-            "min_charging_power": cfg.getfloat("charging", "min_charging_power"),
+            "end_of_day_soc": cfg.getfloat("charging", "end_of_day_soc", fallback=0.8),
+            "min_charging_power": cfg.getfloat(
+                "charging", "min_charging_power", fallback=0
+            ),
             "rng_seed": cfg["sim_params"].getint("seed", None),
             "start_date": start_date,
             "end_date": end_date,
-            "num_threads": cfg.getint("sim_params", "num_threads"),
-            "step_size": cfg.getint("basic", "step_size"),
+            "num_threads": cfg.getint("sim_params", "num_threads", fallback=1),
+            "step_size": cfg.getint("basic", "step_size", fallback=1),
+            "simulation_type": cfg.get("basic", "simulation_type", fallback="schedule"),
             "weights": weights_dict,
             "outputs": outputs,
             "scenario_data_path": scenario_data_path,
@@ -581,6 +587,8 @@ class Simulation:
                 "sim_params", "ignore_spice_ev_warnings", fallback=True
             ),
             "emission_options": emission_options,
+            "delete_rides": cfg.getboolean("sim_params", "delete_rides", fallback=True),
+            "average_speed": cfg.getfloat("charging", "average_speed", fallback=8.65),
         }
 
         data_dict = read_input_data(scenario_data_path, cfg)

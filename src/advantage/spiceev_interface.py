@@ -52,7 +52,6 @@ def get_spice_ev_scenario_dict(
             "vehicle_events": {},
         },
     }
-    # TODO photovoltaics is only relevant for Einspeisevergütung
     spice_ev_dict = dict(scenario_dict, **vehicle.scenario_info)
     deep_update(
         spice_ev_dict, location.get_scenario_info(vehicle.vehicle_type.plugs, point_id)
@@ -116,7 +115,9 @@ def get_charging_characteristic(
     total_charge_from_feed_in = 0
     total_emission = 0
     timestamp = scenario.start_time
-    spice_ev_timestep = int(60 / scenario.stepsPerHour)  # length of one spice_ev timestep in minutes
+    spice_ev_timestep = int(
+        60 / scenario.stepsPerHour
+    )  # length of one spice_ev timestep in minutes
     for i in range(scenario.n_intervals):
         charge = list(scenario.connChargeByTS["GC1"][i].values())[0]
         feed_in = scenario.feedInPower["GC1"][i]
@@ -131,7 +132,9 @@ def get_charging_characteristic(
             current_emission = get_current_emission(
                 timestamp, emission_df, emission_options
             )
-            total_emission += max(charge - feed_in, 0) * current_emission / scenario.stepsPerHour
+            total_emission += (
+                max(charge - feed_in, 0) * current_emission / scenario.stepsPerHour
+            )
         # set new timestamp
         timestamp += datetime.timedelta(minutes=spice_ev_timestep)
 

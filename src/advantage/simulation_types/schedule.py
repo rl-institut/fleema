@@ -44,7 +44,9 @@ class Schedule(SimulationType):
                 soc_df_slice = soc_df.loc[soc_df["timestep"] >= task.start_time]
                 if len(soc_df_slice.index):
                     # get lowest possible soc at this point in time (if no charging has happened)
-                    lowest_current_soc = max(soc_df_slice.iat[0, -1], self.simulation.soc_min)
+                    lowest_current_soc = max(
+                        soc_df_slice.iat[0, -1], self.simulation.soc_min
+                    )
                 charging_list_temp.append(
                     self.simulation.evaluate_charging_location(
                         vehicle.vehicle_type,
@@ -156,12 +158,11 @@ class Schedule(SimulationType):
                 # apply delta soc to timeseries
                 delta_soc = charge_option["delta_soc"]
                 for i in charge_index:
-                    new_soc = min(
-                        soc_df_slice.at[i, 'soc'] + delta_soc, 1.0)
-                    soc_df_slice.at[i, 'soc'] = new_soc
+                    new_soc = min(soc_df_slice.at[i, "soc"] + delta_soc, 1.0)
+                    soc_df_slice.at[i, "soc"] = new_soc
                     if new_soc == 1.0:
-                        delta_soc = new_soc - soc_df_slice.at[i, 'soc']
-                    soc_df_slice.at[i, 'necessary_charging'] -= delta_soc
+                        delta_soc = new_soc - soc_df_slice.at[i, "soc"]
+                    soc_df_slice.at[i, "necessary_charging"] -= delta_soc
 
                 min_soc_bool = soc_df_slice["necessary_charging"] <= 0
                 min_soc_satisfied = min_soc_bool.all()
@@ -188,36 +189,41 @@ class Schedule(SimulationType):
                             f"Desired SoC {end_soc} for the last time step couldn't be met for vehicle {vehicle.id}"
                         )
                     return chosen_events
-                # get all tasks that still need charging to be possible
-                impossible_tasks = soc_df_slice.loc[
-                    soc_df_slice["necessary_charging"] > 0
-                ]
-                # get starting time of first impossible task (row 0, column 0: "timestep")
-                first_impossible_task_start = impossible_tasks.iat[0, 0]
-                # cancel the impossible task. not setting the valid_schedule flag results in
-                # a recalculation of charging slots without the impossible task
-                first_impossible_task = vehicle.get_task(first_impossible_task_start)
-                if first_impossible_task is None:
-                    raise ValueError("No task to remove or change to has been found")
-                vehicle.remove_task(first_impossible_task)
 
-                next_task = vehicle.get_next_task(int(first_impossible_task_start))
-                if next_task is not None:
-                    vehicle.remove_task(next_task)
-                    next_task.start_point = first_impossible_task.start_point
-                    vehicle.add_task(next_task)
-                    # TODO change time needed for this task?
+                if not self.simulation.delete_rides:
+                    raise ValueError(
+                        f"Not enough charging possible for vehicle {vehicle.id}!"
+                    )
+                else:
+                    self.delete_ride(soc_df_slice, vehicle)
+                    return None
 
-                print(
-                    f"Not enough charging possible for vehicle {vehicle.id},",
-                    f"ride starting at timestep {first_impossible_task_start} had to be removed!",
-                )
-                self.simulation.observer.add_to_accumulated_results(f"deleted_rides_vehicle_{vehicle.id}", 1)
-                return None
-                # TODO optional Value Error instead of removing rides as config option
-                # raise ValueError(
-                #     f"Not enough charging possible for vehicle {veh.id}!"
-                # )
+    def delete_ride(self, soc_df, vehicle):
+        # get all tasks that still need charging to be possible
+        impossible_tasks = soc_df.loc[soc_df["necessary_charging"] > 0]
+        # get starting time of first impossible task (row 0, column 0: "timestep")
+        first_impossible_task_start = impossible_tasks.iat[0, 0]
+        # cancel the impossible task. not setting the valid_schedule flag results in
+        # a recalculation of charging slots without the impossible task
+        first_impossible_task = vehicle.get_task(first_impossible_task_start)
+        if first_impossible_task is None:
+            raise ValueError("No task to remove or change to has been found")
+        vehicle.remove_task(first_impossible_task)
+
+        next_task = vehicle.get_next_task(int(first_impossible_task_start))
+        if next_task is not None:
+            vehicle.remove_task(next_task)
+            next_task.start_point = first_impossible_task.start_point
+            vehicle.add_task(next_task)
+            # TODO change time needed for this task?
+
+        print(
+            f"Not enough charging possible for vehicle {vehicle.id},",
+            f"ride starting at timestep {first_impossible_task_start} had to be removed!",
+        )
+        self.simulation.observer.add_to_accumulated_results(
+            f"deleted_rides_vehicle_{vehicle.id}", 1
+        )
 
     def _add_chosen_events(self, vehicle, chosen_events):
         for charge_option in chosen_events:
@@ -232,8 +238,8 @@ class Schedule(SimulationType):
         # create tasks for all vehicles from input schedule
         self._create_initial_schedule()
         # create charging tasks based on rating
-        end_soc = 0.8  # TODO add to config
-        self._distribute_charging_slots(0, self.simulation.time_steps, end_soc)
+        end_of_day_soc = self.simulation.end_of_day_soc
+        self._distribute_charging_slots(0, self.simulation.time_steps, end_of_day_soc)
         # create save directory
         if True in self.simulation.outputs.values():
             self.simulation.save_directory.mkdir(parents=True, exist_ok=True)
