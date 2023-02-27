@@ -116,7 +116,7 @@ def get_charging_characteristic(
     total_charge_from_feed_in = 0
     total_emission = 0
     timestamp = scenario.start_time
-    spice_ev_timestep = int(60 / scenario.stepsPerHour)
+    spice_ev_timestep = int(60 / scenario.stepsPerHour)  # length of one spice_ev timestep in minutes
     for i in range(scenario.n_intervals):
         charge = list(scenario.connChargeByTS["GC1"][i].values())[0]
         feed_in = scenario.feedInPower["GC1"][i]
@@ -127,12 +127,11 @@ def get_charging_characteristic(
 
         total_cost += max(charge - feed_in, 0) * cost + feed_in * feed_in_cost
 
-        # TODO call function that gets emission at timestamp
         if emission_df is not None:
             current_emission = get_current_emission(
                 timestamp, emission_df, emission_options
             )
-            total_emission += max(charge - feed_in, 0) * current_emission
+            total_emission += max(charge - feed_in, 0) * current_emission / scenario.stepsPerHour
         # set new timestamp
         timestamp += datetime.timedelta(minutes=spice_ev_timestep)
 
