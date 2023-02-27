@@ -403,13 +403,12 @@ class Simulation:
             return empty_dict
 
         charging_result = get_charging_characteristic(
-            spiceev_scenario, self.feed_in_cost,
+            spiceev_scenario,
+            self.feed_in_cost,
         )
 
         max_cost_score = self.max_cost - self.min_cost
-        cost_score = (
-            self.max_cost - charging_result["cost"]
-        ) / max_cost_score
+        cost_score = (self.max_cost - charging_result["cost"]) / max_cost_score
         local_feed_in_score = charging_result["feed_in"]
         soc_score = 0.1 if current_soc < 0.8 else 0  # TODO improve this formula
         score = (

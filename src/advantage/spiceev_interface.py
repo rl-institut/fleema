@@ -91,7 +91,10 @@ def run_spice_ev(spice_ev_dict, strategy, ignore_warnings=True) -> "Scenario":
 
 
 def get_charging_characteristic(
-    scenario, feed_in_cost, emission_df=None, emission_options=None,
+    scenario,
+    feed_in_cost,
+    emission_df=None,
+    emission_options=None,
 ):
     """Calculate average cost and part of charging from feed-in in a spice_ev scenario.
 
@@ -142,9 +145,9 @@ def get_charging_characteristic(
 
     feed_in_factor = min(total_charge_from_feed_in / total_charge, 1)
     result_dict = {
-        "cost": round(average_cost, 4),
-        "feed_in": round(feed_in_factor, 4),
-        "emission": round(total_emission, 4),
+        "cost": round(max(average_cost, 0), 4),
+        "feed_in": round(max(feed_in_factor, 0), 4),
+        "emission": round(max(total_emission, 0), 4),
     }
     return result_dict
 
