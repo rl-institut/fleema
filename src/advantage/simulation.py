@@ -454,8 +454,8 @@ class Simulation:
                 charging_location,
                 next_location,
                 Status.DRIVING,
-                trip_to["trip_time"],
-                trip_to["soc_delta"],
+                trip_from["trip_time"],
+                trip_from["soc_delta"],
             )
             result_dict["task_from"] = task_from
         return result_dict
