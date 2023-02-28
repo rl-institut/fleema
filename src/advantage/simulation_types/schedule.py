@@ -255,8 +255,6 @@ class Schedule(SimulationType):
                     self.execute_task(veh, task)
 
                 veh.export(self.simulation.save_directory)
-        if self.simulation.outputs["vehicle_csv"]:
-            self.simulation.observer.export_log(self.simulation.save_directory)
 
         # generate power grid timeseries for locations
         for location in self.simulation.charging_locations:
