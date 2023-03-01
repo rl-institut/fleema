@@ -23,9 +23,8 @@ class Location:
     grid_info : dict, optional
         Dictionary with grid connection in kW, load and generator time series.
         Example: {"power": 50, "load": load_df, "generator": gen_df}
-    TODO
     output : dict
-        Dictionary with
+        Comprises information on grid power and connected vehicles in total and for every charging point.
 
 
     """
@@ -151,21 +150,23 @@ class Location:
 
         return scenario_dict
 
-    def update_output(self, start_time, end_time, step_size, time_steps, vehicle):
+    def update_output(self, start_time, end_time, step_size, time_steps, charging_power_list):
         """Records newest output when it is called during the vehicle method charge().
 
-        TODO: docstrings
         Parameters
         ----------
         start_time : int
+            Starting step of charging
         end_time : int
+            Excluded end step of charging
         step_size : int
+            Charging time in steps
         time_steps : int
-        vehicle : :obj: `advantage.Vehicle`
+            Number of steps in the scenario
+        charging_power_list : list
+            Charging power for each step during the charging event
 
         """
-        charging_power = vehicle.vehicle_type.charging_capacity["inductive"]
-
         if not self.output:
             self.output = {
                 "total_power": [0 for _ in range(time_steps)],
@@ -177,15 +178,15 @@ class Location:
                     0 for _ in range(time_steps)
                 ]
 
-        for i in range(start_time, end_time, step_size):
-            if i > time_steps:
+        for current_time in range(start_time, end_time, step_size):
+            if current_time > time_steps:
                 print("Charging time is out of time schedule!")
                 break
-
-            self.output[f"{self.chargers[0].name}_power"][i] += charging_power
-            self.output[f"{self.chargers[0].name}_connected_vehicle"][i] += 1
-            self.output["total_power"][i] += charging_power
-            self.output["total_connected_vehicles"][i] += 1
+            charging_power = charging_power_list.pop(0)
+            self.output[f"{self.chargers[0].name}_power"][current_time] += charging_power
+            self.output[f"{self.chargers[0].name}_connected_vehicle"][current_time] += 1
+            self.output["total_power"][current_time] += charging_power
+            self.output["total_connected_vehicles"][current_time] += 1
 
     def export(self, timeseries, directory):
         """Generates csv file of the output as power_grid_timeseries.
@@ -195,10 +196,10 @@ class Location:
             Save directory
 
         """
-        df = {"timestamp": timeseries}
+        output = {"timestamp": timeseries}
         for k, v in self.output.items():
-            df[k] = v
-        activity = pd.DataFrame(df)
+            output[k] = v
+        activity = pd.DataFrame(output)
         activity = activity.reset_index(drop=True)
         activity.to_csv(
             pathlib.Path(directory, f"{self.name}_power_grid_timeseries.csv")
