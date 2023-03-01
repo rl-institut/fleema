@@ -531,9 +531,11 @@ class Simulation:
 
         # parse output options
         vehicle_csv = cfg.getboolean("outputs", "vehicle_csv")
+        location_csv = cfg.getboolean("outputs", "location_csv")
 
         outputs = {
             "vehicle_csv": vehicle_csv,
+            "location_csv": location_csv,
         }
 
         # parse cost options
@@ -544,8 +546,12 @@ class Simulation:
             "column": cfg["cost_options"]["column"],
         }
         emission_options = {
-            "start_time": cfg.get("emission_options", "start_time", fallback=start_date_string),
-            "step_duration": cfg.getint("emission_options", "step_duration", fallback=3600),
+            "start_time": cfg.get(
+                "emission_options", "start_time", fallback=start_date_string
+            ),
+            "step_duration": cfg.getint(
+                "emission_options", "step_duration", fallback=3600
+            ),
             "column": cfg.get("emission_options", "column", fallback="emission"),
         }
 
