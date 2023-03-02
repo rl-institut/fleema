@@ -108,7 +108,7 @@ class SimulationType:
                 task.end_time,
                 self.simulation.step_size,
                 self.simulation.time_steps,
-                charging_power_list
+                charging_power_list,
             )
 
     def get_predicted_soc(self, vehicle: "Vehicle", start: int, end: int):
