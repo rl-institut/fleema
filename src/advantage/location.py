@@ -169,8 +169,8 @@ class Location:
         """
         if not self.output:
             self.output = {
-                "total_power": [0 for _ in range(time_steps)],
-                "total_connected_vehicles": [0 for _ in range(time_steps)],
+                f"{self.name}_total_power": [0 for _ in range(time_steps)],
+                f"{self.name}_total_connected_vehicles": [0 for _ in range(time_steps)],
             }
             for charger in self.chargers:
                 self.output[f"{charger.name}_power"] = [0 for _ in range(time_steps)]
