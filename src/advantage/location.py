@@ -1,5 +1,3 @@
-import pandas as pd
-import pathlib
 from typing import List, TYPE_CHECKING, Optional
 from advantage.util.helpers import deep_update
 
@@ -150,7 +148,9 @@ class Location:
 
         return scenario_dict
 
-    def update_output(self, start_time, end_time, step_size, time_steps, charging_power_list):
+    def update_output(
+        self, start_time, end_time, step_size, time_steps, charging_power_list
+    ):
         """Records newest output when it is called during the vehicle method charge().
 
         Parameters
@@ -169,8 +169,8 @@ class Location:
         """
         if not self.output:
             self.output = {
-                "total_power": [0 for _ in range(time_steps)],
-                "total_connected_vehicles": [0 for _ in range(time_steps)],
+                f"{self.name}_total_power": [0 for _ in range(time_steps)],
+                f"{self.name}_total_connected_vehicles": [0 for _ in range(time_steps)],
             }
             for charger in self.chargers:
                 self.output[f"{charger.name}_power"] = [0 for _ in range(time_steps)]
@@ -183,24 +183,9 @@ class Location:
                 print("Charging time is out of time schedule!")
                 break
             charging_power = charging_power_list.pop(0)
-            self.output[f"{self.chargers[0].name}_power"][current_time] += charging_power
+            self.output[f"{self.chargers[0].name}_power"][
+                current_time
+            ] += charging_power
             self.output[f"{self.chargers[0].name}_connected_vehicle"][current_time] += 1
-            self.output["total_power"][current_time] += charging_power
-            self.output["total_connected_vehicles"][current_time] += 1
-
-    def export(self, timeseries, directory):
-        """Generates csv file of the output as power_grid_timeseries.
-
-        timeseries : :obj: `pandas.DatetimeIndex`
-        directory : :obj:`pathlib.Path`
-            Save directory
-
-        """
-        output = {"timestamp": timeseries}
-        for k, v in self.output.items():
-            output[k] = v
-        activity = pd.DataFrame(output)
-        activity = activity.reset_index(drop=True)
-        activity.to_csv(
-            pathlib.Path(directory, f"{self.name}_power_grid_timeseries.csv")
-        )
+            self.output[f"{self.name}_total_power"][current_time] += charging_power
+            self.output[f"{self.name}_total_connected_vehicles"][current_time] += 1
