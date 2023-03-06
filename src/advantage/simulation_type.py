@@ -103,13 +103,14 @@ class SimulationType:
                 charging_result,
                 self.simulation.observer,
             )
-            task.start_point.update_output(
-                task.start_time,
-                task.end_time,
-                self.simulation.step_size,
-                self.simulation.time_steps,
-                charging_power_list,
-            )
+            if self.simulation.outputs["location_csv"]:
+                task.start_point.update_output(
+                    task.start_time,
+                    task.end_time,
+                    self.simulation.step_size,
+                    self.simulation.time_steps,
+                    charging_power_list,
+                )
 
     def get_predicted_soc(self, vehicle: "Vehicle", start: int, end: int):
         """Calculates predicted SoC of given vehicle after the given timespan by running all tasks.

@@ -530,8 +530,8 @@ class Simulation:
         end_date = date_string_to_datetime(end_date) + datetime.timedelta(1)
 
         # parse output options
-        vehicle_csv = cfg.getboolean("outputs", "vehicle_csv")
-        location_csv = cfg.getboolean("outputs", "location_csv")
+        vehicle_csv = cfg.getboolean("outputs", "vehicle_csv", fallback=True)
+        location_csv = cfg.getboolean("outputs", "location_csv", fallback=False)
 
         outputs = {
             "vehicle_csv": vehicle_csv,
