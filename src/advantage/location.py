@@ -174,7 +174,9 @@ class Location:
             }
             if self.num_chargers > 1:
                 for charger in self.chargers:
-                    self.output[f"{charger.name}_power"] = [0 for _ in range(time_steps)]
+                    self.output[f"{charger.name}_power"] = [
+                        0 for _ in range(time_steps)
+                    ]
                     self.output[f"{charger.name}_connected_vehicle"] = [
                         0 for _ in range(time_steps)
                     ]
@@ -188,6 +190,8 @@ class Location:
                 self.output[f"{self.chargers[0].name}_power"][
                     current_time
                 ] += charging_power
-                self.output[f"{self.chargers[0].name}_connected_vehicle"][current_time] += 1
+                self.output[f"{self.chargers[0].name}_connected_vehicle"][
+                    current_time
+                ] += 1
             self.output[f"{self.name}_total_power"][current_time] += charging_power
             self.output[f"{self.name}_total_connected_vehicles"][current_time] += 1
