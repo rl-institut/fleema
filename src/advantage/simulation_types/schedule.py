@@ -1,3 +1,6 @@
+import pandas as pd
+import pathlib
+
 from advantage.simulation_type import SimulationType
 from typing import TYPE_CHECKING
 from operator import itemgetter
@@ -257,3 +260,32 @@ class Schedule(SimulationType):
                 veh.export(self.simulation.save_directory)
         if self.simulation.outputs["vehicle_csv"]:
             self.simulation.observer.export_log(self.simulation.save_directory)
+
+        # generate power grid timeseries for locations
+        if self.simulation.outputs["location_csv"]:
+            output = {
+                "timestamp": self.simulation.time_series,
+                "total_power": [0 for _ in range(self.simulation.time_steps)],
+                "total_connected_vehicles": [
+                    0 for _ in range(self.simulation.time_steps)
+                ],
+            }
+
+            for location in self.simulation.charging_locations:
+                for k, v in location.output.items():
+                    if "total_power" in k:
+                        output["total_power"] = [
+                            sum(x) for x in zip(v, output["total_power"])
+                        ]
+                    if "total_connected_vehicles" in k:
+                        output["total_connected_vehicles"] = [
+                            sum(x) for x in zip(v, output["total_connected_vehicles"])
+                        ]
+                    output[k] = v
+
+            df = pd.DataFrame(output)
+            df.to_csv(
+                pathlib.Path(
+                    self.simulation.save_directory, "power_grid_timeseries.csv"
+                )
+            )

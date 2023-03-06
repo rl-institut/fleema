@@ -10,7 +10,7 @@ class Location:
 
     This class allows type checking.
 
-    Parameters
+    Attributes
     ----------
     name : str
         Name/ID of the location.
@@ -21,7 +21,9 @@ class Location:
     grid_info : dict, optional
         Dictionary with grid connection in kW, load and generator time series.
         Example: {"power": 50, "load": load_df, "generator": gen_df}
-    output :
+    output : dict
+        Comprises information on grid power and connected vehicles in total and for every charging point.
+
 
     """
 
@@ -31,6 +33,7 @@ class Location:
         location_type: str = "",  # TODO remove?
         chargers: Optional[List["Charger"]] = None,
         grid_info: Optional[dict] = None,
+        event_csv: Optional[bool] = True,
     ):
         """
         Constructor of the Location class.
@@ -53,6 +56,7 @@ class Location:
         self.chargers = chargers if chargers else []
         self.grid_info = grid_info
         self.output = None
+        self.event_csv = event_csv
         self.generator_exists = False
 
     @property
@@ -143,3 +147,51 @@ class Location:
             deep_update(scenario_dict, info)
 
         return scenario_dict
+
+    def update_output(
+        self, start_time, end_time, step_size, time_steps, charging_power_list
+    ):
+        """Records newest output when it is called during the vehicle method charge().
+
+        Parameters
+        ----------
+        start_time : int
+            Starting step of charging
+        end_time : int
+            Excluded end step of charging
+        step_size : int
+            Charging time in steps
+        time_steps : int
+            Number of steps in the scenario
+        charging_power_list : list
+            Charging power for each step during the charging event
+
+        """
+        if not self.output:
+            self.output = {
+                f"{self.name}_total_power": [0 for _ in range(time_steps)],
+                f"{self.name}_total_connected_vehicles": [0 for _ in range(time_steps)],
+            }
+            if self.num_chargers > 1:
+                for charger in self.chargers:
+                    self.output[f"{charger.name}_power"] = [
+                        0 for _ in range(time_steps)
+                    ]
+                    self.output[f"{charger.name}_connected_vehicle"] = [
+                        0 for _ in range(time_steps)
+                    ]
+
+        for current_time in range(start_time, end_time, step_size):
+            if current_time > time_steps:
+                print("Charging time is out of time schedule!")
+                break
+            charging_power = charging_power_list.pop(0)
+            if self.num_chargers > 1:
+                self.output[f"{self.chargers[0].name}_power"][
+                    current_time
+                ] += charging_power
+                self.output[f"{self.chargers[0].name}_connected_vehicle"][
+                    current_time
+                ] += 1
+            self.output[f"{self.name}_total_power"][current_time] += charging_power
+            self.output[f"{self.name}_total_connected_vehicles"][current_time] += 1
