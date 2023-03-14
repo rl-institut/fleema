@@ -169,7 +169,7 @@ class Vehicle:
 
         """
         if self.vehicle_type.event_csv:
-            self.soc = round(self.soc, 4)
+            self.soc = round(self.soc, 8)
             self.output["timestamp"].append(timestamp)
             self.output["event_start"].append(event_start)
             self.output["event_time"].append(event_time)
