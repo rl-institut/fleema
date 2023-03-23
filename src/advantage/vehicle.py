@@ -220,7 +220,7 @@ class Vehicle:
                 self.output["end_location"].append("")
             if simulation_state is not None:
                 simulation_state.update_vehicle(self)
-                simulation_state.log_data(charging_demand, charging_result, distance)
+                simulation_state.log_data(charging_demand, charging_result, distance, consumption)
             self.output["consumption"].append(round(interp_consumption, 4))
 
     def add_task(self, task: "Task"):
