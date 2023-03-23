@@ -48,9 +48,9 @@ class SimulationState:
         self.add_to_accumulated_results("distance", distance)
         self.add_to_accumulated_results("charging_demand", charging_demand)
         if charging_result is not None:
-            cost = round(charging_demand * charging_result["cost"], 4)
+            cost = charging_result["cost"]
             emission = charging_result["emission"]
-            energy_from_feed_in = round(charging_demand * charging_result["feed_in"], 4)
+            energy_from_feed_in = charging_demand * charging_result["feed_in"]
             energy_from_grid = charging_demand - energy_from_feed_in
             self.add_to_accumulated_results("cost", cost)
             self.add_to_accumulated_results("emission", emission)
