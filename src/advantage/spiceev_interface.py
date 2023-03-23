@@ -114,7 +114,7 @@ def get_charging_characteristic(
     Returns
     -------
     dict[string, float]
-        Keys: "cost" contains average cost in €/kWh,
+        Keys: "cost" contains total cost in €,
         "feed_in": renewable part of charging energy [0-1],
         "emission": total CO2-emission in g
 
@@ -133,9 +133,12 @@ def get_charging_characteristic(
         cost = scenario.prices["GC1"][i]
 
         total_charge += charge
-        total_charge_from_feed_in += min(charge, feed_in)
+        charge_from_feed_in = min(charge, feed_in)
+        total_charge_from_feed_in += charge_from_feed_in
 
-        total_cost += max(charge - feed_in, 0) * cost + feed_in * feed_in_cost
+        total_cost += (
+            max(charge - feed_in, 0) * cost + charge_from_feed_in * feed_in_cost
+        ) / scenario.stepsPerHour
 
         if emission_df is not None:
             current_emission = get_current_time_series_value(
@@ -147,13 +150,12 @@ def get_charging_characteristic(
         # set new timestamp
         timestamp += datetime.timedelta(minutes=spice_ev_timestep)
 
-    average_cost = total_cost / total_charge
-
     feed_in_factor = min(total_charge_from_feed_in / total_charge, 1)
     result_dict = {
-        "cost": round(max(average_cost, 0), 4),
-        "feed_in": round(max(feed_in_factor, 0), 4),
-        "emission": round(max(total_emission, 0), 4),
+        "cost": max(total_cost, 0),
+        "feed_in": max(feed_in_factor, 0),
+        "emission": max(total_emission, 0),
+        "grid_energy": max(total_charge / scenario.stepsPerHour, 0),
     }
     return result_dict
 

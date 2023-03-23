@@ -395,7 +395,8 @@ class Simulation:
             charging_start + charging_time,
             mock_vehicle,
         )
-        charged_soc = spiceev_scenario.socs[-1][0] - current_soc  # type: ignore
+        charged_soc = (spiceev_scenario.strat.world_state.vehicles[mock_vehicle.id].battery.soc
+                       - current_soc)
         if charged_soc <= 0 or math.isnan(charged_soc):
             return empty_dict
         charge_score = 1 - ((-drive_soc) / charged_soc)
@@ -408,7 +409,11 @@ class Simulation:
         )
 
         max_cost_score = self.max_cost - self.min_cost
-        cost_score = (self.max_cost - charging_result["cost"]) / max_cost_score
+        cost_score = (
+            self.max_cost
+            - charging_result["cost"]
+            / (charged_soc * mock_vehicle.vehicle_type.battery_capacity)
+        ) / max_cost_score
         local_feed_in_score = charging_result["feed_in"]
         soc_score = 0.1 if current_soc < 0.8 else 0  # TODO improve this formula
         score = (

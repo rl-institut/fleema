@@ -127,6 +127,7 @@ class Vehicle:
             "soc_start": [],
             "soc_end": [],
             "energy": [],
+            "actual_energy_from_grid": [],
             "station_charging_capacity": [],
             "average_charging_power": [],
             "distance": [],
@@ -176,7 +177,7 @@ class Vehicle:
 
         """
         if self.vehicle_type.event_csv:
-            self.soc = round(self.soc, 8)
+            self.soc = self.soc
             self.output["timestamp"].append(timestamp)
             self.output["event_start"].append(event_start)
             self.output["event_time"].append(event_time)
@@ -194,6 +195,9 @@ class Vehicle:
             self.output["average_charging_power"].append(round(charging_power, 4))
             self.output["distance"].append(distance)
             if charging_result is not None:
+                self.output["actual_energy_from_grid"].append(
+                    charging_result["grid_energy"]
+                )
                 energy_from_feed_in = round(
                     charging_demand * charging_result["feed_in"], 4
                 )
@@ -201,11 +205,10 @@ class Vehicle:
                 self.output["energy_from_grid"].append(
                     charging_demand - energy_from_feed_in
                 )
-                self.output["energy_cost"].append(
-                    round(charging_demand * charging_result["cost"], 4)
-                )
+                self.output["energy_cost"].append(round(charging_result["cost"], 8))
                 self.output["emission"].append(charging_result["emission"])
             else:
+                self.output["actual_energy_from_grid"].append(0)
                 self.output["energy_from_feed_in"].append(0)
                 self.output["energy_from_grid"].append(0)
                 self.output["energy_cost"].append(0)
@@ -518,7 +521,7 @@ class Vehicle:
         if len(self.output["soc_start"]):
             charging_demand = self.output["soc_end"][-1] - self.output["soc_start"][-1]
             charging_demand *= self.vehicle_type.battery_capacity
-            return max(round(charging_demand, 4), 0)
+            return max(charging_demand, 0)
         else:
             return 0
 
@@ -527,6 +530,6 @@ class Vehicle:
         if len(self.output["soc_start"]):
             last_consumption = self.output["soc_end"][-1] - self.output["soc_start"][-1]
             last_consumption *= self.vehicle_type.battery_capacity
-            return min(round(last_consumption, 4), 0)
+            return min(last_consumption, 0)
         else:
             return 0

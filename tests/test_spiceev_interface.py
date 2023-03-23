@@ -73,4 +73,4 @@ def test_run_spice_ev(car, time_series, spot, cost_options):
     spice_dict["components"]["vehicles"]["car"]["connected_charging_station"] = "point_0"
     scenario = run_spice_ev(spice_dict, "balanced")
     # check if soc is higher than before
-    assert scenario.socs[-1][0] > car.soc  # type: ignore
+    assert scenario.strat.world_state.vehicles[car.id].battery.soc > car.soc  # type: ignore
