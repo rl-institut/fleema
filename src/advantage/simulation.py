@@ -72,7 +72,6 @@ class Simulation:
     def __init__(
         self,
         vehicle_types,
-        locations,
         charging_points,
         cfg_dict,
         data_dict,
@@ -83,8 +82,6 @@ class Simulation:
         ----------
         vehicle_types : dict
             Dictionary with the given types of vehicles and their features that are used in the scenario.
-        locations : list
-            List with names of locations which can be charging and non-charging locations.
         charging_points : dict
             Dictionary with the given types of charging points and their features that are used in the scenario.
         cfg_dict : dict
@@ -168,7 +165,9 @@ class Simulation:
         self.vehicles: Dict[Union[str, int], "Vehicle"] = {}
 
         self.locations: Dict[str, "Location"] = {}
-        for location_name in locations:
+        x = data_dict["distance"].keys()
+        print(x)
+        for location_name in data_dict["distance"].keys():
             self.locations[location_name] = Location(location_name)
 
         self.plug_types: Dict[int, "PlugType"] = {}
@@ -518,11 +517,6 @@ class Simulation:
             vehicle_types = json.load(f)
         vehicle_types = vehicle_types["vehicle_types"]
 
-        # parse locations
-        location_file_path = pathlib.Path(scenario_data_path, cfg["files"]["distance"])
-        locations = list(pd.read_csv(location_file_path).keys())
-        locations.pop(0)
-
         charging_points_file = cfg["files"]["charging_points"]
         ext = charging_points_file.split(".")[-1]
         if ext != "json":
@@ -611,7 +605,6 @@ class Simulation:
 
         return Simulation(
             vehicle_types,
-            locations,
             charging_points,
             cfg_dict,
             data_dict,
