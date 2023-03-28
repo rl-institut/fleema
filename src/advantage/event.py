@@ -65,6 +65,7 @@ class Task(Event):
     task: Status
     float_time: float = 0.0
     delta_soc: float = 0.0
+    consumption: float = 0.0
 
     @property
     def is_calculated(self):
@@ -74,4 +75,6 @@ class Task(Event):
         -------
         bool
         """
-        return self.float_time != 0.0 and self.delta_soc != 0.0
+        return (
+            self.float_time != 0.0 and self.delta_soc != 0.0 and self.consumption != 0.0
+        )
