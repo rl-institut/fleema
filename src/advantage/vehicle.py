@@ -134,6 +134,7 @@ class Vehicle:
             "energy_from_grid": [],
             "energy_cost": [],
             "emission": [],
+            "consumption": [],
         }
 
     def _update_activity(
@@ -146,6 +147,7 @@ class Vehicle:
         nominal_charging_capacity=0,
         distance=0.0,
         charging_result=None,
+        interp_consumption=0,
     ):
         """Records newest energy and activity in the attributes soc and output.
 
@@ -165,7 +167,12 @@ class Vehicle:
             Charging power of the vehicle's battery in percentage. Default is zero.
         nominal_charging_capacity : float
             Power of the connected charging point.
-
+        distance : float
+            Potential distance between two locations. Default is zero.
+        charging_result : charging_result : dict[string, float]
+            Default is None.
+        interp_consumption : float
+            Consumption from when driving, calculated by the driving simulation. Default is zero.
 
         """
         if self.vehicle_type.event_csv:
@@ -211,6 +218,7 @@ class Vehicle:
             if simulation_state is not None:
                 simulation_state.update_vehicle(self)
                 simulation_state.log_data(charging_demand, charging_result, distance)
+            self.output["consumption"].append(round(interp_consumption, 4))
 
     def add_task(self, task: "Task"):
         """Add a task to the self.tasks using the start_time as key."""
@@ -340,6 +348,7 @@ class Vehicle:
         power : float
         new_soc : float
         charging_capacity : float
+        charging_result : dict[string, float]
         observer : Optional[SimulationState]
         """
         if not all(
@@ -376,6 +385,7 @@ class Vehicle:
         new_soc: float,
         distance: float,
         observer=None,
+        interp_consumption=0,
     ):
         """This method updates the vehicle with driving results.
 
@@ -386,7 +396,11 @@ class Vehicle:
         time : int
         destination : Location
         new_soc : float
-        observer : Optional[SimulationState]"""
+        distance : float
+        observer : Optional[SimulationState]
+        interp_consumption : float
+
+        """
         # call drive api with task, soc, ...
         if not all(
             isinstance(i, int) or isinstance(i, float) for i in [start, time, new_soc]
@@ -418,7 +432,14 @@ class Vehicle:
         self.status = Status.DRIVING
         self.soc = new_soc
         self.current_location = destination
-        self._update_activity(timestamp, start, time, observer, distance=distance)
+        self._update_activity(
+            timestamp,
+            start,
+            time,
+            observer,
+            distance=distance,
+            interp_consumption=interp_consumption,
+        )
 
     def park(self, timestamp, start, time, observer=None):
         """This method updates the vehicle after a parking event."""

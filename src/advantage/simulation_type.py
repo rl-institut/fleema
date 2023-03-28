@@ -42,6 +42,7 @@ class SimulationType:
             Task to be executed
         """
         if task.task == Status.DRIVING:
+            trip = None
             if not task.is_calculated:
                 trip = self.simulation.driving_sim.calculate_trip(
                     task.start_point,
@@ -55,6 +56,14 @@ class SimulationType:
             distance, _ = self.simulation.driving_sim.get_location_values(
                 task.start_point, task.end_point
             )
+            if not trip:
+                trip = self.simulation.driving_sim.calculate_trip(
+                    task.start_point,
+                    task.end_point,
+                    vehicle.vehicle_type,
+                    self.simulation.average_speed,
+                    str(self.simulation.time_series[task.start_time]),
+                )
             vehicle.drive(
                 step_to_timestamp(self.simulation.time_series, task.start_time),
                 task.start_time,
@@ -63,6 +72,7 @@ class SimulationType:
                 vehicle.soc + task.delta_soc,
                 distance,
                 self.simulation.observer,
+                trip["consumption"],
             )
         elif task.task == Status.CHARGING:
             # call spiceev to calculate charging
