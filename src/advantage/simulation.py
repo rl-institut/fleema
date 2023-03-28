@@ -165,9 +165,7 @@ class Simulation:
         self.vehicles: Dict[Union[str, int], "Vehicle"] = {}
 
         self.locations: Dict[str, "Location"] = {}
-        x = data_dict["distance"].keys()
-        print(x)
-        for location_name in data_dict["distance"].keys():
+        for location_name in data_dict["distance"]:
             self.locations[location_name] = Location(location_name)
 
         self.plug_types: Dict[int, "PlugType"] = {}
