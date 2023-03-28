@@ -80,14 +80,14 @@ class Simulation:
 
         Parameters
         ----------
-        schedule : pandas.core.frame.DataFrame
-            Pandas Dataframe with information about the specific route of the given vehicle fleet.
         vehicle_types : dict
             Dictionary with the given types of vehicles and their features that are used in the scenario.
         charging_points : dict
             Dictionary with the given types of charging points and their features that are used in the scenario.
         cfg_dict : dict
             Dictionary with configuration details which are used in the Simulation class to influence the outcome.
+        data_dict : dict
+            Dictionary of Pandas dataframes: schedule, consumption, distance, incline, temperature and emission.
 
         """
         self.soc_min = cfg_dict["soc_min"]
@@ -165,7 +165,7 @@ class Simulation:
         self.vehicles: Dict[Union[str, int], "Vehicle"] = {}
 
         self.locations: Dict[str, "Location"] = {}
-        for location_name in self.schedule.departure_name.unique():
+        for location_name in data_dict["distance"]:
             self.locations[location_name] = Location(location_name)
 
         self.plug_types: Dict[int, "PlugType"] = {}
