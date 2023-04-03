@@ -48,8 +48,9 @@ class SimulationType:
                     task.end_point,
                     vehicle.vehicle_type,
                     self.simulation.average_speed,
-                    self.simulation.time_series[task.start_time],
+                    str(self.simulation.time_series[task.start_time]),
                 )
+                task.consumption = trip["consumption"]
                 task.delta_soc = trip["soc_delta"]
                 task.float_time = trip["trip_time"]
             distance, _ = self.simulation.driving_sim.get_location_values(
@@ -63,6 +64,7 @@ class SimulationType:
                 vehicle.soc + task.delta_soc,
                 distance,
                 self.simulation.observer,
+                task.consumption,
             )
         elif task.task == Status.CHARGING:
             # call spiceev to calculate charging
