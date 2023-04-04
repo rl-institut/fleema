@@ -37,14 +37,39 @@ def soc_plot(simulation: "Simulation"):
         ax.plot(ts, vehicles_soc_list[veh])
     ax.set_title("SOC of vehicles over time")
     ax.set_ylabel("SOC in percentage")
-    # plt.xticks(rotation=45)
     fig.autofmt_xdate(rotation=45)
     ax.legend(simulation.vehicles.keys())
     fig.savefig(simulation.save_directory / "soc_timeseries.png")
 
 
-def grid_timeseries():
-    pass
+def grid_timeseries(simulation: "Simulation"):
+    """Generates plots for every grid (location) with the number of charging vehicles over time.
+
+    Parameters
+    ----------
+    simulation : Simulation
+        The current simulation object that holds the grids (locations) with their "output" attribute.
+    """
+    for location in simulation.locations:
+        output = simulation.locations[location].output
+        if output is None:
+            continue
+        y = []
+        if len(output) <= 2:
+            y.append(output[f"{location}_total_power"])
+        else:
+            for key in output.keys():
+                y.append(output[key])
+        # plot
+        fig, ax = plt.subplots()
+        for plot_data in y:
+            ax.plot(simulation.time_series, plot_data)
+        ax.set_title("Grid Timeseries")
+        ax.set_ylabel("Number of vehicles charging")
+        fig.autofmt_xdate(rotation=45)
+        ax.legend(output.keys())
+        plt.savefig(simulation.save_directory / f"{location}_timeseries.png")
+        plt.clf()
 
 
 def energy_from_grid_vs_pv():
@@ -55,6 +80,6 @@ def plot(simulation, flag=False):
     """Generates all output plots and saves them in the output directory."""
 
     if flag:
-        soc_plot(simulation)
-        grid_timeseries()
+        # soc_plot(simulation)
+        grid_timeseries(simulation)
         energy_from_grid_vs_pv()
