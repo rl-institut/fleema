@@ -532,10 +532,12 @@ class Simulation:
         # parse output options
         vehicle_csv = cfg.getboolean("outputs", "vehicle_csv", fallback=True)
         location_csv = cfg.getboolean("outputs", "location_csv", fallback=False)
+        plots_png = cfg.getboolean("outputs", "plots_png", fallback=True)
 
         outputs = {
             "vehicle_csv": vehicle_csv,
             "location_csv": location_csv,
+            "plots_png": plots_png,
         }
 
         # parse cost options

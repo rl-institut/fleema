@@ -291,5 +291,4 @@ class Schedule(SimulationType):
                 )
             )
 
-        # todo: plot function call
-        plot(self.simulation, flag=True)
+        plot(self.simulation, flag=self.simulation.outputs["plots_png"])
