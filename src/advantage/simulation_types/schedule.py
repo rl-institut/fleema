@@ -290,5 +290,6 @@ class Schedule(SimulationType):
                     self.simulation.save_directory, "power_grid_timeseries.csv"
                 )
             )
+            self.simulation.outputs["total_power"] = output["total_power"]
 
         plot(self.simulation, flag=self.simulation.outputs["plots_png"])

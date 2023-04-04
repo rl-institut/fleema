@@ -9,6 +9,7 @@ plot
 
 """
 
+import pathlib
 import matplotlib.pyplot as plt
 
 from advantage.simulation import Simulation
@@ -47,7 +48,7 @@ def soc_plot(simulation: "Simulation"):
     ax.set_ylabel("SOC in percentage")
     fig.autofmt_xdate(rotation=45)
     ax.legend(simulation.vehicles.keys())
-    fig.savefig(simulation.save_directory / "soc_timeseries.png")
+    fig.savefig(simulation.save_directory / "plots" / "soc_timeseries.png")
 
 
 def grid_timeseries(simulation: "Simulation"):
@@ -58,6 +59,16 @@ def grid_timeseries(simulation: "Simulation"):
     simulation : Simulation
         The current simulation object that holds the grids (locations) with their "output" attribute.
     """
+    # total grid timeseries
+    fig, ax = plt.subplots()
+    ax.plot(simulation.time_series, simulation.outputs["total_power"])
+    ax.set_title("Total Power Grid Timeseries")
+    ax.set_ylabel("kWh")
+    fig.autofmt_xdate(rotation=45)
+    plt.savefig(simulation.save_directory / "plots" / "Total_power_timeseries.png")
+    plt.clf()
+
+    # timeseries by location (grid)
     for location in simulation.locations:
         output = simulation.locations[location].output
         if output is None:
@@ -72,21 +83,29 @@ def grid_timeseries(simulation: "Simulation"):
         fig, ax = plt.subplots()
         for plot_data in y:
             ax.plot(simulation.time_series, plot_data)
-        ax.set_title("Grid Timeseries")
-        ax.set_ylabel("Number of vehicles charging")
+        ax.set_title(f"{location} Grid Timeseries")
+        ax.set_ylabel("kWh")
         fig.autofmt_xdate(rotation=45)
-        ax.legend(output.keys())
-        plt.savefig(simulation.save_directory / f"{location}_timeseries.png")
+        plt.savefig(simulation.save_directory / "plots" / f"{location}_timeseries.png")
         plt.clf()
 
 
-def energy_from_grid_vs_pv(simulation):
+def energy_from_grid_vs_feed_in(simulation):
     pass
 
 
 def plot(simulation, flag=False):
-    """Generates all output plots and saves them in the output directory."""
+    """Generates all output plots and saves them in the output directory.
+
+    Parameters
+    ----------
+    simulation : Simulation
+        The current simulation object
+    flag : bool
+        Is to be changed in the config and decides if the plots are being generated. Default is False.
+    """
     if flag:
+        pathlib.Path(simulation.save_directory / "plots").mkdir(parents=True, exist_ok=True)
         soc_plot(simulation)
         grid_timeseries(simulation)
-        energy_from_grid_vs_pv()
+        energy_from_grid_vs_feed_in(simulation)
