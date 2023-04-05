@@ -21,7 +21,7 @@ def soc_plot(simulation: "Simulation"):
     Parameters
     ----------
     simulation : Simulation
-        The current simulation object that holds the grids (locations) with their "output" attribute.
+        The current simulation object with the vehicles and their socs.
     """
     # data
     vehicles_soc_list = {
@@ -52,7 +52,7 @@ def soc_plot(simulation: "Simulation"):
 
 
 def grid_timeseries(simulation: "Simulation"):
-    """Generates plots for every grid (location) with the number of charging vehicles over time.
+    """Generates plots for every grid (location) with the energy charging over time.
 
     Parameters
     ----------
@@ -90,11 +90,26 @@ def grid_timeseries(simulation: "Simulation"):
         plt.clf()
 
 
-def energy_from_grid_vs_feed_in(simulation):
-    pass
+def energy_from_grid_feedin(simulation: "Simulation"):
+    """Generates a pie-chart with the distribution of the energy in grid and feed-in.
+
+    Parameters
+    ----------
+    simulation : Simulation
+        The current simulation object with vehicles and its drawn energy.
+    """
+    grid_and_feedin = [0, 0]
+    for vehicle in simulation.vehicles.keys():
+        grid_and_feedin[0] += sum(simulation.vehicles[vehicle].output["energy_from_grid"])
+        grid_and_feedin[1] += sum(simulation.vehicles[vehicle].output["energy_from_feed_in"])
+    fig, ax = plt.subplots()
+    ax.set_title("Energy Distribution")
+    ax.pie(grid_and_feedin, labels=['Grid', 'Feed-in'], autopct='%1.1f%%')
+    fig.savefig(simulation.save_directory / "plots" / "energy_distribution.png")
+    plt.clf()
 
 
-def plot(simulation, flag=False):
+def plot(simulation: "Simulation", flag=False):
     """Generates all output plots and saves them in the output directory.
 
     Parameters
@@ -106,6 +121,6 @@ def plot(simulation, flag=False):
     """
     if flag:
         pathlib.Path(simulation.save_directory / "plots").mkdir(parents=True, exist_ok=True)
-        soc_plot(simulation)
-        grid_timeseries(simulation)
-        energy_from_grid_vs_feed_in(simulation)
+        # soc_plot(simulation)
+        # grid_timeseries(simulation)
+        energy_from_grid_feedin(simulation)
