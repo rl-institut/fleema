@@ -192,20 +192,18 @@ class Vehicle:
             consumption = self._get_last_consumption()
             self.output["energy"].append(charging_demand + consumption)
             self.output["station_charging_capacity"].append(nominal_charging_capacity)
-            self.output["average_charging_power"].append(round(charging_power, 4))
+            self.output["average_charging_power"].append(charging_power)
             self.output["distance"].append(distance)
             if charging_result is not None:
                 self.output["actual_energy_from_grid"].append(
                     charging_result["grid_energy"]
                 )
-                energy_from_feed_in = round(
-                    charging_demand * charging_result["feed_in"], 4
-                )
+                energy_from_feed_in = charging_demand * charging_result["feed_in"]
                 self.output["energy_from_feed_in"].append(energy_from_feed_in)
                 self.output["energy_from_grid"].append(
                     charging_demand - energy_from_feed_in
                 )
-                self.output["energy_cost"].append(round(charging_result["cost"], 8))
+                self.output["energy_cost"].append(charging_result["cost"])
                 self.output["emission"].append(charging_result["emission"])
             else:
                 self.output["actual_energy_from_grid"].append(0)
@@ -221,7 +219,7 @@ class Vehicle:
             if simulation_state is not None:
                 simulation_state.update_vehicle(self)
                 simulation_state.log_data(charging_demand, charging_result, distance, consumption)
-            self.output["consumption"].append(round(interp_consumption, 4))
+            self.output["consumption"].append(interp_consumption)
 
     def add_task(self, task: "Task"):
         """Add a task to the self.tasks using the start_time as key."""
@@ -467,6 +465,7 @@ class Vehicle:
             activity = pd.DataFrame(self.output)
 
             activity = activity.reset_index(drop=True)
+            activity = activity.round(4)
             activity.to_csv(pathlib.Path(directory, f"{self.id}_events.csv"))
 
     @property
