@@ -395,8 +395,10 @@ class Simulation:
             charging_start + charging_time,
             mock_vehicle,
         )
-        charged_soc = (spiceev_scenario.strat.world_state.vehicles[mock_vehicle.id].battery.soc
-                       - current_soc)
+        charged_soc = (
+            spiceev_scenario.strat.world_state.vehicles[mock_vehicle.id].battery.soc
+            - current_soc
+        )
         if charged_soc <= 0 or math.isnan(charged_soc):
             return empty_dict
         charge_score = 1 - ((-drive_soc) / charged_soc)

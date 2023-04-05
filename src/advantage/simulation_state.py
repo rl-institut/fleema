@@ -57,7 +57,9 @@ class SimulationState:
             self.add_to_accumulated_results("emission", emission)
             self.add_to_accumulated_results("energy_from_feed_in", energy_from_feed_in)
             self.add_to_accumulated_results("energy_from_grid", energy_from_grid)
-            self.add_to_accumulated_results("actual_energy_from_grid", charging_result["grid_energy"])
+            self.add_to_accumulated_results(
+                "actual_energy_from_grid", charging_result["grid_energy"]
+            )
 
     def calculate_key_log_parameters(self):
         """Calculates values for the log files."""
