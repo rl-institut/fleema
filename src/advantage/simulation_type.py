@@ -100,7 +100,7 @@ class SimulationType:
                 task.start_time,
                 task.end_time - task.start_time,
                 average_charging_power,
-                spiceev_scenario.socs[-1][0],
+                spiceev_scenario.strat.world_state.vehicles[vehicle.id].battery.soc,
                 nominal_charging_power,
                 charging_result,
                 self.simulation.observer,

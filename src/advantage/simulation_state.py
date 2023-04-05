@@ -43,19 +43,23 @@ class SimulationState:
         elif vehicle.status == Status.CHARGING:
             self.charging_vehicles.append(vehicle)
 
-    def log_data(self, charging_demand, charging_result, distance):
+    def log_data(self, charging_demand, charging_result, distance, consumption):
         """Accumulates specified event data and save it in self.accumulated_results."""
         self.add_to_accumulated_results("distance", distance)
         self.add_to_accumulated_results("charging_demand", charging_demand)
+        self.add_to_accumulated_results("consumption", consumption)
         if charging_result is not None:
-            cost = round(charging_demand * charging_result["cost"], 4)
+            cost = charging_result["cost"]
             emission = charging_result["emission"]
-            energy_from_feed_in = round(charging_demand * charging_result["feed_in"], 4)
+            energy_from_feed_in = charging_demand * charging_result["feed_in"]
             energy_from_grid = charging_demand - energy_from_feed_in
             self.add_to_accumulated_results("cost", cost)
             self.add_to_accumulated_results("emission", emission)
             self.add_to_accumulated_results("energy_from_feed_in", energy_from_feed_in)
             self.add_to_accumulated_results("energy_from_grid", energy_from_grid)
+            self.add_to_accumulated_results(
+                "actual_energy_from_grid", charging_result["grid_energy"]
+            )
 
     def calculate_key_log_parameters(self):
         """Calculates values for the log files."""

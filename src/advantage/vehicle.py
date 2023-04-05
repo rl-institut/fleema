@@ -127,6 +127,7 @@ class Vehicle:
             "soc_start": [],
             "soc_end": [],
             "energy": [],
+            "actual_energy_from_grid": [],
             "station_charging_capacity": [],
             "average_charging_power": [],
             "distance": [],
@@ -176,7 +177,7 @@ class Vehicle:
 
         """
         if self.vehicle_type.event_csv:
-            self.soc = round(self.soc, 8)
+            self.soc = self.soc
             self.output["timestamp"].append(timestamp)
             self.output["event_start"].append(event_start)
             self.output["event_time"].append(event_time)
@@ -191,21 +192,21 @@ class Vehicle:
             consumption = self._get_last_consumption()
             self.output["energy"].append(charging_demand + consumption)
             self.output["station_charging_capacity"].append(nominal_charging_capacity)
-            self.output["average_charging_power"].append(round(charging_power, 4))
+            self.output["average_charging_power"].append(charging_power)
             self.output["distance"].append(distance)
             if charging_result is not None:
-                energy_from_feed_in = round(
-                    charging_demand * charging_result["feed_in"], 4
+                self.output["actual_energy_from_grid"].append(
+                    charging_result["grid_energy"]
                 )
+                energy_from_feed_in = charging_demand * charging_result["feed_in"]
                 self.output["energy_from_feed_in"].append(energy_from_feed_in)
                 self.output["energy_from_grid"].append(
                     charging_demand - energy_from_feed_in
                 )
-                self.output["energy_cost"].append(
-                    round(charging_demand * charging_result["cost"], 4)
-                )
+                self.output["energy_cost"].append(charging_result["cost"])
                 self.output["emission"].append(charging_result["emission"])
             else:
+                self.output["actual_energy_from_grid"].append(0)
                 self.output["energy_from_feed_in"].append(0)
                 self.output["energy_from_grid"].append(0)
                 self.output["energy_cost"].append(0)
@@ -217,8 +218,10 @@ class Vehicle:
                 self.output["end_location"].append("")
             if simulation_state is not None:
                 simulation_state.update_vehicle(self)
-                simulation_state.log_data(charging_demand, charging_result, distance)
-            self.output["consumption"].append(round(interp_consumption, 4))
+                simulation_state.log_data(
+                    charging_demand, charging_result, distance, consumption
+                )
+            self.output["consumption"].append(interp_consumption)
 
     def add_task(self, task: "Task"):
         """Add a task to the self.tasks using the start_time as key."""
@@ -464,6 +467,7 @@ class Vehicle:
             activity = pd.DataFrame(self.output)
 
             activity = activity.reset_index(drop=True)
+            activity = activity.round(4)
             activity.to_csv(pathlib.Path(directory, f"{self.id}_events.csv"))
 
     @property
@@ -518,7 +522,7 @@ class Vehicle:
         if len(self.output["soc_start"]):
             charging_demand = self.output["soc_end"][-1] - self.output["soc_start"][-1]
             charging_demand *= self.vehicle_type.battery_capacity
-            return max(round(charging_demand, 4), 0)
+            return max(charging_demand, 0)
         else:
             return 0
 
@@ -527,6 +531,6 @@ class Vehicle:
         if len(self.output["soc_start"]):
             last_consumption = self.output["soc_end"][-1] - self.output["soc_start"][-1]
             last_consumption *= self.vehicle_type.battery_capacity
-            return min(round(last_consumption, 4), 0)
+            return min(last_consumption, 0)
         else:
             return 0
