@@ -4,7 +4,7 @@ Functions
 ---------
 soc_plot
 grid_timeseries
-energy_from_grid_vs_pv
+energy_from_grid_feedin
 plot
 
 """
@@ -193,7 +193,10 @@ def energy_from_grid_feedin(simulation: "Simulation"):
 
 
 def plot(simulation: "Simulation", flag=False):
-    """Generates all output plots and saves them in the output directory.
+    """Generates all output plots and saves them in the results directory.
+
+    Static Matplotlib plots are saved in the results directory under plots and
+    the dynamic Plotly plots are saved as html files in directory html under plots.
 
     Parameters
     ----------
