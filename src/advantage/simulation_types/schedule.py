@@ -2,6 +2,7 @@ import pandas as pd
 import pathlib
 
 from advantage.simulation_type import SimulationType
+from advantage.plot import plot
 from typing import TYPE_CHECKING
 from operator import itemgetter
 
@@ -290,3 +291,6 @@ class Schedule(SimulationType):
                     self.simulation.save_directory, "power_grid_timeseries.csv"
                 )
             )
+            self.simulation.outputs["total_power"] = output["total_power"]
+
+        plot(self.simulation, flag=self.simulation.outputs["plots_png"])
