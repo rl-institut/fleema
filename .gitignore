@@ -10,6 +10,6 @@ _build
 .coverage
 .idea
 /venv
-results/*/
+/results/*/
 scenario_setting/
 *_data/
