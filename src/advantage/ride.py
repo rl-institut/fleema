@@ -18,6 +18,7 @@ class RideCalc:
         inclines: pd.DataFrame,
         temperature: pd.DataFrame,
         temperature_option,
+        level_of_loading: list,
     ) -> None:
         """RideCalc constructor.
 
@@ -39,6 +40,7 @@ class RideCalc:
         self.inclines = inclines
         self.temperature = temperature
         self.temperature_option = temperature_option
+        self.level_of_loading = level_of_loading
 
         self.uniques = [
             sorted(self.consumption_table[col].unique())
@@ -63,6 +65,8 @@ class RideCalc:
             Ending location of trip
         vehicle_type : VehicleType
             Vehicle type to look up in consumption and for calculation of SoC
+        speed : float
+            Average speed during the given trip.
         departure_time : str
             Departure time represented by a string.
 
@@ -74,7 +78,7 @@ class RideCalc:
         """
         # TODO add load level somewhere?
         temperature = self.get_temperature(departure_time)
-        load_level = 0
+        load_level = self.get_level_of_loading(departure_time)
         distance, incline = self.get_location_values(origin, destination)
         trip_time = distance / speed * 60
         consumption, soc_delta = self.calculate_consumption(
@@ -337,3 +341,6 @@ class RideCalc:
         step = datetime.datetime.strptime(departure_time, "%Y-%m-%d %H:%M:%S").hour
         row = self.temperature.loc[self.temperature["hour"] == step]
         return row[self.temperature_option].values[0]
+
+    def get_level_of_loading(self, departure_time):
+        pass

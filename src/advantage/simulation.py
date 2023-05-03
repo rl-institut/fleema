@@ -144,9 +144,10 @@ class Simulation:
         inclines = data_dict["incline"]
         temperature = data_dict["temperature"]
         temperature_option = cfg_dict["temperature_option"]
+        level_of_loading = data_dict["level_of_loading"]
 
         self.driving_sim = RideCalc(
-            consumption, distances, inclines, temperature, temperature_option
+            consumption, distances, inclines, temperature, temperature_option, level_of_loading
         )
 
         # use other args to create objects

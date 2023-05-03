@@ -101,6 +101,8 @@ def read_input_data(scenario_data_path, cfg):
             capacity = veh_types["vehicle_types"][file_df.loc[i, "vehicle_type"]]["capacity"]
             lol.append(file_df.loc[i, "occupation"] / capacity)
         data_dict["schedule"]["level_of_loading"] = lol
+        data_dict["level_of_loading"] = \
+            pd.DataFrame({"departure_time": file_df["departure_time"].values, "level_of_loading": lol})
 
     return data_dict
 

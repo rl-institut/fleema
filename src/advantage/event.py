@@ -20,7 +20,7 @@ class Status(Enum):
 class Event:
     """Base event dataclass. Includes basic data and representation functions.
 
-    Parameters
+    Attributes
     ----------
     start_time : int
         Starting time step of the event.
@@ -44,20 +44,20 @@ class Event:
 class Task(Event):
     """Saves data for a charging, driving or break event.
 
-    Parameters
+    Attributes
     ----------
-    start_time : int
+    start_point : int
         Starting time step of the event.
-    end_time : int
+    end_point : int
         End time step of the event.
-    departure_point : Location
-        Starting point of the task.
-    arrival_point : Location
-        End point of the task.
     task : Status
         Status (Enum): DRIVING, CHARGING, PARKING, BREAK.
+    float_time : float
+        Length of the task.
     delta_soc : float
         A positive delta_soc means charging, negative is consumption.
+    consumption : float
+        Energy drain of the task.
     """
 
     start_point: "Location"
