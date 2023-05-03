@@ -100,7 +100,7 @@ def read_input_data(scenario_data_path, cfg):
         for i in range(len(file_df)):
             capacity = veh_types["vehicle_types"][file_df.loc[i, "vehicle_type"]]["capacity"]
             lol.append(file_df.loc[i, "occupation"] / capacity)
-        file_df["level_of_loading"] = lol
+        data_dict["schedule"]["level_of_loading"] = lol
 
     return data_dict
 
