@@ -18,7 +18,7 @@ class RideCalc:
         inclines: pd.DataFrame,
         temperature: pd.DataFrame,
         temperature_option,
-        level_of_loading: list,
+        level_of_loading: pd.DataFrame,
     ) -> None:
         """RideCalc constructor.
 
@@ -76,7 +76,15 @@ class RideCalc:
             Returns dict with the keys "consumption", "soc_delta", "trip_time"
 
         """
-        # TODO add load level somewhere?
+        # check departure time format
+        try:
+            datetime.datetime.strptime(departure_time, "%Y-%m-%d %H:%M:%S")
+        except ValueError:
+            warnings.warn(
+                "Bad format: Wrong datetime string format. Example: '2022-01-01 01:01:00'"
+            )
+            departure_time = "2022-01-01 12:00:00"
+
         temperature = self.get_temperature(departure_time)
         load_level = self.get_level_of_loading(departure_time)
         distance, incline = self.get_location_values(origin, destination)
@@ -294,7 +302,7 @@ class RideCalc:
         return distance, incline
 
     def get_temperature(self, departure_time):
-        """Returns temperature according to the given timestep parameter.
+        """Returns temperature according to the given time parameter.
 
         Parameters
         ----------
@@ -331,16 +339,37 @@ class RideCalc:
                 "Option default is set to the second column in temperature.csv."
             )
             self.temperature_option = self.temperature.columns[1]
-        try:
-            datetime.datetime.strptime(departure_time, "%Y-%m-%d %H:%M:%S")
-        except ValueError:
-            warnings.warn(
-                "Bad format: Wrong datetime string format. Example: '2022-01-01 01:01:00'"
-            )
-            departure_time = "2022-01-01 12:00:00"
         step = datetime.datetime.strptime(departure_time, "%Y-%m-%d %H:%M:%S").hour
         row = self.temperature.loc[self.temperature["hour"] == step]
         return row[self.temperature_option].values[0]
 
     def get_level_of_loading(self, departure_time):
-        pass
+        """Returns level of loading according to the given time parameter.
+
+        Parameters
+        ----------
+        departure_time : str
+            Departure time represented by a string.
+
+        Warnings
+        --------
+        bad option
+            If departure_time is not in self.level_of_loading it returns zero.
+
+        Returns
+        -------
+        float
+            Level of loading which is between 0 and 1.
+
+        """
+        # departure not in self.level_of_loading
+        if departure_time == "2022-01-01 01:01:00":
+            return 0
+        if departure_time not in self.level_of_loading["departure_time"].values:
+            warnings.warn(
+                f"Bad option: Departure time {departure_time} does not exist. Option default is set to zero."
+            )
+            return 0
+        lol = self.level_of_loading[self.level_of_loading["departure_time"] == departure_time]
+        lol = lol["level_of_loading"].values
+        return lol[0]
