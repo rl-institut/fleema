@@ -136,6 +136,7 @@ class Vehicle:
             "energy_cost": [],
             "emission": [],
             "consumption": [],
+            "level_of_loading": [],
         }
 
     def _update_activity(
@@ -149,6 +150,7 @@ class Vehicle:
         distance=0.0,
         charging_result=None,
         interp_consumption=0,
+        load_level=0.0,
     ):
         """Records newest energy and activity in the attributes soc and output.
 
@@ -174,6 +176,8 @@ class Vehicle:
             Default is None.
         interp_consumption : float
             Consumption from when driving, calculated by the driving simulation. Default is zero.
+        load_level : float
+            Level of load from 0 - 1, 1 being the maximum load of the vehicle.
 
         """
         if self.vehicle_type.event_csv:
@@ -194,6 +198,7 @@ class Vehicle:
             self.output["station_charging_capacity"].append(nominal_charging_capacity)
             self.output["average_charging_power"].append(charging_power)
             self.output["distance"].append(distance)
+            self.output["level_of_loading"].append(load_level)
             if charging_result is not None:
                 self.output["actual_energy_from_grid"].append(
                     charging_result["grid_energy"]
@@ -338,6 +343,7 @@ class Vehicle:
         power,
         new_soc,
         charging_capacity,
+        load_level: float,
         charging_result=None,
         observer=None,
     ):
@@ -351,6 +357,8 @@ class Vehicle:
         power : float
         new_soc : float
         charging_capacity : float
+        load_level : float
+            Level of load from 0 - 1, 1 being the maximum load of the vehicle.
         charging_result : dict[string, float]
         observer : Optional[SimulationState]
         """
@@ -377,6 +385,7 @@ class Vehicle:
             charging_power=power,
             nominal_charging_capacity=charging_capacity,
             charging_result=charging_result,
+            load_level=load_level,
         )
 
     def drive(
@@ -387,6 +396,7 @@ class Vehicle:
         destination: "Location",
         new_soc: float,
         distance: float,
+        load_level: float,
         observer=None,
         interp_consumption=0,
     ):
@@ -400,6 +410,8 @@ class Vehicle:
         destination : Location
         new_soc : float
         distance : float
+        load_level : float
+            Level of load from 0 - 1, 1 being the maximum load of the vehicle.
         observer : Optional[SimulationState]
         interp_consumption : float
 
@@ -442,6 +454,7 @@ class Vehicle:
             observer,
             distance=distance,
             interp_consumption=interp_consumption,
+            load_level=load_level,
         )
 
     def park(self, timestamp, start, time, observer=None):

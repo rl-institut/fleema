@@ -41,7 +41,10 @@ class SimulationType:
         task : Task
             Task to be executed
         """
-        load_level = self.simulation.schedule.loc[self.simulation.schedule["departure_time"] == str(self.simulation.time_series[task.start_time])]["level_of_loading"].values
+        load_level = self.simulation.schedule.loc[
+            self.simulation.schedule["departure_time"]
+            == str(self.simulation.time_series[task.start_time])
+        ]["level_of_loading"].values
         load_level = 0 if len(load_level) != 1 else load_level[0]
         if task.task == Status.DRIVING:
             if not task.is_calculated:
@@ -66,6 +69,7 @@ class SimulationType:
                 task.end_point,
                 vehicle.soc + task.delta_soc,
                 distance,
+                load_level,
                 self.simulation.observer,
                 task.consumption,
             )
@@ -105,6 +109,7 @@ class SimulationType:
                 average_charging_power,
                 spiceev_scenario.strat.world_state.vehicles[vehicle.id].battery.soc,
                 nominal_charging_power,
+                load_level,
                 charging_result,
                 self.simulation.observer,
             )
