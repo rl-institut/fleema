@@ -144,10 +144,9 @@ class Simulation:
         inclines = data_dict["incline"]
         temperature = data_dict["temperature"]
         temperature_option = cfg_dict["temperature_option"]
-        level_of_loading = data_dict["level_of_loading"]
 
         self.driving_sim = RideCalc(
-            consumption, distances, inclines, temperature, temperature_option, level_of_loading
+            consumption, distances, inclines, temperature, temperature_option
         )
 
         # use other args to create objects
@@ -246,6 +245,7 @@ class Simulation:
             vehicle.vehicle_type,
             self.average_speed,
             row.departure_time,
+            row["level_of_loading"],
         )
         dep_time = self.datetime_to_timesteps(row.departure_time)
         arr_time = self.datetime_to_timesteps(row.arrival_time)

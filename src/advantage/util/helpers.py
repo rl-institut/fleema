@@ -96,15 +96,12 @@ def read_input_data(scenario_data_path, cfg):
         import json
         f = open(f"{scenario_data_path}/" + cfg["files"]["vehicle_types"])
         veh_types = json.load(f)
-        lol = []
+        load_level = []
         for i in range(len(file_df)):
             capacity = veh_types["vehicle_types"][file_df.loc[i, "vehicle_type"]]["capacity"]
-            lol.append(file_df.loc[i, "occupation"] / capacity)
+            load_level.append(file_df.loc[i, "occupation"] / capacity)
         # create new column in schedule
-        data_dict["schedule"]["level_of_loading"] = lol
-        # create pandas.Dataframe and add to data_dict
-        data_dict["level_of_loading"] = \
-            pd.DataFrame({"departure_time": file_df["departure_time"].values, "level_of_loading": lol})
+        data_dict["schedule"]["level_of_loading"] = load_level
     return data_dict
 
 
