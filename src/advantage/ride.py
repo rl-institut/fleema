@@ -87,11 +87,6 @@ class RideCalc:
             )
             departure_time = "2022-01-01 12:00:00"
 
-        if not 0 <= load_level <= 1:
-            warnings.warn(
-                "Bad option: Load level is not between 0 and 1. Default is set to 0 now."
-            )
-            load_level = 0
         temperature = self.get_temperature(departure_time)
         distance, incline = self.get_location_values(origin, destination)
         trip_time = distance / speed * 60
@@ -145,7 +140,7 @@ class RideCalc:
         return consumption, consumption / vehicle_type.battery_capacity
 
     def get_consumption(
-        self, vehicle_type_name: str, incline, temperature, speed, load_level
+        self, vehicle_type_name: str, incline, temperature, speed, load_level: float
     ):
         """Get consumption in kWh/km for a specified vehicle type and route.
 
@@ -168,6 +163,16 @@ class RideCalc:
             Returns consumption factor in kWh/km
 
         """
+        if load_level is not float:
+            warnings.warn(
+                "Bad option: Load level should be of type float. Default is set to 0 now."
+            )
+            load_level = 0
+        if not 0 <= load_level <= 1:
+            warnings.warn(
+                "Bad option: Load level is not between 0 and 1. Default is set to 0 now."
+            )
+            load_level = 0
 
         df = self.consumption_table[
             self.consumption_table["vehicle_type"] == vehicle_type_name

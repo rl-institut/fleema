@@ -1,4 +1,5 @@
 from advantage.ride import RideCalc
+from advantage.location import Location
 import pandas as pd
 import pytest
 import pathlib
@@ -55,3 +56,20 @@ def test_get_temperature_bad_option(driving_sim_bad_temperature_option):
 
 def test_get_temperature_bad_option_wrong_string_format(driving_sim_bad_temperature_option):
     assert driving_sim_bad_temperature_option.get_temperature("2022-01-01T16:30:00") == 6.3
+
+
+def test_load_level_basic(driving_sim):
+    assert driving_sim.get_consumption("EZ10", -0.04, -16, 2.626, 0.0) * -1 == 2.13
+    assert driving_sim.get_consumption("EZ10", -0.03, -2, 17.957, 0.5) * -1 == 0.308
+
+
+def test_load_level_input_bigger_one(driving_sim):
+    assert driving_sim.get_consumption("EZ10", -0.04, -16, 2.626, 2) * -1 == 2.13
+
+
+def test_load_level_input_smaller_one(driving_sim):
+    assert driving_sim.get_consumption("EZ10", -0.04, -16, 2.626, -1) * -1 == 2.13
+
+
+def test_load_level_input_string(driving_sim):
+    assert driving_sim.get_consumption("EZ10", -0.04, -16, 2.626, "0") * -1 == 2.13
