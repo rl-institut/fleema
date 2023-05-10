@@ -88,7 +88,9 @@ class RideCalc:
             departure_time = "2022-01-01 12:00:00"
 
         if not 0 <= load_level <= 1:
-            warnings.warn("Bad option: Load level is not between 0 and 1. Default is set to 0 now.")
+            warnings.warn(
+                "Bad option: Load level is not between 0 and 1. Default is set to 0 now."
+            )
             load_level = 0
         temperature = self.get_temperature(departure_time)
         distance, incline = self.get_location_values(origin, destination)

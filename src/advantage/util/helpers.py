@@ -91,14 +91,19 @@ def read_input_data(scenario_data_path, cfg):
         data_dict[file] = file_df
 
     # add lol to schedule
-    file_df = pd.read_csv(pathlib.Path(scenario_data_path, cfg["files"]["schedule"]), index_col=0)
+    file_df = pd.read_csv(
+        pathlib.Path(scenario_data_path, cfg["files"]["schedule"]), index_col=0
+    )
     if "level_of_loading" not in file_df.keys():
         import json
+
         f = open(f"{scenario_data_path}/" + cfg["files"]["vehicle_types"])
         veh_types = json.load(f)
         load_level = []
         for i in range(len(file_df)):
-            capacity = veh_types["vehicle_types"][file_df.loc[i, "vehicle_type"]]["capacity"]
+            capacity = veh_types["vehicle_types"][file_df.loc[i, "vehicle_type"]][
+                "capacity"
+            ]
             load_level.append(file_df.loc[i, "occupation"] / capacity)
         # create new column in schedule
         data_dict["schedule"]["level_of_loading"] = load_level
