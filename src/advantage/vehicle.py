@@ -136,7 +136,7 @@ class Vehicle:
             "energy_cost": [],
             "emission": [],
             "consumption": [],
-            "level_of_loading": [],
+            "load_level": [],
         }
 
     def _update_activity(
@@ -198,7 +198,7 @@ class Vehicle:
             self.output["station_charging_capacity"].append(nominal_charging_capacity)
             self.output["average_charging_power"].append(charging_power)
             self.output["distance"].append(distance)
-            self.output["level_of_loading"].append(load_level)
+            self.output["load_level"].append(load_level)
             if charging_result is not None:
                 self.output["actual_energy_from_grid"].append(
                     charging_result["grid_energy"]
