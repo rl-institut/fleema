@@ -60,7 +60,7 @@ def test_get_temperature_bad_option_wrong_string_format(driving_sim_bad_temperat
 
 def test_load_level_basic(driving_sim):
     assert driving_sim.get_consumption("EZ10", -0.04, -16, 2.626, 0.0) * -1 == 2.13
-    assert driving_sim.get_consumption("EZ10", -0.03, -2, 17.957, 0.5) * -1 == 0.308
+    assert driving_sim.get_consumption("EZ10", -0.03, 0, 17.957, 0.5) * -1 == 0.274
 
 
 def test_load_level_input_bigger_one(driving_sim):

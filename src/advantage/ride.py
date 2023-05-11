@@ -78,15 +78,6 @@ class RideCalc:
             Returns dict with the keys "consumption", "soc_delta", "trip_time"
 
         """
-        # check departure time format
-        try:
-            datetime.datetime.strptime(departure_time, "%Y-%m-%d %H:%M:%S")
-        except ValueError:
-            warnings.warn(
-                "Bad format: Wrong datetime string format. Example: '2022-01-01 01:01:00'"
-            )
-            departure_time = "2022-01-01 12:00:00"
-
         temperature = self.get_temperature(departure_time)
         distance, incline = self.get_location_values(origin, destination)
         trip_time = distance / speed * 60
@@ -163,7 +154,7 @@ class RideCalc:
             Returns consumption factor in kWh/km
 
         """
-        if load_level is not float:
+        if not isinstance(load_level, float) and not isinstance(load_level, int):
             warnings.warn(
                 "Bad option: Load level should be of type float. Default is set to 0 now."
             )
@@ -350,6 +341,14 @@ class RideCalc:
                 "Option default is set to the second column in temperature.csv."
             )
             self.temperature_option = self.temperature.columns[1]
+        # check departure time format
+        try:
+            datetime.datetime.strptime(departure_time, "%Y-%m-%d %H:%M:%S")
+        except ValueError:
+            warnings.warn(
+                "Bad format: Wrong datetime string format. Example: '2022-01-01 01:01:00'"
+            )
+            departure_time = "2022-01-01 12:00:00"
         step = datetime.datetime.strptime(departure_time, "%Y-%m-%d %H:%M:%S").hour
         row = self.temperature.loc[self.temperature["hour"] == step]
         return row[self.temperature_option].values[0]
