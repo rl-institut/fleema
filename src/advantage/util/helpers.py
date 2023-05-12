@@ -10,6 +10,7 @@ import os
 import sys
 import pandas as pd
 import pathlib
+import json
 
 
 # see https://stackoverflow.com/questions/8391411/how-to-block-calls-to-print
@@ -90,23 +91,12 @@ def read_input_data(scenario_data_path, cfg):
             file_df = pd.read_csv(file_path)
         data_dict[file] = file_df
 
-    # add lol to schedule
-    file_df = pd.read_csv(
-        pathlib.Path(scenario_data_path, cfg["files"]["schedule"]), index_col=0
-    )
-    if "level_of_loading" not in file_df.keys():
-        import json
+    # Add level_of_loading column to schedule
+    with open(f"{scenario_data_path}/{cfg['files']['vehicle_types']}") as f:
+        veh_types = json.load(f)["vehicle_types"]
+    load_level = data_dict["schedule"]["occupation"] / data_dict["schedule"]["vehicle_type"].map(veh_types).str["capacity"]
+    data_dict["schedule"]["level_of_loading"] = load_level.tolist()
 
-        f = open(f"{scenario_data_path}/" + cfg["files"]["vehicle_types"])
-        veh_types = json.load(f)
-        load_level = []
-        for i in range(len(file_df)):
-            capacity = veh_types["vehicle_types"][file_df.loc[i, "vehicle_type"]][
-                "capacity"
-            ]
-            load_level.append(file_df.loc[i, "occupation"] / capacity)
-        # create new column in schedule
-        data_dict["schedule"]["level_of_loading"] = load_level
     return data_dict
 
 
