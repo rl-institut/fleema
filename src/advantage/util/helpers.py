@@ -91,10 +91,13 @@ def read_input_data(scenario_data_path, cfg):
             file_df = pd.read_csv(file_path)
         data_dict[file] = file_df
 
-    # Add level_of_loading column to schedule
+    # Add level_of_loading column to schedule in data_dict
     with open(f"{scenario_data_path}/{cfg['files']['vehicle_types']}") as f:
         veh_types = json.load(f)["vehicle_types"]
-    load_level = data_dict["schedule"]["occupation"] / data_dict["schedule"]["vehicle_type"].map(veh_types).str["capacity"]
+    load_level = (
+        data_dict["schedule"]["occupation"]
+        / data_dict["schedule"]["vehicle_type"].map(veh_types).str["capacity"]
+    )
     data_dict["schedule"]["level_of_loading"] = load_level.tolist()
 
     return data_dict

@@ -39,7 +39,7 @@ def test_constructor(sim_state):
 def test_drive_result(car, time_series, sim_state):
     start_step = 5
     time_stamp = step_to_timestamp(time_series, start_step)
-    car.drive(time_stamp, start_step, 10, Location(), 0.45, 1, 0, observer=sim_state)
+    car.drive(time_stamp, start_step, 10, Location(), 0.45, 1, observer=sim_state)
     assert sim_state.driving_vehicles[0] == car
 
 
@@ -47,7 +47,7 @@ def test_multi_drive(car, time_series, sim_state):
     for i in range(1, 5):
         start_step = 5 * i
         time_stamp = step_to_timestamp(time_series, start_step)
-        car.drive(time_stamp, start_step, 10, Location(), 0.45, 1, 0, observer=sim_state)
+        car.drive(time_stamp, start_step, 10, Location(), 0.45, 1, observer=sim_state)
     assert len(sim_state.driving_vehicles) == 1
 
 

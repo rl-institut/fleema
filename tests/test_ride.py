@@ -1,5 +1,4 @@
 from advantage.ride import RideCalc
-from advantage.location import Location
 import pandas as pd
 import pytest
 import pathlib

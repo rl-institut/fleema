@@ -343,7 +343,7 @@ class Vehicle:
         power,
         new_soc,
         charging_capacity,
-        load_level: float,
+        load_level=0,
         charging_result=None,
         observer=None,
     ):
@@ -396,7 +396,7 @@ class Vehicle:
         destination: "Location",
         new_soc: float,
         distance: float,
-        load_level: float,
+        load_level=0,
         observer=None,
         interp_consumption=0,
     ):
