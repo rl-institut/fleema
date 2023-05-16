@@ -93,7 +93,10 @@ def read_input_data(scenario_data_path, cfg):
 
     # Add level_of_loading column to schedule in data_dict
     if "occupation" not in data_dict["schedule"].keys():
-        load_level = [float(cfg["sim_params"]["load_level_default"]) for _ in range(data_dict["schedule"].shape[0])]
+        load_level = [
+            float(cfg["sim_params"]["load_level_default"])
+            for _ in range(data_dict["schedule"].shape[0])
+        ]
     else:
         with open(f"{scenario_data_path}/{cfg['files']['vehicle_types']}") as f:
             veh_types = json.load(f)["vehicle_types"]
