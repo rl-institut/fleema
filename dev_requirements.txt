@@ -4,4 +4,3 @@ pytest-cov
 mypy
 tox
 black
-plotly >= 5.14.1

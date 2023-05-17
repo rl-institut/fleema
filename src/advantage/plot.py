@@ -17,17 +17,13 @@ import plotly.express as px
 from advantage.simulation import Simulation
 
 
-def soc_plot(simulation: "Simulation", flag_png, flag_html):
+def soc_plot(simulation: "Simulation"):
     """Plots the SOC (state of charge) of all vehicles over the simulated time.
 
     Parameters
     ----------
     simulation : Simulation
         The current simulation object with the vehicles and their socs.
-    flag_png : bool
-        Is to be changed in the config and decides if the png plots are being generated. Default is False.
-    flag_html : bool
-        Is to be changed in the config and decides if the html plots are being generated. Default is False.
     """
     # data
     vehicles_soc_list = {
@@ -47,7 +43,7 @@ def soc_plot(simulation: "Simulation", flag_png, flag_html):
             else:
                 vehicles_soc_list[veh][i] = tmp_soc
     # matplotlib
-    if flag_png:
+    if simulation.outputs["plot_png"]:
         fig, ax = plt.subplots()
         for veh in range(len(vehicles_soc_list)):
             ax.plot(simulation.time_series, vehicles_soc_list[veh])
@@ -58,7 +54,7 @@ def soc_plot(simulation: "Simulation", flag_png, flag_html):
         fig.savefig(simulation.save_directory / "plots" / "soc_timeseries.png")
 
     # plotly
-    if flag_html:
+    if simulation.outputs["plot_html"]:
         df = pd.DataFrame()
         for veh in vehicles_soc_list.keys():
             tmp_df = pd.DataFrame(
@@ -81,19 +77,15 @@ def soc_plot(simulation: "Simulation", flag_png, flag_html):
         fig.write_html(simulation.save_directory / "plots/html" / "soc_timeseries.html")
 
 
-def grid_timeseries(simulation: "Simulation", flag_png, flag_html):
+def grid_timeseries(simulation: "Simulation"):
     """Generates plots for every grid (location) with the energy charging over time.
 
     Parameters
     ----------
     simulation : Simulation
         The current simulation object that holds the grids (locations) with their "output" attribute.
-    flag_png : bool
-        Is to be changed in the config and decides if the png plots are being generated. Default is False.
-    flag_html : bool
-        Is to be changed in the config and decides if the html plots are being generated. Default is False.
     """
-    if flag_png:
+    if simulation.outputs["plot_png"]:
         # total grid timeseries
         fig, ax = plt.subplots()
         ax.plot(simulation.time_series, simulation.outputs["total_power"])
@@ -117,7 +109,7 @@ def grid_timeseries(simulation: "Simulation", flag_png, flag_html):
                 y.append(output[key])
 
         # matplotlib
-        if flag_png:
+        if simulation.outputs["plot_png"]:
             fig, ax = plt.subplots()
             for plot_data in y:
                 ax.plot(simulation.time_series, plot_data)
@@ -130,7 +122,7 @@ def grid_timeseries(simulation: "Simulation", flag_png, flag_html):
             plt.clf()
 
         # plotly
-        if flag_html:
+        if simulation.outputs["plot_html"]:
             # total grid
             total_df = pd.DataFrame(
                 {
@@ -171,17 +163,13 @@ def grid_timeseries(simulation: "Simulation", flag_png, flag_html):
             )
 
 
-def energy_from_grid_feedin(simulation: "Simulation", flag_png, flag_html):
+def energy_from_grid_feedin(simulation: "Simulation"):
     """Generates a pie-chart with the distribution of the energy in grid and feed-in.
 
     Parameters
     ----------
     simulation : Simulation
         The current simulation object with vehicles and its drawn energy.
-    flag_png : bool
-        Is to be changed in the config and decides if the png plots are being generated. Default is False.
-    flag_html : bool
-        Is to be changed in the config and decides if the html plots are being generated. Default is False.
     """
     grid_and_feedin = [0, 0]
     for vehicle in simulation.vehicles.keys():
@@ -192,7 +180,7 @@ def energy_from_grid_feedin(simulation: "Simulation", flag_png, flag_html):
             simulation.vehicles[vehicle].output["energy_from_feed_in"]
         )
     # matplotlib
-    if flag_png:
+    if simulation.outputs["plot_png"]:
         fig, ax = plt.subplots()
         ax.set_title("Energy Distribution")
         ax.pie(grid_and_feedin, labels=["Grid", "Feed-in"], autopct="%1.1f%%")
@@ -200,7 +188,7 @@ def energy_from_grid_feedin(simulation: "Simulation", flag_png, flag_html):
         plt.clf()
 
     # plotly
-    if flag_html:
+    if simulation.outputs["plot_html"]:
         df = {"energy value": grid_and_feedin, "energy type": ["grid", "feed-in"]}
         fig = px.pie(
             df,
@@ -214,7 +202,7 @@ def energy_from_grid_feedin(simulation: "Simulation", flag_png, flag_html):
         )
 
 
-def plot(simulation: "Simulation", flag_png=False, flag_html=False):
+def plot(simulation: "Simulation"):
     """Generates all output plots and saves them in the results directory.
 
     Static Matplotlib plots are saved in the results directory under plots and
@@ -224,20 +212,14 @@ def plot(simulation: "Simulation", flag_png=False, flag_html=False):
     ----------
     simulation : Simulation
         The current simulation object
-    flag_png : bool
-        Is to be changed in the config and decides if the png plots are being generated. Default is False.
-    flag_html : bool
-        Is to be changed in the config and decides if the html plots are being generated. Default is False.
     """
-    if not flag_png and not flag_html:
+    if not simulation.outputs["plot_png"] and not simulation.outputs["plot_html"]:
         return
-    pathlib.Path(simulation.save_directory / "plots").mkdir(
-        parents=True, exist_ok=True
-    )
-    if flag_html:
+    pathlib.Path(simulation.save_directory / "plots").mkdir(parents=True, exist_ok=True)
+    if simulation.outputs["plot_html"]:
         pathlib.Path(simulation.save_directory / "plots/html").mkdir(
             parents=True, exist_ok=True
         )
-    soc_plot(simulation, flag_png, flag_html)
-    grid_timeseries(simulation, flag_png, flag_html)
-    energy_from_grid_feedin(simulation, flag_png, flag_html)
+    soc_plot(simulation)
+    grid_timeseries(simulation)
+    energy_from_grid_feedin(simulation)
