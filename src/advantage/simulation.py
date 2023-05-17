@@ -161,6 +161,9 @@ class Simulation:
                 info["charging_curve"],
                 self.min_charging_power,
                 self.outputs["vehicle_csv"],
+                None,
+                info.get("v2g", False),
+                info.get("v2g_power_factor", 0.5)
             )
         self.vehicles: Dict[Union[str, int], "Vehicle"] = {}
 
@@ -315,13 +318,15 @@ class Simulation:
         """
         time_stamp = step_to_timestamp(self.time_series, start_time)
         charging_time = int(end_time - start_time)
+        # TODO add proper way to choose strategy
+        strategy = "balanced_market" if charging_time > 15 else "greedy"
         spice_dict = get_spice_ev_scenario_dict(
             vehicle, location, point_id, time_stamp, charging_time, self.cost_options
         )
         spice_dict["components"]["vehicles"][vehicle.id][
             "connected_charging_station"
         ] = list(spice_dict["components"]["charging_stations"].keys())[0]
-        scenario = run_spice_ev(spice_dict, "balanced", self.ignore_spice_ev_warnings)
+        scenario = run_spice_ev(spice_dict, strategy, self.ignore_spice_ev_warnings)
         return scenario
 
     @block_printing

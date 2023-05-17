@@ -43,6 +43,8 @@ class VehicleType:
     min_charging_power: float = 0.0
     event_csv: bool = True
     label: Optional[str] = None
+    v2g: bool = False
+    v2g_power_factor: float = 0.5
 
     @property
     def plugs(self):
@@ -81,7 +83,6 @@ class Vehicle:
         vehicle_type: "VehicleType" = VehicleType(),
         status: Status = Status.PARKING,
         soc: float = 1.0,
-        availability: bool = True,  # TODO Warum availability, wenn es schon einen Status gibt?
         rotation: Optional[str] = None,
         current_location: Optional["Location"] = None,
     ):
@@ -110,7 +111,6 @@ class Vehicle:
         self.status = status
         self.soc_start = soc
         self.soc = soc
-        self.availability = availability
         self.rotation = rotation
         self.current_location = current_location
         self.tasks: Dict[int, "Task"] = {}
@@ -514,8 +514,8 @@ class Vehicle:
                         "mileage": self.vehicle_type.base_consumption * 100,
                         "charging_curve": self.vehicle_type.charging_curve,
                         "min_charging_power": self.vehicle_type.min_charging_power,
-                        "v2g": False,
-                        "v2g_power_factor": 0.5,
+                        "v2g": self.vehicle_type.v2g,
+                        "v2g_power_factor": self.vehicle_type.v2g_power_factor,
                     }
                 },
                 "vehicles": {
