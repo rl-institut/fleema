@@ -129,7 +129,7 @@ def get_charging_characteristic(
     )  # length of one spice_ev timestep in minutes
     for i in range(scenario.n_intervals):
         charge = list(scenario.connChargeByTS["GC1"][i].values())[0]
-        feed_in = scenario.feedInPower["GC1"][i]
+        feed_in = scenario.localGenerationPower["GC1"][i]
         cost = scenario.prices["GC1"][i]
 
         total_charge += charge
