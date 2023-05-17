@@ -52,6 +52,7 @@ class RideCalc:
         vehicle_type: "VehicleType",
         speed: float,
         departure_time: str = "2022-01-01 01:01:00",
+        load_level: float = 0,
     ):
         """Calculate consumption as a part of total SoC.
 
@@ -63,8 +64,13 @@ class RideCalc:
             Ending location of trip
         vehicle_type : VehicleType
             Vehicle type to look up in consumption and for calculation of SoC
+        speed : float
+            Average speed during the given trip.
         departure_time : str
             Departure time represented by a string.
+        load_level : float
+            Number between 0 and 1 that represents the occupation of the vehicle capacity.
+            Default is zero.
 
         Returns
         -------
@@ -72,9 +78,7 @@ class RideCalc:
             Returns dict with the keys "consumption", "soc_delta", "trip_time"
 
         """
-        # TODO add load level somewhere?
         temperature = self.get_temperature(departure_time)
-        load_level = 0
         distance, incline = self.get_location_values(origin, destination)
         trip_time = distance / speed * 60
         consumption, soc_delta = self.calculate_consumption(
@@ -127,7 +131,7 @@ class RideCalc:
         return consumption, consumption / vehicle_type.battery_capacity
 
     def get_consumption(
-        self, vehicle_type_name: str, incline, temperature, speed, load_level
+        self, vehicle_type_name: str, incline, temperature, speed, load_level: float
     ):
         """Get consumption in kWh/km for a specified vehicle type and route.
 
@@ -150,6 +154,16 @@ class RideCalc:
             Returns consumption factor in kWh/km
 
         """
+        if not isinstance(load_level, float) and not isinstance(load_level, int):
+            warnings.warn(
+                "Bad option: Load level should be of type float. Default is set to 0 now."
+            )
+            load_level = 0
+        if not 0 <= load_level <= 1:
+            warnings.warn(
+                "Bad option: Load level is not between 0 and 1. Default is set to 0 now."
+            )
+            load_level = 0
 
         df = self.consumption_table[
             self.consumption_table["vehicle_type"] == vehicle_type_name
@@ -290,7 +304,7 @@ class RideCalc:
         return distance, incline
 
     def get_temperature(self, departure_time):
-        """Returns temperature according to the given timestep parameter.
+        """Returns temperature according to the given time parameter.
 
         Parameters
         ----------
@@ -327,6 +341,7 @@ class RideCalc:
                 "Option default is set to the second column in temperature.csv."
             )
             self.temperature_option = self.temperature.columns[1]
+        # check departure time format
         try:
             datetime.datetime.strptime(departure_time, "%Y-%m-%d %H:%M:%S")
         except ValueError:

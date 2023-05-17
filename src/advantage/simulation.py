@@ -245,6 +245,7 @@ class Simulation:
             vehicle.vehicle_type,
             self.average_speed,
             row.departure_time,
+            row["level_of_loading"],
         )
         dep_time = self.datetime_to_timesteps(row.departure_time)
         arr_time = self.datetime_to_timesteps(row.arrival_time)
