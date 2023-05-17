@@ -293,4 +293,4 @@ class Schedule(SimulationType):
             )
             self.simulation.outputs["total_power"] = output["total_power"]
 
-        plot(self.simulation, flag=self.simulation.outputs["plots_png"])
+        plot(self.simulation)
