@@ -12,9 +12,19 @@ plot
 import pathlib
 import matplotlib.pyplot as plt
 import pandas as pd
-import plotly.express as px
+import importlib
 
 from advantage.simulation import Simulation
+
+
+def lazy_import(module_name):
+    try:
+        return importlib.import_module(module_name)
+    except ImportError:
+        return None
+
+
+px = lazy_import("plotly.express")
 
 
 def soc_plot(simulation: "Simulation"):
@@ -54,7 +64,7 @@ def soc_plot(simulation: "Simulation"):
         fig.savefig(simulation.save_directory / "plots" / "soc_timeseries.png")
 
     # plotly
-    if simulation.outputs["plot_html"]:
+    if px and simulation.outputs["plot_html"]:
         df = pd.DataFrame()
         for veh in vehicles_soc_list.keys():
             tmp_df = pd.DataFrame(
@@ -122,7 +132,7 @@ def grid_timeseries(simulation: "Simulation"):
             plt.clf()
 
         # plotly
-        if simulation.outputs["plot_html"]:
+        if px and simulation.outputs["plot_html"]:
             # total grid
             total_df = pd.DataFrame(
                 {
@@ -188,7 +198,7 @@ def energy_from_grid_feedin(simulation: "Simulation"):
         plt.clf()
 
     # plotly
-    if simulation.outputs["plot_html"]:
+    if px and simulation.outputs["plot_html"]:
         df = {"energy value": grid_and_feedin, "energy type": ["grid", "feed-in"]}
         fig = px.pie(
             df,
