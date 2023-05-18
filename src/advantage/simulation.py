@@ -114,6 +114,7 @@ class Simulation:
         self.outputs = cfg_dict["outputs"]
         self.ignore_spice_ev_warnings = cfg_dict["ignore_spice_ev_warnings"]
         self.average_speed = cfg_dict["average_speed"]
+        self.inputs = cfg_dict["inputs"]
 
         save_directory_name = "{}_{}_{}".format(
             cfg_dict["scenario_name"],
@@ -584,6 +585,15 @@ class Simulation:
             "soc_factor": cfg.getfloat("weights", "soc_factor"),
         }
 
+        # parse inputs
+        inputs = {
+            "config": config_path.name,
+            "basic_information": dict(cfg.items("basic")),
+            "scenario_data_path": str(scenario_data_path),
+            "save_directory": "results",
+            "input_files": dict(cfg.items("files")),
+        }
+
         cfg_dict = {
             "soc_min": cfg.getfloat("charging", "soc_min"),
             "end_of_day_soc": cfg.getfloat("charging", "end_of_day_soc", fallback=0.8),
@@ -609,6 +619,7 @@ class Simulation:
             "emission_options": emission_options,
             "delete_rides": cfg.getboolean("sim_params", "delete_rides", fallback=True),
             "average_speed": cfg.getfloat("charging", "average_speed", fallback=8.65),
+            "inputs": inputs,
         }
 
         data_dict = read_input_data(scenario_data_path, cfg)
