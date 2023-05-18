@@ -6,11 +6,11 @@ import pathlib
 
 @pytest.fixture()
 def driving_sim():
-    cons_path = pathlib.Path("scenario_data", "bad_birnbach", "consumption.csv")
-    cons = pd.read_csv(cons_path)
-    temp_path = pathlib.Path("scenario_data", "bad_birnbach", "temperature.csv")
-    temp = pd.read_csv(temp_path)
-    return RideCalc(cons, cons, cons, temp, "median")  # TODO add inclines/distances
+    cons = pd.read_csv(pathlib.Path("scenario_data", "bad_birnbach", "consumption.csv"))
+    dist = pd.read_csv(pathlib.Path("scenario_data", "bad_birnbach", "distance.csv"))
+    incl = pd.read_csv(pathlib.Path("scenario_data", "bad_birnbach", "incline.csv"))
+    temp = pd.read_csv(pathlib.Path("scenario_data", "bad_birnbach", "temperature.csv"))
+    return RideCalc(cons, dist, incl, temp, "median")
 
 
 @pytest.fixture()
@@ -20,6 +20,17 @@ def driving_sim_bad_temperature_option():
     temp_path = pathlib.Path("scenario_data", "bad_birnbach", "temperature.csv")
     temp = pd.read_csv(temp_path)
     return RideCalc(cons, cons, cons, temp, "bad_column")
+
+
+def test_get_nearest_unique_basic(driving_sim):
+    assert driving_sim.get_nearest_uniques(0, 1) == (0, 0)
+    assert driving_sim.get_nearest_uniques(0.1, 1) == (0, 0.25)
+    assert driving_sim.get_nearest_uniques(1, 1) == (1, 1)
+
+
+def test_get_nearest_unique_outer_boundaries(driving_sim):
+    assert driving_sim.get_nearest_uniques(-1, 1) == (0, 0)
+    assert driving_sim.get_nearest_uniques(2, 1) == (1, 1)
 
 
 def test_get_consumption(driving_sim):
@@ -39,6 +50,7 @@ def test_get_consumption(driving_sim):
     assert not error_list, "errors occured:\n{}".format("\n".join(error_list))"""
 
 
+# get_temperature
 def test_get_temperature_basic(driving_sim):
     assert driving_sim.get_temperature("2022-01-01 01:01:00") == 12.9
     assert driving_sim.get_temperature("1999-01-01 00:01:00") == 13.3
@@ -57,6 +69,7 @@ def test_get_temperature_bad_option_wrong_string_format(driving_sim_bad_temperat
     assert driving_sim_bad_temperature_option.get_temperature("2022-01-01T16:30:00") == 6.3
 
 
+# get_consumption: load_level
 def test_load_level_basic(driving_sim):
     assert driving_sim.get_consumption("EZ10", -0.04, -16, 2.626, 0.0) * -1 == 2.13
     assert driving_sim.get_consumption("EZ10", -0.03, 0, 17.957, 0.5) * -1 == 0.274
