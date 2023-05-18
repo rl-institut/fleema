@@ -272,6 +272,8 @@ class RideCalc:
         if value in self.uniques[column]:
             upper = value
             lower = value
+        elif value > upper:
+            lower = upper
         else:
             # find the first unique thats bigger than the value (uniques is sorted)
             for count, bound in enumerate(self.uniques[column]):
