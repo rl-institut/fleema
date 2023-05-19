@@ -33,21 +33,64 @@ def test_get_nearest_unique_outer_boundaries(driving_sim):
     assert driving_sim.get_nearest_uniques(2, 1) == (1, 1)
 
 
-def test_get_consumption(driving_sim):
-    # TODO change for new consumption table
-    """error_list = []
-    if not -49.706 == driving_sim.get_consumption("bus_18m", -0.04, -10, 2.626, 0.0):
-        error_list.append("First result is wrong")
-    if not -1.163 == driving_sim.get_consumption("atlas_7m", 0.04, 20, 37.093, 0.9):
-        error_list.append("Second result is wrong")
-    consumption = driving_sim.get_consumption("bus_18m", -0.04, -12.5, 2.626, 0.0)
-    if not -62.502 < consumption < -49.706:
-        error_list.append("Third result is wrong")
-    consumption = driving_sim.get_consumption("bus_18m", -0.03, 0.0, 2.626, 0.0)
-    if not -28.303 < consumption < -28.154:
-        error_list.append("Fourth result is wrong")
+def test_get_consumption_basic(driving_sim):
+    assert driving_sim.get_consumption("EZ10", 0, -0.04, -16, 2.626)*-1 == 2.13
+    assert driving_sim.get_consumption("EZ10", 0, -0.04, -12, 2.626)*-1 == 1.886
+    res = [driving_sim.get_consumption("EZ10", 0, -0.04, -temp, 2.626)*-1 for temp in [15.9, 15, 14, 13, 12.5, 12.1]]
+    for v in res:
+        assert 1.886 < v < 2.13
 
-    assert not error_list, "errors occured:\n{}".format("\n".join(error_list))"""
+
+# vehicle type name
+def test_get_consumption_vehicle_type_wrong_data_type(driving_sim):
+    with pytest.raises(TypeError):
+        driving_sim.get_consumption(0, 0, -0.04, -12, 2.626)
+
+
+def test_get_consumption_vehicle_type_doesnt_exist(driving_sim):
+    with pytest.raises(ValueError):
+        driving_sim.get_consumption("M18", 0, -0.04, -12, 2.626)
+
+
+# load_level
+def test_get_consumption_load_level_out_of_bounds(driving_sim):
+    assert driving_sim.get_consumption("EZ10", 2, -0.04, -16, 2.626) * -1 == 2.13
+    assert driving_sim.get_consumption("EZ10", -1, -0.04, -16, 2.626) * -1 == 2.13
+
+
+def test_get_consumption_load_level_input_string(driving_sim):
+    assert driving_sim.get_consumption("EZ10", "0", -0.04, -16, 2.626) * -1 == 2.13
+
+
+# incline
+def test_get_consumption_incline_wrong_data_type(driving_sim):
+    with pytest.raises(TypeError):
+        driving_sim.get_consumption("EZ10", 0, "-0.04", -12, 2.626)
+
+
+def test_get_consumption_incline_out_of_bounds(driving_sim):
+    assert driving_sim.get_consumption("EZ10", 0, -1, -16, 2.626)*-1 == 2.13
+    assert driving_sim.get_consumption("EZ10", 0, 1, -16, 2.626)*-1 == 2.304
+
+
+# speed
+def test_get_consumption_speed_out_of_bounds(driving_sim):
+    assert driving_sim.get_consumption("EZ10", 0, -0.04, -16, 0)*-1 == 2.13
+    assert driving_sim.get_consumption("EZ10", 0, -0.04, -16, 100)*-1 == 0.349
+
+
+def test_get_consumption_speed_wrong_data_type(driving_sim):
+    assert driving_sim.get_consumption("EZ10", 0, -0.04, -16, "2.626")*-1 == 0.808
+
+
+# temperature
+def test_get_consumption_temperature_out_of_bounds(driving_sim):
+    assert driving_sim.get_consumption("EZ10", 0, -0.04, -100, 2.626)*-1 == 2.13
+    assert driving_sim.get_consumption("EZ10", 0, -0.04, 100, 2.626)*-1 == 0.516
+
+
+def test_get_consumption_temperature_wrong_data_type(driving_sim):
+    assert driving_sim.get_consumption("EZ10", 0, -0.04, "-16", 2.626)*-1 == 0.487
 
 
 # get_temperature
@@ -69,19 +112,4 @@ def test_get_temperature_bad_option_wrong_string_format(driving_sim_bad_temperat
     assert driving_sim_bad_temperature_option.get_temperature("2022-01-01T16:30:00") == 6.3
 
 
-# get_consumption: load_level
-def test_load_level_basic(driving_sim):
-    assert driving_sim.get_consumption("EZ10", -0.04, -16, 2.626, 0.0) * -1 == 2.13
-    assert driving_sim.get_consumption("EZ10", -0.03, 0, 17.957, 0.5) * -1 == 0.274
 
-
-def test_load_level_input_bigger_one(driving_sim):
-    assert driving_sim.get_consumption("EZ10", -0.04, -16, 2.626, 2) * -1 == 2.13
-
-
-def test_load_level_input_smaller_one(driving_sim):
-    assert driving_sim.get_consumption("EZ10", -0.04, -16, 2.626, -1) * -1 == 2.13
-
-
-def test_load_level_input_string(driving_sim):
-    assert driving_sim.get_consumption("EZ10", -0.04, -16, 2.626, "0") * -1 == 2.13

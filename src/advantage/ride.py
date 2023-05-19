@@ -124,14 +124,19 @@ class RideCalc:
 
         """
         consumption_factor = self.get_consumption(
-            vehicle_type.name, incline, temperature, speed, load_level
+            vehicle_type.name, load_level, incline, temperature, speed
         )
         consumption = consumption_factor * distance
 
         return consumption, consumption / vehicle_type.battery_capacity
 
     def get_consumption(
-        self, vehicle_type_name: str, incline, temperature, speed, load_level: float
+        self,
+        vehicle_type_name: str,
+        load_level,
+        incline,
+        temperature,
+        speed,
     ):
         """Get consumption in kWh/km for a specified vehicle type and route.
 
@@ -154,16 +159,9 @@ class RideCalc:
             Returns consumption factor in kWh/km
 
         """
-        if not isinstance(load_level, float) and not isinstance(load_level, int):
-            warnings.warn(
-                "Bad option: Load level should be of type float. Default is set to 0 now."
-            )
-            load_level = 0
-        if not 0 <= load_level <= 1:
-            warnings.warn(
-                "Bad option: Load level is not between 0 and 1. Default is set to 0 now."
-            )
-            load_level = 0
+        load_level, incline, temperature, speed = self._check_inputs(
+            vehicle_type_name, load_level, incline, temperature, speed
+        )
 
         df = self.consumption_table[
             self.consumption_table["vehicle_type"] == vehicle_type_name
@@ -354,3 +352,42 @@ class RideCalc:
         step = datetime.datetime.strptime(departure_time, "%Y-%m-%d %H:%M:%S").hour
         row = self.temperature.loc[self.temperature["hour"] == step]
         return row[self.temperature_option].values[0]
+
+    def _check_inputs(self, vehicle_type_name, load_level, incline, temperature, speed):
+        # check data type
+        defaults = {
+            "load_level": [load_level, 0],
+            "incline": [incline, 0],
+            "temperature": [temperature, 20],
+            "speed": [speed, 12.115],
+        }
+        for k, v in defaults.items():
+            if not isinstance(v[0], float) and not isinstance(v[0], int):
+                warnings.warn(
+                    f"Wrong data type: {k} should be of type float or int. Default is set to {v[1]}."
+                )
+                v[0] = v[1]
+            defaults[k] = v[0]
+
+        # vehicle_type_name
+        if not isinstance(vehicle_type_name, str):
+            raise TypeError(
+                f"Argument vehicle_type_name='{vehicle_type_name}' should be of type string,"
+                f" not {type(vehicle_type_name)}."
+            )
+        if vehicle_type_name not in self.uniques[0]:
+            raise ValueError(f"The vehicle type '{vehicle_type_name}' does not exist.")
+
+        # load_level
+        if not 0 <= defaults["load_level"] <= 1:
+            warnings.warn(
+                "Bad option: Load level is not between 0 and 1. Default is set to 0."
+            )
+            defaults["load_level"] = 0
+
+        # speed
+        if defaults["speed"] < 0:
+            warnings.warn("Bad option: Speed is smaller than 0. Default is set to 0.")
+            defaults["speed"] = 0
+
+        return tuple(defaults.values())
