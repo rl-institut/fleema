@@ -4,10 +4,10 @@ import warnings
 import pandas as pd
 
 from typing import TYPE_CHECKING
+from advantage.location import Location
 
 if TYPE_CHECKING:
     from advantage.vehicle import VehicleType
-    from advantage.location import Location
 
 
 class RideCalc:
@@ -123,6 +123,8 @@ class RideCalc:
             Returns consumption in kWh and the SoC delta resulting from this trip
 
         """
+        if not isinstance(vehicle_type, VehicleType):
+            raise TypeError(f"Vehicle '{vehicle_type}' is not of type 'VehicleType'")
         consumption_factor = self.get_consumption(
             vehicle_type.name, load_level, incline, temperature, speed
         )
@@ -298,6 +300,10 @@ class RideCalc:
             Returns distance and incline between the locations
 
         """
+        if not isinstance(origin, Location):
+            raise TypeError("Origin is not of type 'Location'")
+        if not isinstance(destination, Location):
+            raise TypeError("Destination is not of type 'Location'")
         distance = self.distances.at[origin.name, destination.name]
         incline = self.inclines.at[origin.name, destination.name]
 
@@ -354,6 +360,7 @@ class RideCalc:
         return row[self.temperature_option].values[0]
 
     def _check_inputs(self, vehicle_type_name, load_level, incline, temperature, speed):
+        """Return checked inputs with respective defaults if needed."""
         # check data type
         defaults = {
             "load_level": [load_level, 0],
@@ -362,7 +369,9 @@ class RideCalc:
             "speed": [speed, 12.115],
         }
         for k, v in defaults.items():
-            if not isinstance(v[0], float) and not isinstance(v[0], int):
+            try:
+                v[0] = float(v[0])
+            except ValueError:
                 warnings.warn(
                     f"Wrong data type: {k} should be of type float or int. Default is set to {v[1]}."
                 )
