@@ -9,8 +9,8 @@ import pathlib
 @pytest.fixture()
 def driving_sim():
     cons = pd.read_csv(pathlib.Path("scenario_data", "bad_birnbach", "consumption.csv"))
-    dist = pd.read_csv(pathlib.Path("scenario_data", "bad_birnbach", "distance.csv"))
-    incl = pd.read_csv(pathlib.Path("scenario_data", "bad_birnbach", "incline.csv"))
+    dist = pd.read_csv(pathlib.Path("scenario_data", "bad_birnbach", "distance.csv"), index_col=0)
+    incl = pd.read_csv(pathlib.Path("scenario_data", "bad_birnbach", "incline.csv"), index_col=0)
     temp = pd.read_csv(pathlib.Path("scenario_data", "bad_birnbach", "temperature.csv"))
     return RideCalc(cons, dist, incl, temp, "median")
 
@@ -34,6 +34,11 @@ def location_b():
     return Location("Artrium")
 
 
+@pytest.fixture()
+def vehicle_type_ez10():
+    return VehicleType("EZ10")
+
+
 def test_get_nearest_unique_basic(driving_sim):
     assert driving_sim.get_nearest_uniques(0, 1) == (0, 0)
     assert driving_sim.get_nearest_uniques(0.1, 1) == (0, 0.25)
@@ -47,9 +52,12 @@ def test_get_nearest_unique_outer_boundaries(driving_sim):
 
 # get_consumption
 def test_get_consumption_basic(driving_sim):
-    assert driving_sim.get_consumption("EZ10", 0, -0.04, -16, 2.626)*-1 == 2.13
-    assert driving_sim.get_consumption("EZ10", 0, -0.04, -12, 2.626)*-1 == 1.886
-    res = [driving_sim.get_consumption("EZ10", 0, -0.04, -temp, 2.626)*-1 for temp in [15.9, 15, 14, 13, 12.5, 12.1]]
+    assert driving_sim.get_consumption("EZ10", 0, -0.04, -16, 2.626) * -1 == 2.13
+    assert driving_sim.get_consumption("EZ10", 0, -0.04, -12, 2.626) * -1 == 1.886
+    res = [
+        driving_sim.get_consumption("EZ10", 0, -0.04, -temp, 2.626) * -1
+        for temp in [15.9, 15, 14, 13, 12.5, 12.1]
+    ]
     for v in res:
         assert 1.886 < v < 2.13
 
@@ -77,32 +85,32 @@ def test_get_consumption_load_level_input_string(driving_sim):
 
 # get_consumption: incline
 def test_get_consumption_incline_wrong_data_type(driving_sim):
-    assert driving_sim.get_consumption("EZ10", 0, "string", -16, 2.626)*-1 == 2.176
+    assert driving_sim.get_consumption("EZ10", 0, "string", -16, 2.626) * -1 == 2.176
 
 
 def test_get_consumption_incline_out_of_bounds(driving_sim):
-    assert driving_sim.get_consumption("EZ10", 0, -1, -16, 2.626)*-1 == 2.13
-    assert driving_sim.get_consumption("EZ10", 0, 1, -16, 2.626)*-1 == 2.304
+    assert driving_sim.get_consumption("EZ10", 0, -1, -16, 2.626) * -1 == 2.13
+    assert driving_sim.get_consumption("EZ10", 0, 1, -16, 2.626) * -1 == 2.304
 
 
 # get_consumption: speed
 def test_get_consumption_speed_out_of_bounds(driving_sim):
-    assert driving_sim.get_consumption("EZ10", 0, -0.04, -16, 0)*-1 == 2.13
-    assert driving_sim.get_consumption("EZ10", 0, -0.04, -16, 100)*-1 == 0.349
+    assert driving_sim.get_consumption("EZ10", 0, -0.04, -16, 0) * -1 == 2.13
+    assert driving_sim.get_consumption("EZ10", 0, -0.04, -16, 100) * -1 == 0.349
 
 
 def test_get_consumption_speed_wrong_data_type(driving_sim):
-    assert driving_sim.get_consumption("EZ10", 0, -0.04, -16, "string")*-1 == 0.808
+    assert driving_sim.get_consumption("EZ10", 0, -0.04, -16, "string") * -1 == 0.808
 
 
 # get_consumption: temperature
 def test_get_consumption_temperature_out_of_bounds(driving_sim):
-    assert driving_sim.get_consumption("EZ10", 0, -0.04, -100, 2.626)*-1 == 2.13
-    assert driving_sim.get_consumption("EZ10", 0, -0.04, 100, 2.626)*-1 == 0.516
+    assert driving_sim.get_consumption("EZ10", 0, -0.04, -100, 2.626) * -1 == 2.13
+    assert driving_sim.get_consumption("EZ10", 0, -0.04, 100, 2.626) * -1 == 0.516
 
 
 def test_get_consumption_temperature_wrong_data_type(driving_sim):
-    assert driving_sim.get_consumption("EZ10", 0, -0.04, "string", 2.626)*-1 == 0.487
+    assert driving_sim.get_consumption("EZ10", 0, -0.04, "string", 2.626) * -1 == 0.487
 
 
 # get_temperature
@@ -120,7 +128,9 @@ def test_get_temperature_bad_option(driving_sim_bad_temperature_option):
     assert driving_sim_bad_temperature_option.get_temperature("2022-01-01 16:30:00") == 5.2
 
 
-def test_get_temperature_bad_option_wrong_string_format(driving_sim_bad_temperature_option):
+def test_get_temperature_bad_option_wrong_string_format(
+    driving_sim_bad_temperature_option,
+):
     assert driving_sim_bad_temperature_option.get_temperature("2022-01-01T16:30:00") == 6.3
 
 
@@ -138,6 +148,11 @@ def test_get_location_values_type_error(driving_sim, location_a):
 
 
 # calculate_consumption
-def test_calculate_consumption(driving_sim):
-    assert driving_sim.calculate_consumption(VehicleType("EZ10"), -0.04, -16, 2.626, 0, 0) == 0
-    assert driving_sim.calculate_consumption(VehicleType("EZ10"), -0.04, -16, 2.626, 0, 0.370) == 0
+def test_calculate_consumption_basic(driving_sim, vehicle_type_ez10):
+    assert driving_sim.calculate_consumption(vehicle_type_ez10, -0.04, -16, 2.626, 0, 0) == (0, 0)
+    assert driving_sim.calculate_consumption(vehicle_type_ez10, -0.04, -16, 2.626, 0, 1) == (-2.13, -0.0426)
+
+
+def test_calculate_consumption_wrong_type(driving_sim, vehicle_type_ez10):
+    with pytest.raises(TypeError):
+        assert driving_sim.calculate_consumption("vehicle_type_ez10", -0.04, -16, 2.626, 0, 0) == (0, 0)
