@@ -230,7 +230,9 @@ def plot(simulation: "Simulation"):
     pathlib.Path(simulation.save_directory / "plots").mkdir(parents=True, exist_ok=True)
     if simulation.outputs["plot_html"]:
         if not px:
-            warnings.warn("Import Error: Plotly is not imported.")
+            warnings.warn(
+                "Import Warning: Plotly is not imported. HTML plots could not be created."
+            )
         pathlib.Path(simulation.save_directory / "plots/html").mkdir(
             parents=True, exist_ok=True
         )
