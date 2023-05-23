@@ -41,8 +41,7 @@ class RideCalc:
         self.temperature_option = temperature_option
 
         self.uniques = [
-            sorted(self.consumption_table[col].unique())
-            for col in self.consumption_table.iloc[:, :-1]
+            sorted(self.consumption_table[col].unique()) for col in self.consumption_table.iloc[:, :-1]
         ]
 
     def calculate_trip(
@@ -124,9 +123,7 @@ class RideCalc:
             Returns consumption in kWh and the SoC delta resulting from this trip
 
         """
-        consumption_factor = self.get_consumption(
-            vehicle_type.name, load_level, incline, temperature, speed
-        )
+        consumption_factor = self.get_consumption(vehicle_type.name, load_level, incline, temperature, speed)
         consumption = consumption_factor * distance
 
         return consumption, consumption / vehicle_type.battery_capacity
@@ -164,9 +161,7 @@ class RideCalc:
             vehicle_type_name, load_level, incline, temperature, speed
         )
 
-        df = self.consumption_table[
-            self.consumption_table["vehicle_type"] == vehicle_type_name
-        ]
+        df = self.consumption_table[self.consumption_table["vehicle_type"] == vehicle_type_name]
 
         inc_col = df["incline"]
         tmp_col = df["t_amb"]
@@ -175,9 +170,7 @@ class RideCalc:
         cons_col = df["consumption"]
         data_table = list(zip(lol_col, inc_col, speed_col, tmp_col, cons_col))
 
-        consumption_value = self.nd_interp(
-            (load_level, incline, speed, temperature), data_table
-        )
+        consumption_value = self.nd_interp((load_level, incline, speed, temperature), data_table)
 
         return consumption_value * (-1)
 
@@ -346,9 +339,7 @@ class RideCalc:
         try:
             datetime.datetime.strptime(departure_time, "%Y-%m-%d %H:%M:%S")
         except ValueError:
-            warnings.warn(
-                "Bad format: Wrong datetime string format. Example: '2022-01-01 01:01:00'"
-            )
+            warnings.warn("Bad format: Wrong datetime string format. Example: '2022-01-01 01:01:00'")
             departure_time = "2022-01-01 12:00:00"
         step = datetime.datetime.strptime(departure_time, "%Y-%m-%d %H:%M:%S").hour
         row = self.temperature.loc[self.temperature["hour"] == step]
@@ -393,9 +384,7 @@ class RideCalc:
 
         # load_level
         if not 0 <= defaults["load_level"] <= 1:
-            warnings.warn(
-                "Bad option: Load level is not between 0 and 1. Default is set to 0."
-            )
+            warnings.warn("Bad option: Load level is not between 0 and 1. Default is set to 0.")
             defaults["load_level"] = 0
 
         # speed

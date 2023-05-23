@@ -58,10 +58,7 @@ def test_get_consumption_basic(driving_sim):
 
 
 def test_get_consumption_interpolation(driving_sim):
-    res = [
-        driving_sim.get_consumption("EZ10", 0, -0.04, -temp, 2.626) * -1
-        for temp in [15.9, 15, 14, 13, 12.5, 12.1]
-    ]
+    res = [driving_sim.get_consumption("EZ10", 0, -0.04, -temp, 2.626) * -1 for temp in [15.9, 15, 14, 13, 12.5, 12.1]]
     for v in res:
         assert 1.886 < v < 2.13
 
@@ -152,9 +149,18 @@ def test_calculate_consumption_basic(driving_sim, vehicle_type_ez10):
 
 # calculate_trip
 def test_calculate_trip_basic(driving_sim, location_a, location_b, vehicle_type_ez10):
-    assert driving_sim.calculate_trip(location_a, location_a, vehicle_type_ez10, 0) ==\
-           {'consumption': 0, 'soc_delta': 0, 'trip_time': 0}
-    assert driving_sim.calculate_trip(location_a, location_a, vehicle_type_ez10, 100) == \
-           {'consumption': 0, 'soc_delta': 0, 'trip_time': 0}
-    assert driving_sim.calculate_trip(location_a, location_b, vehicle_type_ez10, 1, "2022-01-01 04:00:00") == \
-           {'consumption': -0.37*0.757, 'soc_delta': -0.37*0.757 / vehicle_type_ez10.battery_capacity, 'trip_time': 22.2}
+    assert driving_sim.calculate_trip(location_a, location_a, vehicle_type_ez10, 0) == {
+        "consumption": 0,
+        "soc_delta": 0,
+        "trip_time": 0,
+    }
+    assert driving_sim.calculate_trip(location_a, location_a, vehicle_type_ez10, 100) == {
+        "consumption": 0,
+        "soc_delta": 0,
+        "trip_time": 0,
+    }
+    assert driving_sim.calculate_trip(location_a, location_b, vehicle_type_ez10, 1, "2022-01-01 04:00:00") == {
+        "consumption": -0.37 * 0.757,
+        "soc_delta": -0.37 * 0.757 / vehicle_type_ez10.battery_capacity,
+        "trip_time": 22.2,
+    }
