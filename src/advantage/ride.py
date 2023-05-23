@@ -80,6 +80,7 @@ class RideCalc:
         """
         temperature = self.get_temperature(departure_time)
         distance, incline = self.get_location_values(origin, destination)
+        speed = 1 if speed <= 0 else speed
         trip_time = distance / speed * 60
         consumption, soc_delta = self.calculate_consumption(
             vehicle_type, incline, temperature, speed, load_level, distance
