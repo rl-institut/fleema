@@ -592,6 +592,8 @@ class Simulation:
             "scenario_data_path": str(scenario_data_path),
             "save_directory": "results",
             "input_files": dict(cfg.items("files")),
+            "vehicle_types": vehicle_types,
+            "charging_points": charging_points,
         }
 
         cfg_dict = {
