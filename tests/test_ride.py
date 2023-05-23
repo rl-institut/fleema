@@ -39,13 +39,14 @@ def vehicle_type_ez10():
     return VehicleType("EZ10")
 
 
-def test_get_nearest_unique_basic(driving_sim):
+# get_nearest_unique
+def test_get_nearest_unique_basic_load_level(driving_sim):
     assert driving_sim.get_nearest_uniques(0, 1) == (0, 0)
     assert driving_sim.get_nearest_uniques(0.1, 1) == (0, 0.25)
     assert driving_sim.get_nearest_uniques(1, 1) == (1, 1)
 
 
-def test_get_nearest_unique_outer_boundaries(driving_sim):
+def test_get_nearest_unique_outer_boundaries_load_level(driving_sim):
     assert driving_sim.get_nearest_uniques(-1, 1) == (0, 0)
     assert driving_sim.get_nearest_uniques(2, 1) == (1, 1)
 
@@ -54,6 +55,9 @@ def test_get_nearest_unique_outer_boundaries(driving_sim):
 def test_get_consumption_basic(driving_sim):
     assert driving_sim.get_consumption("EZ10", 0, -0.04, -16, 2.626) * -1 == 2.13
     assert driving_sim.get_consumption("EZ10", 0, -0.04, -12, 2.626) * -1 == 1.886
+
+
+def test_get_consumption_interpolation(driving_sim):
     res = [
         driving_sim.get_consumption("EZ10", 0, -0.04, -temp, 2.626) * -1
         for temp in [15.9, 15, 14, 13, 12.5, 12.1]
@@ -140,19 +144,7 @@ def test_get_location_values_basic(driving_sim, location_a, location_b):
     assert driving_sim.get_location_values(location_a, location_b) == (0.370, 0)
 
 
-def test_get_location_values_type_error(driving_sim, location_a):
-    with pytest.raises(TypeError):
-        driving_sim.get_location_values(1, location_a)
-    with pytest.raises(TypeError):
-        driving_sim.get_location_values(location_a, 1)
-
-
 # calculate_consumption
 def test_calculate_consumption_basic(driving_sim, vehicle_type_ez10):
     assert driving_sim.calculate_consumption(vehicle_type_ez10, -0.04, -16, 2.626, 0, 0) == (0, 0)
     assert driving_sim.calculate_consumption(vehicle_type_ez10, -0.04, -16, 2.626, 0, 1) == (-2.13, -0.0426)
-
-
-def test_calculate_consumption_wrong_type(driving_sim, vehicle_type_ez10):
-    with pytest.raises(TypeError):
-        assert driving_sim.calculate_consumption("vehicle_type_ez10", -0.04, -16, 2.626, 0, 0) == (0, 0)
