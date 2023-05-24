@@ -31,6 +31,18 @@ class SimulationType:
         """
         self.simulation = simulation
 
+    def save_inputs(self):
+        import json
+
+        (self.simulation.save_directory / "inputs").mkdir(parents=True, exist_ok=True)
+        self.simulation.inputs["save_directory"] = str(self.simulation.save_directory)
+        with open(
+            f"{str(self.simulation.save_directory / 'inputs')}/inputs.json",
+            "w",
+            encoding="utf-8",
+        ) as f:
+            json.dump(self.simulation.inputs, f, indent=4)
+
     def execute_task(self, vehicle: "Vehicle", task: "Task"):
         """Makes a vehicle execute a specified task.
 
