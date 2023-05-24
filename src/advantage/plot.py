@@ -10,6 +10,8 @@ plot
 """
 
 import pathlib
+import warnings
+
 import matplotlib.pyplot as plt
 import pandas as pd
 import importlib
@@ -227,6 +229,10 @@ def plot(simulation: "Simulation"):
         return
     pathlib.Path(simulation.save_directory / "plots").mkdir(parents=True, exist_ok=True)
     if simulation.outputs["plot_html"]:
+        if not px:
+            warnings.warn(
+                "Import Warning: Plotly is not imported. HTML plots could not be created."
+            )
         pathlib.Path(simulation.save_directory / "plots/html").mkdir(
             parents=True, exist_ok=True
         )
