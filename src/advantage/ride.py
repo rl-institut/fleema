@@ -46,9 +46,7 @@ class RideCalc:
         if self.defaults["speed"] <= 0:
             raise ValueError("Speed can not be smaller or equal to zero.")
 
-        self.uniques = [
-            sorted(self.consumption_table[col].unique()) for col in self.consumption_table.iloc[:, :-1]
-        ]
+        self.uniques = [sorted(self.consumption_table[col].unique()) for col in self.consumption_table.iloc[:, :-1]]
 
     def calculate_trip(
         self,
@@ -86,7 +84,9 @@ class RideCalc:
         temperature = self.get_temperature(departure_time)
         distance, incline = self.get_location_values(origin, destination)
         if speed <= 0:
-            warnings.warn(f"Bad option: Speed is smaller than or equal to zero. Default is set to {self.defaults['speed']}")
+            warnings.warn(
+                f"Bad option: Speed is smaller than or equal to zero. Default is set to {self.defaults['speed']}"
+            )
             speed = self.defaults["speed"]
         trip_time = distance / speed * 60
         consumption, soc_delta = self.calculate_consumption(
@@ -397,8 +397,9 @@ class RideCalc:
 
         # load_level
         if not 0 <= defaults["load_level"] <= 1:
-            warnings.warn("Bad option: Load level is not between 0 and 1."
-                          f"Default is set to {self.defaults['load_level']}.")
+            warnings.warn(
+                "Bad option: Load level is not between 0 and 1." f"Default is set to {self.defaults['load_level']}."
+            )
             defaults["load_level"] = self.defaults["load_level"]
 
         # speed
