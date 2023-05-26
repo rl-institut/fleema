@@ -248,6 +248,7 @@ class Schedule(SimulationType):
         # create save directory
         if True in self.simulation.outputs.values():
             self.simulation.save_directory.mkdir(parents=True, exist_ok=True)
+            self.save_inputs()
 
         # simulate fleet step by step
         for step in range(self.simulation.time_steps):
