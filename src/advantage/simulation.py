@@ -146,7 +146,7 @@ class Simulation:
         temperature_option = cfg_dict["temperature_option"]
 
         self.driving_sim = RideCalc(
-            consumption, distances, inclines, temperature, temperature_option
+            consumption, distances, inclines, temperature, temperature_option, cfg_dict["defaults"]
         )
 
         # use other args to create objects
@@ -609,6 +609,13 @@ class Simulation:
             "emission_options": emission_options,
             "delete_rides": cfg.getboolean("sim_params", "delete_rides", fallback=True),
             "average_speed": cfg.getfloat("charging", "average_speed", fallback=8.65),
+            "defaults": {
+                "load_level": cfg.getfloat("charging", "load_level_default"),
+                "incline": cfg.getfloat("charging", "incline_default"),
+                "distance": cfg.getfloat("charging", "distance_default"),
+                "temperature": cfg.getfloat("temperature_options", "temperature_default"),
+                "speed": cfg.getfloat("charging", "average_speed"),
+            }
         }
 
         data_dict = read_input_data(scenario_data_path, cfg)
