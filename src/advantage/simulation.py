@@ -627,7 +627,7 @@ class Simulation:
                 "distance": cfg.getfloat("charging", "distance_default"),
                 "temperature": cfg.getfloat("temperature_options", "temperature_default"),
                 "speed": cfg.getfloat("charging", "average_speed"),
-            }
+            },
             "inputs": inputs,
         }
 

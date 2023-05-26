@@ -236,4 +236,3 @@ def test_ride_calc_speed_negative():
     defaults = {"load_level": 0, "incline": 0, "distance": 0, "temperature": 20, "speed": -1}
     with pytest.raises(ValueError):
         RideCalc(cons, dist, incl, temp, "median", defaults)
-
