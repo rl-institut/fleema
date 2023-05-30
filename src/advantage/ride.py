@@ -18,6 +18,7 @@ class RideCalc:
         inclines: pd.DataFrame,
         temperature: pd.DataFrame,
         temperature_option,
+        defaults: dict,
     ) -> None:
         """RideCalc constructor.
 
@@ -33,17 +34,19 @@ class RideCalc:
             Highest, lowest and median temperature for a day
         temperature_option : str
             Contains string of column that is used in temperature dataframe.
+        defaults : dict
+            Contains default values for the inputs in the consumption calculation.
         """
         self.consumption_table = consumption_table
         self.distances = distances
         self.inclines = inclines
         self.temperature = temperature
         self.temperature_option = temperature_option
+        self.defaults = defaults
+        if self.defaults["speed"] <= 0:
+            raise ValueError("Speed can not be smaller or equal to zero.")
 
-        self.uniques = [
-            sorted(self.consumption_table[col].unique())
-            for col in self.consumption_table.iloc[:, :-1]
-        ]
+        self.uniques = [sorted(self.consumption_table[col].unique()) for col in self.consumption_table.iloc[:, :-1]]
 
     def calculate_trip(
         self,
@@ -80,6 +83,11 @@ class RideCalc:
         """
         temperature = self.get_temperature(departure_time)
         distance, incline = self.get_location_values(origin, destination)
+        if speed <= 0:
+            warnings.warn(
+                f"Bad option: Speed is smaller than or equal to zero. Default is set to {self.defaults['speed']}"
+            )
+            speed = self.defaults["speed"]
         trip_time = distance / speed * 60
         consumption, soc_delta = self.calculate_consumption(
             vehicle_type, incline, temperature, speed, load_level, distance
@@ -123,15 +131,20 @@ class RideCalc:
             Returns consumption in kWh and the SoC delta resulting from this trip
 
         """
-        consumption_factor = self.get_consumption(
-            vehicle_type.name, incline, temperature, speed, load_level
-        )
+        consumption_factor = self.get_consumption(vehicle_type.name, load_level, incline, temperature, speed)
+        if distance < 0:
+            raise ValueError("Distance is smaller than zero.")
         consumption = consumption_factor * distance
 
         return consumption, consumption / vehicle_type.battery_capacity
 
     def get_consumption(
-        self, vehicle_type_name: str, incline, temperature, speed, load_level: float
+        self,
+        vehicle_type_name: str,
+        load_level,
+        incline,
+        temperature,
+        speed,
     ):
         """Get consumption in kWh/km for a specified vehicle type and route.
 
@@ -154,20 +167,11 @@ class RideCalc:
             Returns consumption factor in kWh/km
 
         """
-        if not isinstance(load_level, float) and not isinstance(load_level, int):
-            warnings.warn(
-                "Bad option: Load level should be of type float. Default is set to 0 now."
-            )
-            load_level = 0
-        if not 0 <= load_level <= 1:
-            warnings.warn(
-                "Bad option: Load level is not between 0 and 1. Default is set to 0 now."
-            )
-            load_level = 0
+        load_level, incline, temperature, speed = self._validate_consumption_inputs_and_get_defaults(
+            vehicle_type_name, load_level, incline, temperature, speed
+        )
 
-        df = self.consumption_table[
-            self.consumption_table["vehicle_type"] == vehicle_type_name
-        ]
+        df = self.consumption_table[self.consumption_table["vehicle_type"] == vehicle_type_name]
 
         inc_col = df["incline"]
         tmp_col = df["t_amb"]
@@ -176,9 +180,7 @@ class RideCalc:
         cons_col = df["consumption"]
         data_table = list(zip(lol_col, inc_col, speed_col, tmp_col, cons_col))
 
-        consumption_value = self.nd_interp(
-            (load_level, incline, speed, temperature), data_table
-        )
+        consumption_value = self.nd_interp((load_level, incline, speed, temperature), data_table)
 
         return consumption_value * (-1)
 
@@ -272,6 +274,8 @@ class RideCalc:
         if value in self.uniques[column]:
             upper = value
             lower = value
+        elif value > upper:
+            lower = upper
         else:
             # find the first unique thats bigger than the value (uniques is sorted)
             for count, bound in enumerate(self.uniques[column]):
@@ -345,10 +349,45 @@ class RideCalc:
         try:
             datetime.datetime.strptime(departure_time, "%Y-%m-%d %H:%M:%S")
         except ValueError:
-            warnings.warn(
-                "Bad format: Wrong datetime string format. Example: '2022-01-01 01:01:00'"
-            )
+            warnings.warn("Bad format: Wrong datetime string format. Example: '2022-01-01 01:01:00'")
             departure_time = "2022-01-01 12:00:00"
         step = datetime.datetime.strptime(departure_time, "%Y-%m-%d %H:%M:%S").hour
         row = self.temperature.loc[self.temperature["hour"] == step]
         return row[self.temperature_option].values[0]
+
+    def _validate_consumption_inputs_and_get_defaults(self, vehicle_type_name, load_level, incline, temperature, speed):
+        """Returns validated inputs with respective defaults if needed.
+
+        Parameters
+        ----------
+        vehicle_type_name : str
+        load_level : float
+        incline: float
+        temperature : float
+        speed : float
+
+        Returns
+        -------
+        float, float, float, float
+        load_level, incline, temperature, speed
+        """
+        defaults = {
+            "load_level": load_level,
+            "incline": incline,
+            "temperature": temperature,
+            "speed": speed,
+        }
+
+        # load_level
+        if not 0 <= defaults["load_level"] <= 1:
+            warnings.warn(
+                "Bad option: Load level is not between 0 and 1." f"Default is set to {self.defaults['load_level']}."
+            )
+            defaults["load_level"] = self.defaults["load_level"]
+
+        # speed
+        if defaults["speed"] < 0:
+            warnings.warn(f"Bad option: Speed is smaller than 0. Default is set to {self.defaults['speed']}.")
+            defaults["speed"] = self.defaults["speed"]
+
+        return tuple(defaults.values())
