@@ -133,8 +133,7 @@ class RideCalc:
         """
         consumption_factor = self.get_consumption(vehicle_type.name, load_level, incline, temperature, speed)
         if distance < 0:
-            warnings.warn(f"Bad option: Distance is smaller than zero. Default is set to {self.defaults['distance']}")
-            distance = self.defaults["distance"]
+            raise ValueError("Distance is smaller than zero.")
         consumption = consumption_factor * distance
 
         return consumption, consumption / vehicle_type.battery_capacity
@@ -372,28 +371,12 @@ class RideCalc:
         float, float, float, float
         load_level, incline, temperature, speed
         """
-        # check data type
         defaults = {
             "load_level": load_level,
             "incline": incline,
             "temperature": temperature,
             "speed": speed,
         }
-        for k, v in defaults.items():
-            try:
-                if not isinstance(float(v), float):
-                    raise TypeError
-            except ValueError:
-                raise TypeError
-
-        # vehicle_type_name
-        if not isinstance(vehicle_type_name, str):
-            raise TypeError(
-                f"Argument vehicle_type_name='{vehicle_type_name}' should be of type string,"
-                f" not {type(vehicle_type_name)}."
-            )
-        if vehicle_type_name not in self.uniques[0]:
-            raise ValueError(f"The vehicle type '{vehicle_type_name}' does not exist in the driving simulation.")
 
         # load_level
         if not 0 <= defaults["load_level"] <= 1:

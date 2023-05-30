@@ -622,10 +622,9 @@ class Simulation:
             "delete_rides": cfg.getboolean("sim_params", "delete_rides", fallback=True),
             "average_speed": cfg.getfloat("charging", "average_speed", fallback=8.65),
             "defaults": {
-                "load_level": cfg.getfloat("charging", "load_level_default"),
-                "incline": cfg.getfloat("charging", "incline_default"),
-                "distance": cfg.getfloat("charging", "distance_default"),
-                "temperature": cfg.getfloat("temperature_options", "temperature_default"),
+                "load_level": cfg.getfloat("defaults", "load_level_default"),
+                "incline": cfg.getfloat("defaults", "incline_default"),
+                "temperature": cfg.getfloat("defaults", "temperature_default"),
                 "speed": cfg.getfloat("charging", "average_speed"),
             },
             "inputs": inputs,

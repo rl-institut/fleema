@@ -98,17 +98,6 @@ def test_get_consumption_interpolation(driving_sim):
         assert 1.886 < v < 2.13
 
 
-# get_consumption: vehicle type name
-def test_get_consumption_vehicle_type_wrong_data_type(driving_sim):
-    with pytest.raises(TypeError):
-        driving_sim.get_consumption(0, 0, -0.04, -12, 2.626)
-
-
-def test_get_consumption_vehicle_type_doesnt_exist(driving_sim):
-    with pytest.raises(ValueError):
-        driving_sim.get_consumption("M18", 0, -0.04, -12, 2.626)
-
-
 # get_consumption: load_level
 def test_get_consumption_load_level_out_of_bounds(driving_sim):
     assert driving_sim.get_consumption("EZ10", 2, -0.04, -16, 2.626) * -1 == 2.13
@@ -187,7 +176,8 @@ def test_calculate_consumption_basic(driving_sim, vehicle_type_ez10):
 
 
 def test_calculate_consumption_negative_distance(driving_sim, vehicle_type_ez10):
-    assert driving_sim.calculate_consumption(vehicle_type_ez10, -0.04, -16, 2.626, 0, -1) == (0, 0)
+    with pytest.raises(ValueError):
+        driving_sim.calculate_consumption(vehicle_type_ez10, -0.04, -16, 2.626, 0, -1)
 
 
 # calculate_trip
