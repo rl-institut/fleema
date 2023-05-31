@@ -63,16 +63,19 @@ class SimulationState:
 
     def calculate_key_log_parameters(self):
         """Calculates values for the log files."""
-        if self.accumulated_results["charging_demand"]:
-            self_sufficiency = min(
-                round(
-                    self.accumulated_results["energy_from_feed_in"]
-                    / self.accumulated_results["charging_demand"],
-                    4,
-                ),
-                1,
-            )
-            self.accumulated_results["self_sufficiency"] = self_sufficiency
+        try:
+            if self.accumulated_results["charging_demand"]:
+                self_sufficiency = min(
+                    round(
+                        self.accumulated_results["energy_from_feed_in"]
+                        / self.accumulated_results["charging_demand"],
+                        4,
+                    ),
+                    1,
+                )
+                self.accumulated_results["self_sufficiency"] = self_sufficiency
+        except KeyError:
+            pass
 
     def export_log(self, save_directory):
         """Exports accumulated data to a JSON file."""
