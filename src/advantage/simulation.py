@@ -409,7 +409,8 @@ class Simulation:
             spiceev_scenario.strat.world_state.vehicles[mock_vehicle.id].battery.soc
             - current_soc
         )
-        if charged_soc <= 0 or math.isnan(charged_soc):
+        # TODO, check if v2g has been used => don't return empty dict?
+        if charged_soc <= 0 or math.isnan(charged_soc): # TODO change this for v2g
             return empty_dict
         charge_score = 1 - ((-drive_soc) / charged_soc)
         if charge_score <= 0:

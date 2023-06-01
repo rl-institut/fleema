@@ -84,9 +84,9 @@ def run_spice_ev(spice_ev_dict, strategy, ignore_warnings=True) -> "Scenario":
     if ignore_warnings:
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", UserWarning)
-            scenario.run(strategy, {})
+            scenario.run(strategy, {"timing": True, "HORIZON": 1})
     else:
-        scenario.run(strategy, {})
+        scenario.run(strategy, {"timing": True, "HORIZON": 1})
     return scenario
 
 
@@ -133,12 +133,17 @@ def get_charging_characteristic(
         cost = scenario.prices["GC1"][i]
 
         total_charge += charge
-        charge_from_feed_in = min(charge, feed_in)
+        charge_from_feed_in = max(min(charge, feed_in), 0)
         total_charge_from_feed_in += charge_from_feed_in
 
-        total_cost += (
-            max(charge - feed_in, 0) * cost + charge_from_feed_in * feed_in_cost
-        ) / scenario.stepsPerHour
+        if charge >= 0:
+            total_cost += (
+                max(charge - feed_in, 0) * cost + charge_from_feed_in * feed_in_cost
+            ) / scenario.stepsPerHour
+        else:
+            total_cost += (
+                charge * cost
+            ) / scenario.stepsPerHour
 
         if emission_df is not None:
             current_emission = get_current_time_series_value(
@@ -152,10 +157,10 @@ def get_charging_characteristic(
 
     feed_in_factor = min(total_charge_from_feed_in / total_charge, 1)
     result_dict = {
-        "cost": max(total_cost, 0),
+        "cost": total_cost,
         "feed_in": max(feed_in_factor, 0),
         "emission": max(total_emission, 0),
-        "grid_energy": max(total_charge / scenario.stepsPerHour, 0),
+        "grid_energy": total_charge / scenario.stepsPerHour,
     }
     return result_dict
 
