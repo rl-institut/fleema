@@ -559,10 +559,10 @@ class Simulation:
 
         # parse cost options
         cost_options = {
-            "csv_path": pathlib.Path(scenario_data_path, cfg["files"]["cost"]),
-            "start_time": cfg["cost_options"]["start_time"],
-            "step_duration": int(cfg["cost_options"]["step_duration"]),
-            "column": cfg["cost_options"]["column"],
+            "csv_path": pathlib.Path(scenario_data_path, cfg.get("files", "cost", fallback="cost.csv")),
+            "start_time": cfg.get("cost_options", "start_time", fallback="2021-01-01 00:00:00"),
+            "step_duration": cfg.getint("cost_options", "step_duration", fallback=3600),
+            "column": cfg.get("cost_options", "column", fallback="cost"),
         }
         emission_options = {
             "start_time": cfg.get(
@@ -582,13 +582,13 @@ class Simulation:
 
         # parse weights
         weights_dict = {
-            "time_factor": cfg.getfloat("weights", "time_factor"),
-            "energy_factor": cfg.getfloat("weights", "energy_factor"),
-            "cost_factor": cfg.getfloat("weights", "cost_factor"),
+            "time_factor": cfg.getfloat("weights", "time_factor", fallback=1),
+            "energy_factor": cfg.getfloat("weights", "energy_factor", fallback=1),
+            "cost_factor": cfg.getfloat("weights", "cost_factor", fallback=1),
             "local_renewables_factor": cfg.getfloat(
-                "weights", "local_renewables_factor"
+                "weights", "local_renewables_factor", fallback=1
             ),
-            "soc_factor": cfg.getfloat("weights", "soc_factor"),
+            "soc_factor": cfg.getfloat("weights", "soc_factor", fallback=0),
         }
 
         # parse inputs
@@ -603,7 +603,7 @@ class Simulation:
         }
 
         cfg_dict = {
-            "soc_min": cfg.getfloat("charging", "soc_min"),
+            "soc_min": cfg.getfloat("charging", "soc_min", fallback=0.2),
             "end_of_day_soc": cfg.getfloat("charging", "end_of_day_soc", fallback=0.8),
             "min_charging_power": cfg.getfloat(
                 "charging", "min_charging_power", fallback=0
@@ -628,10 +628,10 @@ class Simulation:
             "delete_rides": cfg.getboolean("sim_params", "delete_rides", fallback=True),
             "average_speed": cfg.getfloat("charging", "average_speed", fallback=8.65),
             "defaults": {
-                "level_of_loading": cfg.getfloat("defaults", "load_level_default"),
-                "incline": cfg.getfloat("defaults", "incline_default"),
-                "temperature": cfg.getfloat("defaults", "temperature_default"),
-                "speed": cfg.getfloat("charging", "average_speed"),
+                "level_of_loading": cfg.getfloat("defaults", "load_level_default", fallback=0.),
+                "incline": cfg.getfloat("defaults", "incline_default", fallback=0.),
+                "temperature": cfg.getfloat("defaults", "temperature_default", fallback=20.),
+                "speed": cfg.getfloat("charging", "average_speed", fallback=10.),
             },
             "inputs": inputs,
         }

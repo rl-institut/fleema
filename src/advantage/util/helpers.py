@@ -95,7 +95,7 @@ def read_input_data(scenario_data_path, cfg):
     if "level_of_loading" not in data_dict["schedule"].keys():
         if "occupation" not in data_dict["schedule"].keys():
             level_of_loading = [
-                float(cfg["sim_params"]["load_level_default"])
+                cfg.getfloat("sim_params", "load_level_default", fallback=0.)
                 for _ in range(data_dict["schedule"].shape[0])
             ]
         else:
