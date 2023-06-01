@@ -145,11 +145,11 @@ class Vehicle:
         event_start,
         event_time,
         simulation_state,
-        charging_power=0,
-        nominal_charging_capacity=0,
+        charging_power=0.,
+        nominal_charging_capacity=0.,
         distance=0.0,
         charging_result=None,
-        interp_consumption=0,
+        interp_consumption=0.,
         level_of_loading=0.0,
     ):
         """Records newest energy and activity in the attributes soc and output.

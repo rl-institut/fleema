@@ -168,7 +168,7 @@ class RideCalc:
 
         """
         level_of_loading, incline, temperature, speed = self._validate_consumption_inputs_and_get_defaults(
-            vehicle_type_name, level_of_loading, incline, temperature, speed
+            level_of_loading, incline, temperature, speed
         )
 
         df = self.consumption_table[self.consumption_table["vehicle_type"] == vehicle_type_name]
@@ -380,7 +380,7 @@ class RideCalc:
         # level_of_loading
         if not 0 <= defaults["level_of_loading"] <= 1:
             warnings.warn(
-                "Bad option: Load level is not between 0 and 1." f"Default is set to {self.defaults['level_of_loading']}."
+                f"Bad option: Load level is not between 0 and 1. Default is set to {self.defaults['level_of_loading']}."
             )
             defaults["level_of_loading"] = self.defaults["level_of_loading"]
 

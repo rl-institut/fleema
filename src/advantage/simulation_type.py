@@ -53,10 +53,6 @@ class SimulationType:
         task : Task
             Task to be executed
         """
-        # load_level = self.simulation.schedule.loc[
-        #     self.simulation.schedule["departure_time"]
-        #     == str(self.simulation.time_series[task.start_time])
-        # ]["level_of_loading"].values
         if task.task == Status.DRIVING:
             if not task.is_calculated:
                 trip = self.simulation.driving_sim.calculate_trip(

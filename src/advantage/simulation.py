@@ -264,6 +264,7 @@ class Simulation:
             Status.DRIVING,
             float_time=trip["trip_time"],
             delta_soc=trip["soc_delta"],
+            consumption=trip["consumption"],
             level_of_loading=row["level_of_loading"],
         )
         vehicle.add_task(task)
@@ -459,6 +460,7 @@ class Simulation:
                 Status.DRIVING,
                 trip_to["trip_time"],
                 trip_to["soc_delta"],
+                consumption=trip_to["consumption"],
             )
             result_dict["task_to"] = task_to
         if charging_location is not next_location:
@@ -470,6 +472,7 @@ class Simulation:
                 Status.DRIVING,
                 trip_from["trip_time"],
                 trip_from["soc_delta"],
+                consumption=trip_from["consumption"],
             )
             result_dict["task_from"] = task_from
         return result_dict
