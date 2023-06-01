@@ -12,7 +12,7 @@ def driving_sim():
     dist = pd.read_csv(pathlib.Path("scenario_data", "bad_birnbach", "distance.csv"), index_col=0)
     incl = pd.read_csv(pathlib.Path("scenario_data", "bad_birnbach", "incline.csv"), index_col=0)
     temp = pd.read_csv(pathlib.Path("scenario_data", "bad_birnbach", "temperature.csv"))
-    defaults = {"load_level": 0, "incline": 0, "distance": 0, "temperature": 20, "speed": 8.65}
+    defaults = {"level_of_loading": 0, "incline": 0, "distance": 0, "temperature": 20, "speed": 8.65}
     return RideCalc(cons, dist, incl, temp, "median", defaults)
 
 
@@ -22,7 +22,7 @@ def driving_sim_bad_temperature_option():
     cons = pd.read_csv(cons_path)
     temp_path = pathlib.Path("scenario_data", "bad_birnbach", "temperature.csv")
     temp = pd.read_csv(temp_path)
-    defaults = {"load_level": 0, "incline": 0, "distance": 0, "temperature": 20, "speed": 8.65}
+    defaults = {"level_of_loading": 0, "incline": 0, "distance": 0, "temperature": 20, "speed": 8.65}
     return RideCalc(cons, cons, cons, temp, "bad_column", defaults)
 
 
@@ -53,35 +53,35 @@ def data_table(driving_sim):
 
 
 # nd_interp
-def test_nd_interp_basic_load_level(driving_sim, data_table):
+def test_nd_interp_basic_level_of_loading(driving_sim, data_table):
     assert driving_sim.nd_interp((0, -0.04, 2.626, -16), data_table) == 2.13
     assert driving_sim.nd_interp((0.25, 0.01, 2.626, 8), data_table) == 0.933
 
 
-def test_nd_interp_too_low_load_level(driving_sim, data_table):
+def test_nd_interp_too_low_level_of_loading(driving_sim, data_table):
     assert driving_sim.nd_interp((-1, -0.04, 2.626, -16), data_table) == 2.13
 
 
-def test_nd_interp_too_high_load_level(driving_sim, data_table):
+def test_nd_interp_too_high_level_of_loading(driving_sim, data_table):
     assert driving_sim.nd_interp((2, -0.04, 2.626, -16), data_table) == 1.755
 
 
-def test_nd_interp_too_high_load_level_incline(driving_sim, data_table):
+def test_nd_interp_too_high_level_of_loading_incline(driving_sim, data_table):
     assert driving_sim.nd_interp((2, 1, 2.626, -16), data_table) == 2.031
 
 
-def test_nd_interp_too_high_load_level_incline_speed_temperature(driving_sim, data_table):
+def test_nd_interp_too_high_level_of_loading_incline_speed_temperature(driving_sim, data_table):
     assert driving_sim.nd_interp((2, 1, 50, 50), data_table) == 0.474
 
 
 # get_nearest_unique
-def test_get_nearest_unique_basic_load_level(driving_sim):
+def test_get_nearest_unique_basic_level_of_loading(driving_sim):
     assert driving_sim.get_nearest_uniques(0, 1) == (0, 0)
     assert driving_sim.get_nearest_uniques(0.1, 1) == (0, 0.25)
     assert driving_sim.get_nearest_uniques(1, 1) == (1, 1)
 
 
-def test_get_nearest_unique_outer_boundaries_load_level(driving_sim):
+def test_get_nearest_unique_outer_boundaries_level_of_loading(driving_sim):
     assert driving_sim.get_nearest_uniques(-1, 1) == (0, 0)
     assert driving_sim.get_nearest_uniques(2, 1) == (1, 1)
 
@@ -98,13 +98,13 @@ def test_get_consumption_interpolation(driving_sim):
         assert 1.886 < v < 2.13
 
 
-# get_consumption: load_level
-def test_get_consumption_load_level_out_of_bounds(driving_sim):
+# get_consumption: level_of_loading
+def test_get_consumption_level_of_loading_out_of_bounds(driving_sim):
     assert driving_sim.get_consumption("EZ10", 2, -0.04, -16, 2.626) * -1 == 2.13
     assert driving_sim.get_consumption("EZ10", -1, -0.04, -16, 2.626) * -1 == 2.13
 
 
-def test_get_consumption_load_level_input_string(driving_sim):
+def test_get_consumption_level_of_loading_input_string(driving_sim):
     with pytest.raises(TypeError):
         driving_sim.get_consumption("EZ10", "string", -0.04, -16, 2.626)
 
@@ -204,7 +204,7 @@ def test_ride_calc_basic():
     dist = pd.read_csv(pathlib.Path("scenario_data", "bad_birnbach", "distance.csv"), index_col=0)
     incl = pd.read_csv(pathlib.Path("scenario_data", "bad_birnbach", "incline.csv"), index_col=0)
     temp = pd.read_csv(pathlib.Path("scenario_data", "bad_birnbach", "temperature.csv"))
-    defaults = {"load_level": 0, "incline": 0, "distance": 0, "temperature": 20, "speed": 8.65}
+    defaults = {"level_of_loading": 0, "incline": 0, "distance": 0, "temperature": 20, "speed": 8.65}
     assert RideCalc(cons, dist, incl, temp, "median", defaults)
 
 
@@ -213,7 +213,7 @@ def test_ride_calc_speed_zero():
     dist = pd.read_csv(pathlib.Path("scenario_data", "bad_birnbach", "distance.csv"), index_col=0)
     incl = pd.read_csv(pathlib.Path("scenario_data", "bad_birnbach", "incline.csv"), index_col=0)
     temp = pd.read_csv(pathlib.Path("scenario_data", "bad_birnbach", "temperature.csv"))
-    defaults = {"load_level": 0, "incline": 0, "distance": 0, "temperature": 20, "speed": 0}
+    defaults = {"level_of_loading": 0, "incline": 0, "distance": 0, "temperature": 20, "speed": 0}
     with pytest.raises(ValueError):
         RideCalc(cons, dist, incl, temp, "median", defaults)
 
@@ -223,6 +223,6 @@ def test_ride_calc_speed_negative():
     dist = pd.read_csv(pathlib.Path("scenario_data", "bad_birnbach", "distance.csv"), index_col=0)
     incl = pd.read_csv(pathlib.Path("scenario_data", "bad_birnbach", "incline.csv"), index_col=0)
     temp = pd.read_csv(pathlib.Path("scenario_data", "bad_birnbach", "temperature.csv"))
-    defaults = {"load_level": 0, "incline": 0, "distance": 0, "temperature": 20, "speed": -1}
+    defaults = {"level_of_loading": 0, "incline": 0, "distance": 0, "temperature": 20, "speed": -1}
     with pytest.raises(ValueError):
         RideCalc(cons, dist, incl, temp, "median", defaults)

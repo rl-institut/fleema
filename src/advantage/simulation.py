@@ -262,8 +262,9 @@ class Simulation:
             self.locations[row.departure_name],
             self.locations[row.arrival_name],
             Status.DRIVING,
-            trip["trip_time"],
-            trip["soc_delta"],
+            float_time=trip["trip_time"],
+            delta_soc=trip["soc_delta"],
+            level_of_loading=row["level_of_loading"],
         )
         vehicle.add_task(task)
 
@@ -372,6 +373,7 @@ class Simulation:
         }
         # run pre calculations
         time_window = end_time - start_time
+        # TODO add load level on location eval
         trip_to = self.driving_sim.calculate_trip(
             current_location, charging_location, vehicle_type, self.average_speed
         )
@@ -448,6 +450,7 @@ class Simulation:
         }
         # create drive to and drive from charging point
         if current_location is not charging_location:
+            # TODO add load level to tasks
             task_to = Task(
                 start_time,
                 charging_start,
@@ -622,7 +625,7 @@ class Simulation:
             "delete_rides": cfg.getboolean("sim_params", "delete_rides", fallback=True),
             "average_speed": cfg.getfloat("charging", "average_speed", fallback=8.65),
             "defaults": {
-                "load_level": cfg.getfloat("defaults", "load_level_default"),
+                "level_of_loading": cfg.getfloat("defaults", "load_level_default"),
                 "incline": cfg.getfloat("defaults", "incline_default"),
                 "temperature": cfg.getfloat("defaults", "temperature_default"),
                 "speed": cfg.getfloat("charging", "average_speed"),

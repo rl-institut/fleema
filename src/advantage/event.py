@@ -58,6 +58,8 @@ class Task(Event):
         A positive delta_soc means charging, negative is consumption.
     consumption : float
         Energy drain of the task.
+    level_of_loading : float
+        Additional load the vehicle carries (from 0 to 1)
     """
 
     start_point: "Location"
@@ -66,6 +68,7 @@ class Task(Event):
     float_time: float = 0.0
     delta_soc: float = 0.0
     consumption: float = 0.0
+    level_of_loading: float = 0.0
 
     @property
     def is_calculated(self):
