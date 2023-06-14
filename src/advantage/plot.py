@@ -57,7 +57,7 @@ def soc_plot(simulation: "Simulation"):
     # matplotlib
     if simulation.outputs["plot_png"]:
         fig, ax = plt.subplots()
-        for veh in range(len(vehicles_soc_list)):
+        for veh in vehicles_soc_list:
             ax.plot(simulation.time_series, vehicles_soc_list[veh])
         ax.set_title("SOC of vehicles over time")
         ax.set_ylabel("SOC in percentage")
@@ -97,82 +97,85 @@ def grid_timeseries(simulation: "Simulation"):
     simulation : Simulation
         The current simulation object that holds the grids (locations) with their "output" attribute.
     """
-    if simulation.outputs["plot_png"]:
-        # total grid timeseries
-        fig, ax = plt.subplots()
-        ax.plot(simulation.time_series, simulation.outputs["total_power"])
-        ax.set_title("Total Power Grid Timeseries")
-        ax.set_ylabel("kWh")
-        fig.autofmt_xdate(rotation=45)
-        plt.savefig(simulation.save_directory / "plots" / "total_power_timeseries.png")
-        plt.clf()
-
-    # timeseries by location (grid)
-    single_df = pd.DataFrame()
-    for location in simulation.locations:
-        output = simulation.locations[location].output
-        if output is None:
-            continue
-        y = []
-        if len(output) <= 2:
-            y.append(output[f"{location}_total_power"])
-        else:
-            for key in output.keys():
-                y.append(output[key])
-
-        # matplotlib
+    try:
         if simulation.outputs["plot_png"]:
+            # total grid timeseries
             fig, ax = plt.subplots()
-            for plot_data in y:
-                ax.plot(simulation.time_series, plot_data)
-            ax.set_title(f"{location} Grid Timeseries")
+            ax.plot(simulation.time_series, simulation.outputs["total_power"])
+            ax.set_title("Total Power Grid Timeseries")
             ax.set_ylabel("kWh")
             fig.autofmt_xdate(rotation=45)
-            plt.savefig(
-                simulation.save_directory / "plots" / f"{location}_timeseries.png"
-            )
+            plt.savefig(simulation.save_directory / "plots" / "total_power_timeseries.png")
             plt.clf()
 
-        # plotly
-        if px and simulation.outputs["plot_html"]:
-            # total grid
-            total_df = pd.DataFrame(
-                {
-                    "time": simulation.time_series,
-                    "total power": simulation.outputs["total_power"],
-                }
-            )
-            fig = px.line(total_df, x="time", y="total power", title="Total Power")
-            fig.write_html(
-                simulation.save_directory / "plots/html" / "total_power_timeseries.html"
-            )
-            # single grid
-            single_df = pd.DataFrame()
-            for loc in simulation.locations:
-                output = simulation.locations[loc].output
-                if output is None:
-                    continue
-                tmp_df = pd.DataFrame(
+        # timeseries by location (grid)
+        single_df = pd.DataFrame()
+        for location in simulation.locations:
+            output = simulation.locations[location].output
+            if output is None:
+                continue
+            y = []
+            if len(output) <= 2:
+                y.append(output[f"{location}_total_power"])
+            else:
+                for key in output.keys():
+                    y.append(output[key])
+
+            # matplotlib
+            if simulation.outputs["plot_png"]:
+                fig, ax = plt.subplots()
+                for plot_data in y:
+                    ax.plot(simulation.time_series, plot_data)
+                ax.set_title(f"{location} Grid Timeseries")
+                ax.set_ylabel("kWh")
+                fig.autofmt_xdate(rotation=45)
+                plt.savefig(
+                    simulation.save_directory / "plots" / f"{location}_timeseries.png"
+                )
+                plt.clf()
+
+            # plotly
+            if px and simulation.outputs["plot_html"]:
+                # total grid
+                total_df = pd.DataFrame(
                     {
                         "time": simulation.time_series,
-                        "values": output[f"{loc}_total_power"],
-                        "type": [loc for _ in range(simulation.time_steps)],
+                        "total power": simulation.outputs["total_power"],
                     }
                 )
-                single_df = pd.concat([single_df, tmp_df])
-            fig = px.line(
-                single_df,
-                x="time",
-                y="values",
-                color="type",
-                title="Individual Power Timeseries",
-                template="seaborn",
-            )
-            fig.write_html(
-                simulation.save_directory
-                / "plots/html"
-                / "individual_power_timeseries.html"
-            )
+                fig = px.line(total_df, x="time", y="total power", title="Total Power")
+                fig.write_html(
+                    simulation.save_directory / "plots/html" / "total_power_timeseries.html"
+                )
+                # single grid
+                single_df = pd.DataFrame()
+                for loc in simulation.locations:
+                    output = simulation.locations[loc].output
+                    if output is None:
+                        continue
+                    tmp_df = pd.DataFrame(
+                        {
+                            "time": simulation.time_series,
+                            "values": output[f"{loc}_total_power"],
+                            "type": [loc for _ in range(simulation.time_steps)],
+                        }
+                    )
+                    single_df = pd.concat([single_df, tmp_df])
+                fig = px.line(
+                    single_df,
+                    x="time",
+                    y="values",
+                    color="type",
+                    title="Individual Power Timeseries",
+                    template="seaborn",
+                )
+                fig.write_html(
+                    simulation.save_directory
+                    / "plots/html"
+                    / "individual_power_timeseries.html"
+                )
+    except KeyError:
+        print("Grid timeseries could not be created: not all necessary values have been calculated.")
 
 
 def energy_from_grid_feedin(simulation: "Simulation"):
@@ -193,25 +196,31 @@ def energy_from_grid_feedin(simulation: "Simulation"):
         )
     # matplotlib
     if simulation.outputs["plot_png"]:
-        fig, ax = plt.subplots()
-        ax.set_title("Energy Distribution")
-        ax.pie(grid_and_feedin, labels=["Grid", "Feed-in"], autopct="%1.1f%%")
-        fig.savefig(simulation.save_directory / "plots" / "energy_distribution.png")
-        plt.clf()
+        try:
+            fig, ax = plt.subplots()
+            ax.set_title("Energy Distribution")
+            ax.pie(grid_and_feedin, labels=["Grid", "Feed-in"], autopct="%1.1f%%")
+            fig.savefig(simulation.save_directory / "plots" / "energy_distribution.png")
+            plt.clf()
+        except ValueError:
+            print("Png pie chart could not be created.")
 
     # plotly
     if px and simulation.outputs["plot_html"]:
-        df = {"energy value": grid_and_feedin, "energy type": ["grid", "feed-in"]}
-        fig = px.pie(
-            df,
-            values="energy value",
-            names="energy type",
-            title="Energy Distribution",
-            template="seaborn",
-        )
-        fig.write_html(
-            simulation.save_directory / "plots/html" / "energy_distribution.html"
-        )
+        try:
+            df = {"energy value": grid_and_feedin, "energy type": ["grid", "feed-in"]}
+            fig = px.pie(
+                df,
+                values="energy value",
+                names="energy type",
+                title="Energy Distribution",
+                template="seaborn",
+            )
+            fig.write_html(
+                simulation.save_directory / "plots/html" / "energy_distribution.html"
+            )
+        except ValueError:
+            print("HTML pie chart could not be created.")
 
 
 def plot(simulation: "Simulation"):

@@ -55,7 +55,7 @@ class RideCalc:
         vehicle_type: "VehicleType",
         speed: float,
         departure_time: str = "2022-01-01 01:01:00",
-        load_level: float = 0,
+        level_of_loading: float = 0,
     ):
         """Calculate consumption as a part of total SoC.
 
@@ -71,7 +71,7 @@ class RideCalc:
             Average speed during the given trip.
         departure_time : str
             Departure time represented by a string.
-        load_level : float
+        level_of_loading : float
             Number between 0 and 1 that represents the occupation of the vehicle capacity.
             Default is zero.
 
@@ -90,7 +90,7 @@ class RideCalc:
             speed = self.defaults["speed"]
         trip_time = distance / speed * 60
         consumption, soc_delta = self.calculate_consumption(
-            vehicle_type, incline, temperature, speed, load_level, distance
+            vehicle_type, incline, temperature, speed, level_of_loading, distance
         )
 
         return {
@@ -105,7 +105,7 @@ class RideCalc:
         incline,
         temperature,
         speed,
-        load_level,
+        level_of_loading,
         distance,
     ):
         """Calculates the reduction in SoC of a vehicle type when driving the specified route.
@@ -120,7 +120,7 @@ class RideCalc:
             Ambient temperature
         speed : float
             Average speed during trip
-        load_level : float
+        level_of_loading : float
             Level of load from 0 - 1, 1 being the maximum load of the vehicle
         distance : float
             Distance of trip in km
@@ -131,7 +131,7 @@ class RideCalc:
             Returns consumption in kWh and the SoC delta resulting from this trip
 
         """
-        consumption_factor = self.get_consumption(vehicle_type.name, load_level, incline, temperature, speed)
+        consumption_factor = self.get_consumption(vehicle_type.name, level_of_loading, incline, temperature, speed)
         if distance < 0:
             raise ValueError("Distance is smaller than zero.")
         consumption = consumption_factor * distance
@@ -141,7 +141,7 @@ class RideCalc:
     def get_consumption(
         self,
         vehicle_type_name: str,
-        load_level,
+        level_of_loading,
         incline,
         temperature,
         speed,
@@ -158,7 +158,7 @@ class RideCalc:
             Ambient temperature
         speed : float
             Average speed during trip
-        load_level : float
+        level_of_loading : float
             Level of load from 0 - 1, 1 being the maximum load of the vehicle
 
         Returns
@@ -167,8 +167,8 @@ class RideCalc:
             Returns consumption factor in kWh/km
 
         """
-        load_level, incline, temperature, speed = self._validate_consumption_inputs_and_get_defaults(
-            vehicle_type_name, load_level, incline, temperature, speed
+        level_of_loading, incline, temperature, speed = self._validate_consumption_inputs_and_get_defaults(
+            level_of_loading, incline, temperature, speed
         )
 
         df = self.consumption_table[self.consumption_table["vehicle_type"] == vehicle_type_name]
@@ -180,7 +180,7 @@ class RideCalc:
         cons_col = df["consumption"]
         data_table = list(zip(lol_col, inc_col, speed_col, tmp_col, cons_col))
 
-        consumption_value = self.nd_interp((load_level, incline, speed, temperature), data_table)
+        consumption_value = self.nd_interp((level_of_loading, incline, speed, temperature), data_table)
 
         return consumption_value * (-1)
 
@@ -355,13 +355,12 @@ class RideCalc:
         row = self.temperature.loc[self.temperature["hour"] == step]
         return row[self.temperature_option].values[0]
 
-    def _validate_consumption_inputs_and_get_defaults(self, vehicle_type_name, load_level, incline, temperature, speed):
+    def _validate_consumption_inputs_and_get_defaults(self, level_of_loading, incline, temperature, speed):
         """Returns validated inputs with respective defaults if needed.
 
         Parameters
         ----------
-        vehicle_type_name : str
-        load_level : float
+        level_of_loading : float
         incline: float
         temperature : float
         speed : float
@@ -369,21 +368,21 @@ class RideCalc:
         Returns
         -------
         float, float, float, float
-        load_level, incline, temperature, speed
+        level_of_loading, incline, temperature, speed
         """
         defaults = {
-            "load_level": load_level,
+            "level_of_loading": level_of_loading,
             "incline": incline,
             "temperature": temperature,
             "speed": speed,
         }
 
-        # load_level
-        if not 0 <= defaults["load_level"] <= 1:
+        # level_of_loading
+        if not 0 <= defaults["level_of_loading"] <= 1:
             warnings.warn(
-                "Bad option: Load level is not between 0 and 1." f"Default is set to {self.defaults['load_level']}."
+                f"Bad option: Load level is not between 0 and 1. Default is set to {self.defaults['level_of_loading']}."
             )
-            defaults["load_level"] = self.defaults["load_level"]
+            defaults["level_of_loading"] = self.defaults["level_of_loading"]
 
         # speed
         if defaults["speed"] < 0:

@@ -9,7 +9,7 @@ _build
 .tox
 .coverage
 .idea
-/venv
+/venv*
 results/*/
 scenario_setting/
 *_data/
