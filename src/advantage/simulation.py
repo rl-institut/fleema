@@ -99,6 +99,7 @@ class Simulation:
         self.start_date = cfg_dict["start_date"]
         self.end_date = cfg_dict["end_date"]
         self.step_size = cfg_dict["step_size"]
+        self.step_size_spice_ev = cfg_dict["step_size_spice_ev"]
         time_steps: datetime.timedelta = self.end_date - self.start_date
         self.time_steps = int(time_steps.total_seconds() / 60 / self.step_size)
         self.time_series = pd.date_range(
@@ -318,14 +319,38 @@ class Simulation:
         """
         time_stamp = step_to_timestamp(self.time_series, start_time)
         charging_time = int(end_time - start_time)
-        spice_dict = get_spice_ev_scenario_dict(
-            vehicle, location, point_id, time_stamp, charging_time, self.cost_options
+
+        charging_time = charging_time // self.step_size_spice_ev
+        charging_rest = charging_time - self.step_size_spice_ev * charging_time
+
+        spice_dict0 = get_spice_ev_scenario_dict(
+            vehicle, location, point_id, time_stamp, charging_time, self.cost_options, self.step_size_spice_ev
         )
-        spice_dict["components"]["vehicles"][vehicle.id][
+        spice_dict0["components"]["vehicles"][vehicle.id][
             "connected_charging_station"
-        ] = list(spice_dict["components"]["charging_stations"].keys())[0]
-        scenario = run_spice_ev(spice_dict, "balanced", self.ignore_spice_ev_warnings)
-        return scenario
+        ] = list(spice_dict0["components"]["charging_stations"].keys())[0]
+
+        spice_dict1 = get_spice_ev_scenario_dict(
+            vehicle, location, point_id, time_stamp, charging_rest, self.cost_options, self.step_size
+        )
+        spice_dict1["components"]["vehicles"][vehicle.id][
+            "connected_charging_station"
+        ] = list(spice_dict1["components"]["charging_stations"].keys())[0]
+
+        scenario_bulk = run_spice_ev(spice_dict0, "balanced", self.ignore_spice_ev_warnings)
+        scenario_rest = None
+        if spice_dict1["scenario"]["n_intervals"] > 0:
+            scenario_rest = run_spice_ev(spice_dict1, "balanced", self.ignore_spice_ev_warnings)
+        return scenario_bulk, scenario_rest
+
+        """spice_dict0 = get_spice_ev_scenario_dict(
+            vehicle, location, point_id, time_stamp, charging_time, self.cost_options, self.step_size_spice_ev
+        )
+        spice_dict0["components"]["vehicles"][vehicle.id][
+            "connected_charging_station"
+        ] = list(spice_dict0["components"]["charging_stations"].keys())[0]
+        scenario_bulk = run_spice_ev(spice_dict0, "balanced", self.ignore_spice_ev_warnings)
+        return scenario_bulk"""
 
     @block_printing
     def evaluate_charging_location(
@@ -394,14 +419,14 @@ class Simulation:
             "vehicle", vehicle_type, soc=current_soc + trip_to["soc_delta"]
         )
 
-        spiceev_scenario = self.call_spiceev(
+        spiceev_scenarios = self.call_spiceev(
             charging_location,
             charging_start,
             charging_start + charging_time,
             mock_vehicle,
         )
         charged_soc = (
-            spiceev_scenario.strat.world_state.vehicles[mock_vehicle.id].battery.soc
+            spiceev_scenarios[0].strat.world_state.vehicles[mock_vehicle.id].battery.soc
             - current_soc
         )
         if charged_soc <= 0 or math.isnan(charged_soc):
@@ -411,7 +436,7 @@ class Simulation:
             return empty_dict
 
         charging_result = get_charging_characteristic(
-            spiceev_scenario,
+            spiceev_scenarios[0],
             self.feed_in_cost,
         )
 
@@ -613,6 +638,7 @@ class Simulation:
             "end_date": end_date,
             "num_threads": cfg.getint("sim_params", "num_threads", fallback=1),
             "step_size": cfg.getint("basic", "step_size", fallback=1),
+            "step_size_spice_ev": cfg.getint("basic", "step_size_spice_ev", fallback=1),
             "simulation_type": cfg.get("basic", "simulation_type", fallback="schedule"),
             "weights": weights_dict,
             "outputs": outputs,
