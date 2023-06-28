@@ -6,6 +6,28 @@ from spice_ev.scenario import Scenario
 from advantage.util.helpers import deep_update
 
 
+def apply_to_scenarios(func):
+    def func_wrapper(scenario, *args, **kwargs):
+        if isinstance(scenario, tuple):
+            if None not in scenario:
+                results = []
+                for single_scenario in scenario:
+                    result = func(single_scenario, *args, **kwargs)
+                    results.append(result)
+
+                return {
+                    "cost": max(results[0]["cost"] + results[1]["cost"], 0),
+                    "feed_in": max(results[0]["cost"] + results[1]["cost"], 0),
+                    "emission": max(results[0]["emission"] + results[1]["emission"], 0),
+                    "grid_energy": max(results[0]["grid_energy"] + results[1]["grid_energy"], 0),
+                }
+            else:
+                return func(scenario[0], *args, **kwargs)
+        else:
+            return func(scenario, *args, **kwargs)
+    return func_wrapper
+
+
 def get_spice_ev_scenario_dict(
     vehicle, location, point_id, timestamp: datetime.datetime, time, cost_options, step_size
 ):
@@ -90,6 +112,7 @@ def run_spice_ev(spice_ev_dict, strategy, ignore_warnings=True) -> "Scenario":
     return scenario
 
 
+@apply_to_scenarios
 def get_charging_characteristic(
     scenario,
     feed_in_cost,
@@ -116,7 +139,8 @@ def get_charging_characteristic(
     dict[string, float]
         Keys: "cost" contains total cost in €,
         "feed_in": renewable part of charging energy [0-1],
-        "emission": total CO2-emission in g
+        "emission": total CO2-emission in g,
+        "grid_energy": kW per steps_size which are the timesteps per hour
 
     """
     total_cost = 0

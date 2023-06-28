@@ -320,11 +320,14 @@ class Simulation:
         time_stamp = step_to_timestamp(self.time_series, start_time)
         charging_time = int(end_time - start_time)
 
-        charging_time = charging_time // self.step_size_spice_ev
-        charging_rest = charging_time - self.step_size_spice_ev * charging_time
+        charging_time_up = charging_time // self.step_size_spice_ev
+        charging_rest = charging_time - charging_time_up
+        if charging_time_up < 1:
+            charging_time_up = 1
+            charging_rest = 0
 
         spice_dict0 = get_spice_ev_scenario_dict(
-            vehicle, location, point_id, time_stamp, charging_time, self.cost_options, self.step_size_spice_ev
+            vehicle, location, point_id, time_stamp, charging_time_up, self.cost_options, self.step_size_spice_ev
         )
         spice_dict0["components"]["vehicles"][vehicle.id][
             "connected_charging_station"
@@ -343,14 +346,6 @@ class Simulation:
             scenario_rest = run_spice_ev(spice_dict1, "balanced", self.ignore_spice_ev_warnings)
         return scenario_bulk, scenario_rest
 
-        """spice_dict0 = get_spice_ev_scenario_dict(
-            vehicle, location, point_id, time_stamp, charging_time, self.cost_options, self.step_size_spice_ev
-        )
-        spice_dict0["components"]["vehicles"][vehicle.id][
-            "connected_charging_station"
-        ] = list(spice_dict0["components"]["charging_stations"].keys())[0]
-        scenario_bulk = run_spice_ev(spice_dict0, "balanced", self.ignore_spice_ev_warnings)
-        return scenario_bulk"""
 
     @block_printing
     def evaluate_charging_location(
@@ -436,7 +431,7 @@ class Simulation:
             return empty_dict
 
         charging_result = get_charging_characteristic(
-            spiceev_scenarios[0],
+            spiceev_scenarios,
             self.feed_in_cost,
         )
 
