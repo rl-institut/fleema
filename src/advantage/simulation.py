@@ -298,8 +298,8 @@ class Simulation:
     def call_spiceev(
         self,
         location: "Location",
-        start_time: int,
-        end_time: int,
+        start_ts: int,
+        end_ts: int,
         vehicle: "Vehicle",
         point_id=None,
     ):
@@ -308,8 +308,8 @@ class Simulation:
         Parameters
         ----------
         location : Location
-        start_time : int
-        end_time : int
+        start_ts : int
+        end_ts : int
         vehicle : Vehicle
         point_id : Optional[str]
 
@@ -319,8 +319,8 @@ class Simulation:
             SpiceEV scenario object
 
         """
-        time_stamp = step_to_timestamp(self.time_series, start_time)
-        charging_time = int(end_time - start_time)
+        time_stamp = step_to_timestamp(self.time_series, start_ts)
+        charging_time = int((end_ts - start_ts) * self.step_size)
         # TODO add proper way to choose strategy
         strategy = "balanced_market" if charging_time > 15 else "greedy"
         spice_dict = get_spice_ev_scenario_dict(
@@ -410,7 +410,7 @@ class Simulation:
             - current_soc
         )
         # TODO, check if v2g has been used => don't return empty dict?
-        if charged_soc <= 0 or math.isnan(charged_soc): # TODO change this for v2g
+        if charged_soc <= 0 or math.isnan(charged_soc):  # TODO change this for v2g
             return empty_dict
         charge_score = 1 - ((-drive_soc) / charged_soc)
         if charge_score <= 0:
