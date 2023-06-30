@@ -99,7 +99,6 @@ class Simulation:
         self.start_date = cfg_dict["start_date"]
         self.end_date = cfg_dict["end_date"]
         self.step_size = cfg_dict["step_size"]
-        self.step_size_spice_ev = cfg_dict["step_size_spice_ev"]
         time_steps: datetime.timedelta = self.end_date - self.start_date
         self.time_steps = int(time_steps.total_seconds() / 60 / self.step_size)
         self.time_series = pd.date_range(
@@ -324,48 +323,52 @@ class Simulation:
         """
         time_stamp = step_to_timestamp(self.time_series, start_time)
         charging_time = int(end_time - start_time)
+        step_size_spice_ev = 15
 
-        charging_time_up = charging_time // self.step_size_spice_ev
-        charging_rest = charging_time - charging_time_up
-        if charging_time_up < 1:
-            charging_time_up = 1
-            charging_rest = 0
+        charging_time_main = charging_time // step_size_spice_ev
+        charging_time_remainder = charging_time - charging_time_main
+        if charging_time_main < 1:
+            charging_time_main = 1
+            charging_time_remainder = 0
 
-        spice_dict0 = get_spice_ev_scenario_dict(
+        # create main scenario
+        spice_dict_main = get_spice_ev_scenario_dict(
             vehicle,
             location,
             point_id,
             time_stamp,
-            charging_time_up,
+            charging_time_main,
             self.cost_options,
-            self.step_size_spice_ev,
         )
-        spice_dict0["components"]["vehicles"][vehicle.id][
+        spice_dict_main["components"]["vehicles"][vehicle.id][
             "connected_charging_station"
-        ] = list(spice_dict0["components"]["charging_stations"].keys())[0]
+        ] = list(spice_dict_main["components"]["charging_stations"].keys())[0]
 
-        spice_dict1 = get_spice_ev_scenario_dict(
-            vehicle,
-            location,
-            point_id,
-            time_stamp,
-            charging_rest,
-            self.cost_options,
-            self.step_size,
+        scenario_main = run_spice_ev(
+            spice_dict_main, "balanced", self.ignore_spice_ev_warnings
         )
-        spice_dict1["components"]["vehicles"][vehicle.id][
-            "connected_charging_station"
-        ] = list(spice_dict1["components"]["charging_stations"].keys())[0]
 
-        scenario_bulk = run_spice_ev(
-            spice_dict0, "balanced", self.ignore_spice_ev_warnings
-        )
-        scenario_rest = None
-        if spice_dict1["scenario"]["n_intervals"] > 0:
-            scenario_rest = run_spice_ev(
-                spice_dict1, "balanced", self.ignore_spice_ev_warnings
+        # create remaining scenario if necessary
+        scenario_remainder = None
+        if charging_time_remainder <= 0:
+            spice_dict_remainder = get_spice_ev_scenario_dict(
+                vehicle,
+                location,
+                point_id,
+                time_stamp,
+                charging_time_remainder,
+                self.cost_options,
+                self.step_size,
             )
-        return scenario_bulk, scenario_rest
+            spice_dict_remainder["components"]["vehicles"][vehicle.id][
+                "connected_charging_station"
+            ] = list(spice_dict_remainder["components"]["charging_stations"].keys())[0]
+
+            scenario_remainder = run_spice_ev(
+                spice_dict_remainder, "balanced", self.ignore_spice_ev_warnings
+            )
+
+        return scenario_main, scenario_remainder
 
     @block_printing
     def evaluate_charging_location(
@@ -444,6 +447,8 @@ class Simulation:
             spiceev_scenarios[0].strat.world_state.vehicles[mock_vehicle.id].battery.soc
             - current_soc
         )
+        if spiceev_scenarios[1] is not None:
+            charged_soc += spiceev_scenarios[1].strat.world_state.vehicles[mock_vehicle.id].battery.soc
         if charged_soc <= 0 or math.isnan(charged_soc):
             return empty_dict
         charge_score = 1 - ((-drive_soc) / charged_soc)
@@ -653,7 +658,6 @@ class Simulation:
             "end_date": end_date,
             "num_threads": cfg.getint("sim_params", "num_threads", fallback=1),
             "step_size": cfg.getint("basic", "step_size", fallback=1),
-            "step_size_spice_ev": cfg.getint("basic", "step_size_spice_ev", fallback=1),
             "simulation_type": cfg.get("basic", "simulation_type", fallback="schedule"),
             "weights": weights_dict,
             "outputs": outputs,

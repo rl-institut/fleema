@@ -112,7 +112,7 @@ class SimulationType:
             vehicle.charge(
                 step_to_timestamp(self.simulation.time_series, task.start_time),
                 task.start_time,
-                (task.end_time - task.start_time) * self.simulation.step_size_spice_ev,
+                task.end_time - task.start_time,
                 average_charging_power,
                 spiceev_scenarios[0].strat.world_state.vehicles[vehicle.id].battery.soc,
                 nominal_charging_power,
@@ -121,17 +121,10 @@ class SimulationType:
                 self.simulation.observer,
             )
             if self.simulation.outputs["location_csv"]:
-                adjusted_end_time = (
-                    (
-                        (task.end_time - task.start_time)
-                        // self.simulation.step_size_spice_ev
-                    )
-                    * self.simulation.step_size_spice_ev
-                ) + task.start_time
                 task.start_point.update_output(
                     task.start_time,
-                    adjusted_end_time,
-                    self.simulation.step_size_spice_ev,
+                    task.end_time,
+                    self.simulation.step_size,
                     self.simulation.time_steps,
                     charging_power_list,
                 )

@@ -6,30 +6,24 @@ from spice_ev.scenario import Scenario
 from advantage.util.helpers import deep_update
 
 
-def apply_to_scenarios(func):
+def handle_scenarios_in_charging_characteristic(func):
     """Decorator that takes in the get_charging_characteristic function.
 
     It handles one scenario object or a tuple of 2 scenario objects.
     """
 
-    def func_wrapper(scenario, *args, **kwargs):
-        if isinstance(scenario, tuple):
-            if None not in scenario:
+    def func_wrapper(scenarios, *args, **kwargs):
+        if isinstance(scenarios, tuple):
+            if None not in scenarios:
                 results = []
-                for single_scenario in scenario:
+                for single_scenario in scenarios:
                     result = func(single_scenario, *args, **kwargs)
                     results.append(result)
-
-                return {
-                    "cost": max(results[0]["cost"] + results[1]["cost"], 0),
-                    "feed_in": max(results[0]["cost"] + results[1]["cost"], 0),
-                    "emission": max(results[0]["emission"] + results[1]["emission"], 0),
-                    "grid_energy": max(results[0]["grid_energy"] + results[1]["grid_energy"], 0),
-                }
+                return {k1: results[0][k1] + results[1][k1] for k1 in results[0].keys()}
             else:
-                return func(scenario[0], *args, **kwargs)
+                return func(scenarios[0], *args, **kwargs)
         else:
-            return func(scenario, *args, **kwargs)
+            return func(scenarios, *args, **kwargs)
     return func_wrapper
 
 
@@ -117,7 +111,7 @@ def run_spice_ev(spice_ev_dict, strategy, ignore_warnings=True) -> "Scenario":
     return scenario
 
 
-@apply_to_scenarios
+@handle_scenarios_in_charging_characteristic
 def get_charging_characteristic(
     scenario,
     feed_in_cost,
@@ -145,7 +139,7 @@ def get_charging_characteristic(
         Keys: "cost" contains total cost in €,
         "feed_in": renewable part of charging energy [0-1],
         "emission": total CO2-emission in g,
-        "grid_energy": kW per steps_size which are the timesteps per hour
+        "grid_energy": kWh per steps_size which are the time steps per hour
 
     """
     total_cost = 0
