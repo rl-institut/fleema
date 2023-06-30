@@ -148,7 +148,12 @@ class Simulation:
         temperature_option = cfg_dict["temperature_option"]
 
         self.driving_sim = RideCalc(
-            consumption, distances, inclines, temperature, temperature_option, cfg_dict["defaults"]
+            consumption,
+            distances,
+            inclines,
+            temperature,
+            temperature_option,
+            cfg_dict["defaults"],
         )
 
         # use other args to create objects
@@ -327,25 +332,40 @@ class Simulation:
             charging_rest = 0
 
         spice_dict0 = get_spice_ev_scenario_dict(
-            vehicle, location, point_id, time_stamp, charging_time_up, self.cost_options, self.step_size_spice_ev
+            vehicle,
+            location,
+            point_id,
+            time_stamp,
+            charging_time_up,
+            self.cost_options,
+            self.step_size_spice_ev,
         )
         spice_dict0["components"]["vehicles"][vehicle.id][
             "connected_charging_station"
         ] = list(spice_dict0["components"]["charging_stations"].keys())[0]
 
         spice_dict1 = get_spice_ev_scenario_dict(
-            vehicle, location, point_id, time_stamp, charging_rest, self.cost_options, self.step_size
+            vehicle,
+            location,
+            point_id,
+            time_stamp,
+            charging_rest,
+            self.cost_options,
+            self.step_size,
         )
         spice_dict1["components"]["vehicles"][vehicle.id][
             "connected_charging_station"
         ] = list(spice_dict1["components"]["charging_stations"].keys())[0]
 
-        scenario_bulk = run_spice_ev(spice_dict0, "balanced", self.ignore_spice_ev_warnings)
+        scenario_bulk = run_spice_ev(
+            spice_dict0, "balanced", self.ignore_spice_ev_warnings
+        )
         scenario_rest = None
         if spice_dict1["scenario"]["n_intervals"] > 0:
-            scenario_rest = run_spice_ev(spice_dict1, "balanced", self.ignore_spice_ev_warnings)
+            scenario_rest = run_spice_ev(
+                spice_dict1, "balanced", self.ignore_spice_ev_warnings
+            )
         return scenario_bulk, scenario_rest
-
 
     @block_printing
     def evaluate_charging_location(

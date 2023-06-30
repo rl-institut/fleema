@@ -7,6 +7,11 @@ from advantage.util.helpers import deep_update
 
 
 def apply_to_scenarios(func):
+    """Decorator that takes in the get_charging_characteristic function.
+
+    It handles one scenario object or a tuple of 2 scenario objects.
+    """
+
     def func_wrapper(scenario, *args, **kwargs):
         if isinstance(scenario, tuple):
             if None not in scenario:
@@ -29,7 +34,7 @@ def apply_to_scenarios(func):
 
 
 def get_spice_ev_scenario_dict(
-    vehicle, location, point_id, timestamp: datetime.datetime, time, cost_options, step_size
+    vehicle, location, point_id, timestamp: datetime.datetime, time, cost_options, step_size=1
 ):
     """This function creates a dictionary for SpiceEV.
 
