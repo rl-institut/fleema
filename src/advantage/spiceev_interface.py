@@ -28,7 +28,7 @@ def handle_scenarios_in_charging_characteristic(func):
 
 
 def get_spice_ev_scenario_dict(
-    vehicle, location, point_id, timestamp: datetime.datetime, time, cost_options, step_size=1
+    vehicle, location, point_id, timestamp: datetime.datetime, time, cost_options, step_size=15
 ):
     """This function creates a dictionary for SpiceEV.
 
@@ -139,7 +139,7 @@ def get_charging_characteristic(
         Keys: "cost" contains total cost in €,
         "feed_in": renewable part of charging energy [0-1],
         "emission": total CO2-emission in g,
-        "grid_energy": kWh per steps_size which are the time steps per hour
+        "grid_energy": total charge in kWh
 
     """
     total_cost = 0

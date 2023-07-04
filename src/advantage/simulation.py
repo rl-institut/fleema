@@ -326,7 +326,7 @@ class Simulation:
         step_size_spice_ev = 15
 
         charging_time_main = charging_time // step_size_spice_ev
-        charging_time_remainder = charging_time - charging_time_main
+        charging_time_remainder = charging_time - charging_time_main*step_size_spice_ev
         if charging_time_main < 1:
             charging_time_main = 1
             charging_time_remainder = 0
@@ -348,9 +348,9 @@ class Simulation:
             spice_dict_main, "balanced", self.ignore_spice_ev_warnings
         )
 
-        # create remaining scenario if necessary
+        # create remaining scenario if remainder of charging time with step size 1 exists
         scenario_remainder = None
-        if charging_time_remainder <= 0:
+        if charging_time_remainder >= 1:
             spice_dict_remainder = get_spice_ev_scenario_dict(
                 vehicle,
                 location,
@@ -448,7 +448,8 @@ class Simulation:
             - current_soc
         )
         if spiceev_scenarios[1] is not None:
-            charged_soc += spiceev_scenarios[1].strat.world_state.vehicles[mock_vehicle.id].battery.soc
+            charged_soc += spiceev_scenarios[1].strat.world_state.vehicles[mock_vehicle.id].battery.soc \
+                           - current_soc
         if charged_soc <= 0 or math.isnan(charged_soc):
             return empty_dict
         charge_score = 1 - ((-drive_soc) / charged_soc)
