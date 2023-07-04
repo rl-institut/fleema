@@ -339,6 +339,7 @@ class Simulation:
             time_stamp,
             charging_time_main,
             self.cost_options,
+            step_size_spice_ev,
         )
         spice_dict_main["components"]["vehicles"][vehicle.id][
             "connected_charging_station"
@@ -351,11 +352,12 @@ class Simulation:
         # create remaining scenario if remainder of charging time with step size 1 exists
         scenario_remainder = None
         if charging_time_remainder >= 1:
+            vehicle.soc = scenario_main.socs[-1][0]
             spice_dict_remainder = get_spice_ev_scenario_dict(
                 vehicle,
                 location,
                 point_id,
-                time_stamp,
+                step_to_timestamp(self.time_series, start_time + charging_time_main * step_size_spice_ev),
                 charging_time_remainder,
                 self.cost_options,
                 self.step_size,

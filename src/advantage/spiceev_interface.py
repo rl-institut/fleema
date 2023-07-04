@@ -28,7 +28,7 @@ def handle_scenarios_in_charging_characteristic(func):
 
 
 def get_spice_ev_scenario_dict(
-    vehicle, location, point_id, timestamp: datetime.datetime, time, cost_options, step_size=15
+    vehicle, location, point_id, timestamp: datetime.datetime, time, cost_options, step_size=1
 ):
     """This function creates a dictionary for SpiceEV.
 
