@@ -173,7 +173,10 @@ def get_charging_characteristic(
         # set new timestamp
         timestamp += datetime.timedelta(minutes=spice_ev_timestep)
 
-    feed_in_factor = min(total_charge_from_feed_in / total_charge, 1)
+    if total_charge == 0:
+        feed_in_factor = 0
+    else:
+        feed_in_factor = min(total_charge_from_feed_in / total_charge, 1)
     result_dict = {
         "cost": max(total_cost, 0),
         "feed_in": max(feed_in_factor, 0),

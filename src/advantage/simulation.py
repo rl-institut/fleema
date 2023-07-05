@@ -327,9 +327,11 @@ class Simulation:
 
         charging_time_main = charging_time // step_size_spice_ev
         charging_time_remainder = charging_time - charging_time_main*step_size_spice_ev
+        step_size_main = step_size_spice_ev
         if charging_time_main < 1:
             charging_time_main = 1
             charging_time_remainder = 0
+            step_size_main = self.step_size
 
         # create main scenario
         spice_dict_main = get_spice_ev_scenario_dict(
@@ -339,7 +341,7 @@ class Simulation:
             time_stamp,
             charging_time_main,
             self.cost_options,
-            step_size_spice_ev,
+            step_size_main,
         )
         spice_dict_main["components"]["vehicles"][vehicle.id][
             "connected_charging_station"

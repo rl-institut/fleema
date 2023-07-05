@@ -106,7 +106,14 @@ class SimulationType:
             # calculate average charging power
             charging_power_list = [
                 list(d.values())[0] for d in spiceev_scenarios[0].connChargeByTS["GC1"]
+                for _ in range(int(spiceev_scenarios[0].interval.total_seconds() / 60))
             ]
+            if spiceev_scenarios[1]:
+                charging_power_list_remainder = [
+                    list(d.values())[0] for d in spiceev_scenarios[0].connChargeByTS["GC1"]
+                ]
+                charging_power_list += charging_power_list_remainder
+
             average_charging_power = sum(charging_power_list) / len(charging_power_list)
             # execute charging event
             vehicle.charge(
