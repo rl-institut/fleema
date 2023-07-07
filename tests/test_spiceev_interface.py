@@ -2,7 +2,11 @@ import advantage.vehicle as vehicle
 import advantage.location as location
 import advantage.charger as charger
 from advantage.util.conversions import step_to_timestamp
-from advantage.spiceev_interface import get_spice_ev_scenario_dict, run_spice_ev
+from advantage.spiceev_interface import (
+    get_spice_ev_scenario_dict,
+    run_spice_ev,
+    get_charging_characteristic,
+)
 
 import pytest
 import datetime
@@ -74,3 +78,64 @@ def test_run_spice_ev(car, time_series, spot, cost_options):
     scenario = run_spice_ev(spice_dict, "balanced")
     # check if soc is higher than before
     assert scenario.strat.world_state.vehicles[car.id].battery.soc > car.soc  # type: ignore
+
+
+@pytest.fixture()
+# scenario with step size 1 and interval 1
+def scenario_1(car, spot, time_series, cost_options):
+    spice_dict = get_spice_ev_scenario_dict(
+        car, spot, "point_0", step_to_timestamp(time_series, 5), 1, cost_options, 1
+    )
+    spice_dict["components"]["vehicles"]["car"][
+        "connected_charging_station"
+    ] = "point_0"
+    return run_spice_ev(spice_dict, "balanced")
+
+
+@pytest.fixture()
+# scenario with step size 1 and interval 15
+def scenario_2(car, spot, time_series, cost_options):
+    spice_dict = get_spice_ev_scenario_dict(
+        car, spot, "point_0", step_to_timestamp(time_series, 5), 15, cost_options, 1
+    )
+    spice_dict["components"]["vehicles"]["car"][
+        "connected_charging_station"
+    ] = "point_0"
+    return run_spice_ev(spice_dict, "balanced")
+
+
+@pytest.fixture()
+# scenario with step size 15 and interval 1
+def scenario_3(car, spot, time_series, cost_options):
+    spice_dict = get_spice_ev_scenario_dict(
+        car, spot, "point_0", step_to_timestamp(time_series, 5), 1, cost_options, 15
+    )
+    spice_dict["components"]["vehicles"]["car"][
+        "connected_charging_station"
+    ] = "point_0"
+    return run_spice_ev(spice_dict, "balanced")
+
+
+def test_get_charging_characteristic_different_intervals(scenario_1, scenario_2):
+
+    charging_result_1 = get_charging_characteristic((scenario_1, None), 0.05)
+    charging_result_2 = get_charging_characteristic((scenario_1, scenario_1), 0.05)
+    charging_result_3 = get_charging_characteristic((scenario_2, None), 0.05)
+    charging_result_4 = get_charging_characteristic((scenario_2, scenario_2), 0.05)
+    charging_result_5 = get_charging_characteristic((scenario_1, scenario_2), 0.05)
+
+    assert [i * 2 for i in charging_result_1.values()] == list(charging_result_2.values())
+    assert [i * 2 for i in charging_result_3.values()] == list(charging_result_4.values())
+    assert [i * scenario_2.n_intervals for i in charging_result_1.values()] == list(charging_result_3.values())
+    assert [i + j for i, j in zip(charging_result_1.values(), charging_result_3.values())] \
+           == list(charging_result_5.values())
+
+
+def test_get_charging_characteristic_different_step_size(scenario_1, scenario_3):
+
+    charging_result_1 = get_charging_characteristic((scenario_1, None), 0.05)
+    charging_result_2 = get_charging_characteristic((scenario_3, None), 0.05)
+    charging_result_3 = get_charging_characteristic((scenario_1, scenario_3), 0.05)
+
+    assert [i + j for i, j in zip(charging_result_1.values(), charging_result_2.values())] \
+           == list(charging_result_3.values())
