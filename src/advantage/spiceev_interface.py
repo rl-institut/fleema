@@ -18,16 +18,13 @@ def handle_scenarios_in_charging_characteristic(func):
                 characteristics = []
                 for single_scenario in scenarios:
                     characteristic = func(single_scenario, *args, **kwargs)
-                    # calculate grid_energy
-                    characteristic["grid_energy"] = (characteristic["grid_energy"] * single_scenario.stepsPerHour) / 60
                     characteristics.append(characteristic)
                 result = {k1: characteristics[0][k1] + characteristics[1][k1] for k1 in characteristics[0].keys()}
-
                 # calculate total feed-in factor
                 total_feed_in = 0
                 total_charge = 0
-                for i, characteristic in enumerate(characteristics):
-                    feed_in_tmp = characteristic["feed_in"] * characteristic["grid_energy"] * scenarios[i].stepsPerHour
+                for characteristic in characteristics:
+                    feed_in_tmp = characteristic["feed_in"] * characteristic["grid_energy"]
                     if characteristic["feed_in"] > 0:
                         total_feed_in += feed_in_tmp
                         total_charge += feed_in_tmp / characteristic["feed_in"]
@@ -191,9 +188,6 @@ def get_charging_characteristic(
         feed_in_factor = 0
     else:
         feed_in_factor = min(total_charge_from_feed_in / total_charge, 1)
-
-        # feedin * grid_energy = total_charge_from_feedin
-
     result_dict = {
         "cost": max(total_cost, 0),
         "feed_in": max(feed_in_factor, 0),
