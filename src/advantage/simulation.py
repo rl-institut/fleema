@@ -113,8 +113,9 @@ class Simulation:
         self.weights = cfg_dict["weights"]
         self.outputs = cfg_dict["outputs"]
         self.ignore_spice_ev_warnings = cfg_dict["ignore_spice_ev_warnings"]
-        self.average_speed = cfg_dict["average_speed"]
+        self.average_speed = cfg_dict["defaults"]["speed"]
         self.inputs = cfg_dict["inputs"]
+        self.balanced_market_min_standing_time = cfg_dict["balanced_market_min_standing_time"]
 
         save_directory_name = "{}_{}_{}".format(
             cfg_dict["scenario_name"],
@@ -147,7 +148,12 @@ class Simulation:
         temperature_option = cfg_dict["temperature_option"]
 
         self.driving_sim = RideCalc(
-            consumption, distances, inclines, temperature, temperature_option, cfg_dict["defaults"]
+            consumption,
+            distances,
+            inclines,
+            temperature,
+            temperature_option,
+            cfg_dict["defaults"],
         )
 
         # use other args to create objects
@@ -164,7 +170,7 @@ class Simulation:
                 self.outputs["vehicle_csv"],
                 None,
                 info.get("v2g", False),
-                info.get("v2g_power_factor", 0.5)
+                info.get("v2g_power_factor", 0.5),
             )
         self.vehicles: Dict[Union[str, int], "Vehicle"] = {}
 
@@ -320,9 +326,11 @@ class Simulation:
 
         """
         time_stamp = step_to_timestamp(self.time_series, start_ts)
-        charging_time = int((end_ts - start_ts) * self.step_size)
-        # TODO add proper way to choose strategy
-        strategy = "balanced_market" if charging_time > 15 else "greedy"
+        charging_time = int(end_ts - start_ts)
+        # TODO add proper way to choose strategy (or put this in config)
+        strategy = (
+            "balanced_market" if charging_time * self.step_size > self.balanced_market_min_standing_time else "greedy"
+        )
         spice_dict = get_spice_ev_scenario_dict(
             vehicle, location, point_id, time_stamp, charging_time, self.cost_options
         )
@@ -379,7 +387,7 @@ class Simulation:
         }
         # run pre calculations
         time_window = end_time - start_time
-        # TODO add load level on location eval
+        # TODO add load level on location eval?
         trip_to = self.driving_sim.calculate_trip(
             current_location, charging_location, vehicle_type, self.average_speed
         )
@@ -409,11 +417,11 @@ class Simulation:
             spiceev_scenario.strat.world_state.vehicles[mock_vehicle.id].battery.soc
             - current_soc
         )
-        # TODO, check if v2g has been used => don't return empty dict?
-        if charged_soc <= 0 or math.isnan(charged_soc):  # TODO change this for v2g
+
+        if (charged_soc <= 0 and not vehicle_type.v2g) or math.isnan(charged_soc):
             return empty_dict
-        charge_score = 1 - ((-drive_soc) / charged_soc)
-        if charge_score <= 0:
+        charge_score = max(1 - ((-drive_soc) / charged_soc), 0)
+        if charge_score == 0 and not vehicle_type.v2g:
             return empty_dict
 
         charging_result = get_charging_characteristic(
@@ -565,8 +573,12 @@ class Simulation:
 
         # parse cost options
         cost_options = {
-            "csv_path": pathlib.Path(scenario_data_path, cfg.get("files", "cost", fallback="cost.csv")),
-            "start_time": cfg.get("cost_options", "start_time", fallback="2021-01-01 00:00:00"),
+            "csv_path": pathlib.Path(
+                scenario_data_path, cfg.get("files", "cost", fallback="cost.csv")
+            ),
+            "start_time": cfg.get(
+                "cost_options", "start_time", fallback="2021-01-01 00:00:00"
+            ),
             "step_duration": cfg.getint("cost_options", "step_duration", fallback=3600),
             "column": cfg.get("cost_options", "column", fallback="cost"),
         }
@@ -632,14 +644,20 @@ class Simulation:
             ),
             "emission_options": emission_options,
             "delete_rides": cfg.getboolean("sim_params", "delete_rides", fallback=True),
-            "average_speed": cfg.getfloat("charging", "average_speed", fallback=8.65),
             "defaults": {
-                "level_of_loading": cfg.getfloat("defaults", "load_level_default", fallback=0.),
-                "incline": cfg.getfloat("defaults", "incline_default", fallback=0.),
-                "temperature": cfg.getfloat("defaults", "temperature_default", fallback=20.),
-                "speed": cfg.getfloat("charging", "average_speed", fallback=10.),
+                "level_of_loading": cfg.getfloat(
+                    "defaults", "load_level_default", fallback=0.0
+                ),
+                "incline": cfg.getfloat("defaults", "incline_default", fallback=0.0),
+                "temperature": cfg.getfloat(
+                    "defaults", "temperature_default", fallback=20.0
+                ),
+                "speed": cfg.getfloat("charging", "average_speed", fallback=10.0),
             },
             "inputs": inputs,
+            "balanced_market_min_standing_time": cfg.getint(
+                "charging", "balanced_market_min_standing_time", fallback=15
+            ),
         }
 
         data_dict = read_input_data(scenario_data_path, cfg)

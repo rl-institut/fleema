@@ -141,9 +141,7 @@ def get_charging_characteristic(
                 max(charge - feed_in, 0) * cost + charge_from_feed_in * feed_in_cost
             ) / scenario.stepsPerHour
         else:
-            total_cost += (
-                charge * cost
-            ) / scenario.stepsPerHour
+            total_cost += (charge * cost) / scenario.stepsPerHour
 
         if emission_df is not None:
             current_emission = get_current_time_series_value(
