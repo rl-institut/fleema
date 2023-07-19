@@ -152,6 +152,4 @@ def test_get_charging_characteristic_different_step_size_same_intervals(scenario
     assert charging_result_3["feed_in"] * charging_result_3["grid_energy"] * 60 == \
            charging_result_1["feed_in"] * charging_result_1["grid_energy"] * scenario_n_intervals_1.stepsPerHour\
            + charging_result_2["feed_in"] * charging_result_2["grid_energy"] * scenario_step_size_15.stepsPerHour
-    assert charging_result_3["grid_energy"] == charging_result_1["grid_energy"] * \
-           scenario_n_intervals_1.stepsPerHour / 60\
-           + charging_result_2["grid_energy"] * scenario_step_size_15.stepsPerHour / 60
+    assert charging_result_3["grid_energy"] == charging_result_1["grid_energy"] + charging_result_2["grid_energy"]
