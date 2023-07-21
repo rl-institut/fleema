@@ -369,7 +369,7 @@ class Simulation:
                 vehicle,
                 location,
                 point_id,
-                step_to_timestamp(self.time_series, start_time + charging_time_main * step_size_spice_ev),
+                step_to_timestamp(self.time_series, start_ts + charging_time_main * step_size_spice_ev),
                 charging_time_remainder,
                 self.cost_options,
                 self.step_size,
