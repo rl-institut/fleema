@@ -21,14 +21,9 @@ def handle_scenarios_in_charging_characteristic(func):
                     characteristics.append(characteristic)
                 result = {k1: characteristics[0][k1] + characteristics[1][k1] for k1 in characteristics[0].keys()}
                 # calculate total feed-in factor
-                total_feed_in = 0
-                total_charge = 0
-                for characteristic in characteristics:
-                    feed_in_tmp = characteristic["feed_in"] * characteristic["grid_energy"]
-                    if characteristic["feed_in"] > 0:
-                        total_feed_in += feed_in_tmp
-                        total_charge += feed_in_tmp / characteristic["feed_in"]
-                result["feed_in"] = total_feed_in / total_charge if total_charge > 0 else 0
+                result["feed_in"] = (characteristics[0]["feed_in"] * characteristics[0]["grid_energy"]
+                                     + characteristics[1]["feed_in"]*characteristics[0]["grid_energy"]) /\
+                                    (characteristics[0]["grid_energy"] + characteristics[1]["grid_energy"])
                 return result
             else:
                 return func(scenarios[0], *args, **kwargs)
