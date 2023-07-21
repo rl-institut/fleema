@@ -22,7 +22,7 @@ def handle_scenarios_in_charging_characteristic(func):
                 result = {k1: characteristics[0][k1] + characteristics[1][k1] for k1 in characteristics[0].keys()}
                 # calculate total feed-in factor
                 result["feed_in"] = (characteristics[0]["feed_in"] * characteristics[0]["grid_energy"]
-                                     + characteristics[1]["feed_in"]*characteristics[0]["grid_energy"]) /\
+                                     + characteristics[1]["feed_in"]*characteristics[1]["grid_energy"]) /\
                                     (characteristics[0]["grid_energy"] + characteristics[1]["grid_energy"])
                 return result
             else:
