@@ -331,14 +331,58 @@ class Simulation:
         strategy = (
             "balanced_market" if charging_time * self.step_size > self.balanced_market_min_standing_time else "greedy"
         )
-        spice_dict = get_spice_ev_scenario_dict(
-            vehicle, location, point_id, time_stamp, charging_time, self.cost_options
+
+        # TODO: where comes the scenario step size from
+        step_size_spice_ev = 1
+
+        charging_time_main = charging_time // step_size_spice_ev
+        charging_time_remainder = charging_time - charging_time_main*step_size_spice_ev
+        step_size_main = step_size_spice_ev
+        if charging_time_main < 1:
+            charging_time_main = 1
+            charging_time_remainder = 0
+            step_size_main = self.step_size
+
+        # create main scenario
+        spice_dict_main = get_spice_ev_scenario_dict(
+            vehicle,
+            location,
+            point_id,
+            time_stamp,
+            charging_time_main,
+            self.cost_options,
+            step_size_main,
         )
-        spice_dict["components"]["vehicles"][vehicle.id][
+        spice_dict_main["components"]["vehicles"][vehicle.id][
             "connected_charging_station"
-        ] = list(spice_dict["components"]["charging_stations"].keys())[0]
-        scenario = run_spice_ev(spice_dict, strategy, self.ignore_spice_ev_warnings)
-        return scenario
+        ] = list(spice_dict_main["components"]["charging_stations"].keys())[0]
+
+        scenario_main = run_spice_ev(
+            spice_dict_main, strategy, self.ignore_spice_ev_warnings
+        )
+
+        # create remaining scenario if remainder of charging time with step size 1 exists
+        scenario_remainder = None
+        if charging_time_remainder >= 1:
+            vehicle.soc = scenario_main.socs[-1][0]
+            spice_dict_remainder = get_spice_ev_scenario_dict(
+                vehicle,
+                location,
+                point_id,
+                step_to_timestamp(self.time_series, start_time + charging_time_main * step_size_spice_ev),
+                charging_time_remainder,
+                self.cost_options,
+                self.step_size,
+            )
+            spice_dict_remainder["components"]["vehicles"][vehicle.id][
+                "connected_charging_station"
+            ] = list(spice_dict_remainder["components"]["charging_stations"].keys())[0]
+
+            scenario_remainder = run_spice_ev(
+                spice_dict_remainder, "balanced", self.ignore_spice_ev_warnings
+            )
+
+        return scenario_main, scenario_remainder
 
     @block_printing
     def evaluate_charging_location(
@@ -407,16 +451,19 @@ class Simulation:
             "vehicle", vehicle_type, soc=current_soc + trip_to["soc_delta"]
         )
 
-        spiceev_scenario = self.call_spiceev(
+        spiceev_scenarios = self.call_spiceev(
             charging_location,
             charging_start,
             charging_start + charging_time,
             mock_vehicle,
         )
         charged_soc = (
-            spiceev_scenario.strat.world_state.vehicles[mock_vehicle.id].battery.soc
+            spiceev_scenarios[0].strat.world_state.vehicles[mock_vehicle.id].battery.soc
             - current_soc
         )
+        if spiceev_scenarios[1] is not None:
+            charged_soc = spiceev_scenarios[1].strat.world_state.vehicles[mock_vehicle.id].battery.soc \
+                          - current_soc
 
         if (charged_soc <= 0 and not vehicle_type.v2g) or math.isnan(charged_soc):
             return empty_dict
@@ -425,7 +472,7 @@ class Simulation:
             return empty_dict
 
         charging_result = get_charging_characteristic(
-            spiceev_scenario,
+            spiceev_scenarios,
             self.feed_in_cost,
         )
 

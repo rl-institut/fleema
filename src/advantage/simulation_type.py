@@ -82,7 +82,7 @@ class SimulationType:
             )
         elif task.task == Status.CHARGING:
             # call spiceev to calculate charging
-            spiceev_scenario = self.simulation.call_spiceev(
+            spiceev_scenarios = self.simulation.call_spiceev(
                 task.start_point,
                 task.start_time,
                 task.end_time,
@@ -93,20 +93,27 @@ class SimulationType:
             # TODO fix issue with expected delta_soc and actual charged
             # soc being off when actual starting soc is higher
             charging_result = get_charging_characteristic(
-                spiceev_scenario,
+                spiceev_scenarios,
                 self.simulation.feed_in_cost,
                 self.simulation.emission,
                 self.simulation.emission_options,
             )
             nominal_charging_power = list(
-                spiceev_scenario.components.charging_stations.values()
+                spiceev_scenarios[0].components.charging_stations.values()
             )[0].max_power
             # report = aggregate_local_results(spiceev_scenario, "GC1")
 
             # calculate average charging power
             charging_power_list = [
-                list(d.values())[0] for d in spiceev_scenario.connChargeByTS["GC1"]
+                list(d.values())[0] for d in spiceev_scenarios[0].connChargeByTS["GC1"]
+                for _ in range(int(spiceev_scenarios[0].interval.total_seconds() / 60))
             ]
+            if spiceev_scenarios[1]:
+                charging_power_list_remainder = [
+                    list(d.values())[0] for d in spiceev_scenarios[0].connChargeByTS["GC1"]
+                ]
+                charging_power_list += charging_power_list_remainder
+
             average_charging_power = sum(charging_power_list) / len(charging_power_list)
             # execute charging event
             vehicle.charge(
@@ -114,7 +121,7 @@ class SimulationType:
                 task.start_time,
                 task.end_time - task.start_time,
                 average_charging_power,
-                spiceev_scenario.strat.world_state.vehicles[vehicle.id].battery.soc,
+                spiceev_scenarios[0].strat.world_state.vehicles[vehicle.id].battery.soc,
                 nominal_charging_power,
                 task.level_of_loading,
                 charging_result,
