@@ -275,6 +275,8 @@ class Schedule(SimulationType):
             }
 
             for location in self.simulation.charging_locations:
+                if location.output is None:
+                    continue
                 for k, v in location.output.items():
                     if "total_power" in k:
                         output["total_power"] = [

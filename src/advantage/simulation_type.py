@@ -110,7 +110,7 @@ class SimulationType:
             ]
             if spiceev_scenarios[1]:
                 charging_power_list_remainder = [
-                    list(d.values())[0] for d in spiceev_scenarios[0].connChargeByTS["GC1"]
+                    list(d.values())[0] for d in spiceev_scenarios[1].connChargeByTS["GC1"]
                 ]
                 charging_power_list += charging_power_list_remainder
 
