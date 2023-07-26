@@ -109,10 +109,11 @@ class SimulationType:
                 for _ in range(int(spiceev_scenarios[0].interval.total_seconds() / 60))
             ]
             if spiceev_scenarios[1]:
+                # second scenario has always same stepsize as simulation which is 1
                 charging_power_list_remainder = [
-                    list(d.values())[0] for d in spiceev_scenarios[0].connChargeByTS["GC1"]
+                    list(charge_value.values())[0] for charge_value in spiceev_scenarios[1].connChargeByTS["GC1"]
                 ]
-                charging_power_list += charging_power_list_remainder
+                charging_power_list.extend(charging_power_list_remainder)
 
             average_charging_power = sum(charging_power_list) / len(charging_power_list)
             # execute charging event
