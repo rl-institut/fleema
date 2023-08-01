@@ -325,7 +325,7 @@ class Simulation:
         charging_time = int(end_time - start_time)
 
         # TODO: where comes the scenario step size from
-        step_size_spice_ev = 15
+        step_size_spice_ev = 1
 
         charging_time_main = charging_time // step_size_spice_ev
         charging_time_remainder = charging_time - charging_time_main*step_size_spice_ev
