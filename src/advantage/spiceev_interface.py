@@ -6,6 +6,33 @@ from spice_ev.scenario import Scenario
 from advantage.util.helpers import deep_update
 
 
+def handle_scenarios_in_charging_characteristic(func):
+    """Decorator that takes in the get_charging_characteristic function.
+
+    It handles one scenario object or a tuple of 2 scenario objects.
+    """
+
+    def func_wrapper(scenarios, *args, **kwargs):
+        if isinstance(scenarios, tuple):
+            if None not in scenarios:
+                characteristics = []
+                for single_scenario in scenarios:
+                    characteristic = func(single_scenario, *args, **kwargs)
+                    characteristics.append(characteristic)
+                result = {k1: characteristics[0][k1] + characteristics[1][k1] for k1 in characteristics[0].keys()}
+                # calculate total feed-in factor
+                result["feed_in"] = (characteristics[0]["feed_in"] * characteristics[0]["grid_energy"]
+                                     + characteristics[1]["feed_in"]*characteristics[1]["grid_energy"]) /\
+                                    (characteristics[0]["grid_energy"] + characteristics[1]["grid_energy"])
+                return result
+            else:
+                return func(scenarios[0], *args, **kwargs)
+        else:
+            return func(scenarios, *args, **kwargs)
+
+    return func_wrapper
+
+
 def get_spice_ev_scenario_dict(
     vehicle, location, point_id, timestamp: datetime.datetime, time, cost_options, step_size=1
 ):
@@ -90,6 +117,7 @@ def run_spice_ev(spice_ev_dict, strategy, ignore_warnings=True) -> "Scenario":
     return scenario
 
 
+@handle_scenarios_in_charging_characteristic
 def get_charging_characteristic(
     scenario,
     feed_in_cost,
