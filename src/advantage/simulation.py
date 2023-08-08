@@ -417,6 +417,7 @@ class Simulation:
             "vehicle", vehicle_type, soc=current_soc + trip_to["soc_delta"]
         )
         # filter tasks which are too small
+        # TODO: where comes the scenario step size from
         spice_ev_step_size = 1
         if charging_time < spice_ev_step_size:
             return empty_dict
