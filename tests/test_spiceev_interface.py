@@ -5,7 +5,6 @@ from advantage.util.conversions import step_to_timestamp
 from advantage.spiceev_interface import (
     get_spice_ev_scenario_dict,
     run_spice_ev,
-    get_charging_characteristic,
 )
 
 import pytest
