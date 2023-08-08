@@ -325,9 +325,10 @@ class Simulation:
         charging_time = int(end_time - start_time)
 
         # TODO: where comes the scenario step size from
-        step_size_spice_ev = 1
-
-        charging_time_main = charging_time // step_size_spice_ev
+        spice_ev_step_size = 1
+        charging_time_main = charging_time // spice_ev_step_size
+        if charging_time < spice_ev_step_size:
+            raise Exception("Charging time can't be smaller than a SpiceEV timestep.")
 
         # create scenario
         spice_dict_main = get_spice_ev_scenario_dict(
@@ -337,7 +338,7 @@ class Simulation:
             time_stamp,
             charging_time_main,
             self.cost_options,
-            step_size_spice_ev,
+            spice_ev_step_size,
         )
         spice_dict_main["components"]["vehicles"][vehicle.id][
             "connected_charging_station"
@@ -415,7 +416,10 @@ class Simulation:
         mock_vehicle = Vehicle(
             "vehicle", vehicle_type, soc=current_soc + trip_to["soc_delta"]
         )
-
+        # filter tasks which are too small
+        spice_ev_step_size = 1
+        if charging_time < spice_ev_step_size:
+            return empty_dict
         spiceev_scenario = self.call_spiceev(
             charging_location,
             charging_start,

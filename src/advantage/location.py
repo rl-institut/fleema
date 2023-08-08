@@ -185,7 +185,7 @@ class Location:
             if current_time > time_steps:
                 print("Charging time is out of time schedule!")
                 break
-            charging_power = charging_power_list.pop(0)
+            charging_power = 0 if len(charging_power_list) != 0 else charging_power_list.pop(0)
             if self.num_chargers > 1:
                 self.output[f"{self.chargers[0].name}_power"][
                     current_time
