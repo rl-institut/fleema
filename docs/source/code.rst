@@ -1,4 +1,4 @@
-advantage package
+Advantage Code
 =================
 
 Subpackages

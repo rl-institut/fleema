@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Welcome to rli_template’s documentation! &mdash; advantage-tool 0.0.1 documentation</title>
+  <title>Advantage Documentation &mdash; advantage-tool 0.0.1 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -20,7 +20,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="advantage" href="modules.html" /> 
+    <link rel="next" title="Getting started" href="getting_started.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -38,9 +38,11 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="modules.html">advantage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simulating.html">Simulating</a></li>
+<li class="toctree-l1"><a class="reference internal" href="code.html">Advantage Code</a></li>
 </ul>
 
         </div>
@@ -57,7 +59,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="#" class="icon icon-home"></a> &raquo;</li>
-      <li>Welcome to rli_template’s documentation!</li>
+      <li>Advantage Documentation</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -67,15 +69,37 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="welcome-to-rli-template-s-documentation">
-<h1>Welcome to rli_template’s documentation!<a class="headerlink" href="#welcome-to-rli-template-s-documentation" title="Permalink to this heading">¶</a></h1>
-<div class="toctree-wrapper compound">
-<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="modules.html">advantage</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="advantage.html">advantage package</a></li>
+  <section id="advantage-documentation">
+<h1>Advantage Documentation<a class="headerlink" href="#advantage-documentation" title="Permalink to this heading">¶</a></h1>
+<p>A tool for the energy management of an autonomous vehicle fleet in the ADVANTAGE project.</p>
+<p>Link to GitHub-Project: <a class="reference external" href="https://github.com/rl-institut/advantage-tool">Click</a></p>
+<ul class="simple">
+<li><p>The program uses inductive charging for autonomous electric fleets.</p></li>
+<li><p>automatic inductive charging station</p></li>
+<li><p>scenarios for grid beneficial applications are analysed</p></li>
+<li><p>autonomous electric vehicle fleets, pathways, charging stations, grid connections and local renewable energy sources</p></li>
 </ul>
-</li>
+<dl class="simple">
+<dt>Simulation:</dt><dd><ol class="arabic simple">
+<li><p>simulation takes place in one minute steps</p></li>
+<li><p>first charging slots are allocated from breaks in the schedule of every vehicle through the use of SpiceEV</p></li>
+<li><p>then every charging slots gets a score</p></li>
+<li><p>in the end the best charging slots that fit together are chosen</p></li>
+<li><p>calculations are made</p></li>
+<li><p>outputs are being made</p></li>
+</ol>
+</dd>
+</dl>
+<ul class="simple">
+<li><p>as main input a config file is used that specifies parameters for charging, outputs, files, cost options, etc.</p></li>
+<li><p>the intput files that consist the fleet-scenario are: charging_points.json, vehicle_types.json, consumption.csv, schedule.csv, etc.</p></li>
+</ul>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simulating.html">Simulating</a></li>
+<li class="toctree-l1"><a class="reference internal" href="code.html">Advantage Code</a></li>
 </ul>
 </div>
 </section>
@@ -92,7 +116,7 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="modules.html" class="btn btn-neutral float-right" title="advantage" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="getting_started.html" class="btn btn-neutral float-right" title="Getting started" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

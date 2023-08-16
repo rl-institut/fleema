@@ -54,3 +54,28 @@ In PyCharm, this can be set up as a run configuration:
 * choose module name instead of script path
 * input the module name ``advantage``
 * set the root directory of this repository as the working directory
+
+Features
+--------
+
+- charging strategies: schedule, balanced market, on-demand
+- vehicle-to-grid
+- feed-in
+- variety of input and output
+
+Contribute
+----------
+
+- Issue Tracker: https://github.com/rl-institut/advantage-tool/issues
+- Source Code: https://github.com/rl-institut/advantage-tool
+
+Support
+-------
+
+If you are having issues, please let us know.
+We have a mailing list located at: project@google-groups.com
+
+License
+-------
+
+The project is licensed under the MIT license.
