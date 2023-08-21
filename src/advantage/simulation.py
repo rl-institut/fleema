@@ -459,6 +459,7 @@ class Simulation:
         ) / max_cost_score
         local_feed_in_score = charging_result["feed_in"]
         soc_score = 0.1 if current_soc < 0.8 else 0  # TODO improve this formula
+        # TODO maybe add specific v2g score
         score = (
             time_score * self.weights["time_factor"]
             + charge_score * self.weights["energy_factor"]

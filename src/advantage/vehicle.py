@@ -137,6 +137,7 @@ class Vehicle:
             "emission": [],
             "consumption": [],
             "level_of_loading": [],
+            "v2g_energy": [],
         }
 
     def _update_activity(
@@ -210,12 +211,14 @@ class Vehicle:
                 )
                 self.output["energy_cost"].append(charging_result["cost"])
                 self.output["emission"].append(charging_result["emission"])
+                self.output["v2g_energy"].append(charging_result["v2g_energy"])
             else:
                 self.output["actual_energy_from_grid"].append(0)
                 self.output["energy_from_feed_in"].append(0)
                 self.output["energy_from_grid"].append(0)
                 self.output["energy_cost"].append(0)
                 self.output["emission"].append(0)
+                self.output["v2g_energy"].append(0)
 
             if self.current_location is not None:
                 self.output["end_location"].append(self.current_location.name)
