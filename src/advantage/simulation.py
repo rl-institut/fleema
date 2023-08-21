@@ -115,7 +115,9 @@ class Simulation:
         self.ignore_spice_ev_warnings = cfg_dict["ignore_spice_ev_warnings"]
         self.average_speed = cfg_dict["defaults"]["speed"]
         self.inputs = cfg_dict["inputs"]
-        self.balanced_market_min_standing_time = cfg_dict["balanced_market_min_standing_time"]
+        self.balanced_market_min_standing_time = cfg_dict[
+            "balanced_market_min_standing_time"
+        ]
 
         save_directory_name = "{}_{}_{}".format(
             cfg_dict["scenario_name"],
@@ -329,7 +331,9 @@ class Simulation:
         charging_time = int(end_ts - start_ts)
         # TODO add proper way to choose strategy (or put this in config)
         strategy = (
-            "balanced_market" if charging_time * self.step_size > self.balanced_market_min_standing_time else "greedy"
+            "balanced_market"
+            if charging_time * self.step_size > self.balanced_market_min_standing_time
+            else "greedy"
         )
 
         # TODO: where comes the scenario step size from
@@ -422,9 +426,7 @@ class Simulation:
         charging_start = int(start_time + round(trip_to["trip_time"], 0))
         charging_time = time_window - driving_time
         charge_start_soc = current_soc + trip_to["soc_delta"]
-        mock_vehicle = Vehicle(
-            "vehicle", vehicle_type, soc=charge_start_soc
-        )
+        mock_vehicle = Vehicle("vehicle", vehicle_type, soc=charge_start_soc)
         # filter tasks which are too small
         spiceev_scenario = self.call_spiceev(
             charging_location,

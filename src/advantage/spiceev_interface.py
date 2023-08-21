@@ -7,7 +7,13 @@ from advantage.util.helpers import deep_update
 
 
 def get_spice_ev_scenario_dict(
-    vehicle, location, point_id, timestamp: datetime.datetime, time, cost_options, step_size=1
+    vehicle,
+    location,
+    point_id,
+    timestamp: datetime.datetime,
+    time,
+    cost_options,
+    step_size=1,
 ):
     """This function creates a dictionary for SpiceEV.
 
