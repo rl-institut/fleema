@@ -447,8 +447,9 @@ class Simulation:
         # call spiceev to calculate charging
         charging_start = int(start_time + round(trip_to["trip_time"], 0))
         charging_time = time_window - driving_time
+        charge_start_soc = current_soc + trip_to["soc_delta"]
         mock_vehicle = Vehicle(
-            "vehicle", vehicle_type, soc=current_soc + trip_to["soc_delta"]
+            "vehicle", vehicle_type, soc=charge_start_soc
         )
 
         spiceev_scenarios = self.call_spiceev(
@@ -459,11 +460,11 @@ class Simulation:
         )
         charged_soc = (
             spiceev_scenarios[0].strat.world_state.vehicles[mock_vehicle.id].battery.soc
-            - current_soc
+            - charge_start_soc
         )
         if spiceev_scenarios[1] is not None:
             charged_soc = spiceev_scenarios[1].strat.world_state.vehicles[mock_vehicle.id].battery.soc \
-                          - current_soc
+                          - charge_start_soc
 
         if (charged_soc <= 0 and not vehicle_type.v2g) or math.isnan(charged_soc):
             return empty_dict
@@ -476,8 +477,9 @@ class Simulation:
             self.feed_in_cost,
         )
 
+        # TODO check what v2g does to cost score (could go infinite in weird scenarios)
         max_cost_score = self.max_cost - self.min_cost
-        cost_score = (
+        cost_score = (  # TODO cost score depending on charged soc is bad for v2g
             self.max_cost
             - charging_result["cost"]
             / (charged_soc * mock_vehicle.vehicle_type.battery_capacity)

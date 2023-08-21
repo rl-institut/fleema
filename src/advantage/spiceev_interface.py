@@ -150,6 +150,7 @@ def get_charging_characteristic(
     """
     total_cost = 0
     total_charge = 0
+    total_v2g = 0
     total_charge_from_feed_in = 0
     total_emission = 0
     timestamp = scenario.start_time
@@ -161,7 +162,8 @@ def get_charging_characteristic(
         feed_in = scenario.localGenerationPower["GC1"][i]
         cost = scenario.prices["GC1"][i]
 
-        total_charge += charge
+        total_charge += max(charge, 0)
+        total_v2g += min(charge, 0)
         charge_from_feed_in = max(min(charge, feed_in), 0)
         total_charge_from_feed_in += charge_from_feed_in
 
@@ -191,6 +193,7 @@ def get_charging_characteristic(
         "feed_in": max(feed_in_factor, 0),
         "emission": max(total_emission, 0),
         "grid_energy": total_charge / scenario.stepsPerHour,
+        "v2g_energy": total_v2g / scenario.stepsPerHour,
     }
     return result_dict
 
