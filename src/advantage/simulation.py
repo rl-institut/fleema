@@ -115,9 +115,7 @@ class Simulation:
         self.ignore_spice_ev_warnings = cfg_dict["ignore_spice_ev_warnings"]
         self.average_speed = cfg_dict["defaults"]["speed"]
         self.inputs = cfg_dict["inputs"]
-        self.charging_step_size = cfg_dict[
-            "charging_step_size"
-        ]
+        self.charging_step_size = cfg_dict["charging_step_size"]
         self.balanced_market_min_standing_time = cfg_dict[
             "balanced_market_min_standing_time"
         ]
@@ -460,9 +458,7 @@ class Simulation:
         charged_energy = charged_soc * mock_vehicle.vehicle_type.battery_capacity
         if charged_energy > 0:
             cost_score = (
-                self.max_cost
-                - charging_result["cost"]
-                / charged_energy
+                self.max_cost - charging_result["cost"] / charged_energy
             ) / max_cost_score
         elif vehicle_type.v2g and charging_result["cost"] < 0:
             if charged_energy == 0:
@@ -470,10 +466,7 @@ class Simulation:
             else:
                 # cost and charged energy are both negative
                 # absolute charged energy should be small, absolute cost high for a good score
-                cost_score = (
-                    charging_result["cost"]
-                    / charged_energy
-                ) / max_cost_score
+                cost_score = (charging_result["cost"] / charged_energy) / max_cost_score
         else:
             cost_score = 0
 
