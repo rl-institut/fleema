@@ -115,6 +115,9 @@ class Simulation:
         self.ignore_spice_ev_warnings = cfg_dict["ignore_spice_ev_warnings"]
         self.average_speed = cfg_dict["defaults"]["speed"]
         self.inputs = cfg_dict["inputs"]
+        self.charging_step_size = cfg_dict[
+            "charging_step_size"
+        ]
         self.balanced_market_min_standing_time = cfg_dict[
             "balanced_market_min_standing_time"
         ]
@@ -336,11 +339,9 @@ class Simulation:
             else "greedy"
         )
 
-        # TODO: where comes the scenario step size from
-        spice_ev_step_size = 1
-        if charging_time < spice_ev_step_size:
+        if charging_time < self.charging_step_size:
             return None
-        charging_time = charging_time // spice_ev_step_size
+        charging_time = charging_time // self.charging_step_size
 
         # create scenario
         spice_dict_main = get_spice_ev_scenario_dict(
@@ -350,7 +351,7 @@ class Simulation:
             time_stamp,
             charging_time,
             self.cost_options,
-            spice_ev_step_size,
+            self.charging_step_size,
         )
         spice_dict_main["components"]["vehicles"][vehicle.id][
             "connected_charging_station"
@@ -452,13 +453,30 @@ class Simulation:
             self.feed_in_cost,
         )
 
-        # TODO check what v2g does to cost score (could go infinite in weird scenarios)
+        # calculate maximum price difference
         max_cost_score = self.max_cost - self.min_cost
-        cost_score = (  # TODO cost score depending on charged soc is bad for v2g
-            self.max_cost
-            - charging_result["cost"]
-            / (charged_soc * mock_vehicle.vehicle_type.battery_capacity)
-        ) / max_cost_score
+        # cost score calculation varies for v2g applications with negative (or 0) charged energy
+        # when charged energy is positive, v2g is already included in the cost
+        charged_energy = charged_soc * mock_vehicle.vehicle_type.battery_capacity
+        if charged_energy > 0:
+            cost_score = (
+                self.max_cost
+                - charging_result["cost"]
+                / charged_energy
+            ) / max_cost_score
+        elif vehicle_type.v2g and charging_result["cost"] < 0:
+            if charged_energy == 0:
+                cost_score = 2
+            else:
+                # cost and charged energy are both negative
+                # absolute charged energy should be small, absolute cost high for a good score
+                cost_score = (
+                    charging_result["cost"]
+                    / charged_energy
+                ) / max_cost_score
+        else:
+            cost_score = 0
+
         local_feed_in_score = charging_result["feed_in"]
         soc_score = 0.1 if current_soc < 0.8 else 0  # TODO improve this formula
         # TODO maybe add specific v2g score
@@ -680,6 +698,9 @@ class Simulation:
                 "speed": cfg.getfloat("charging", "average_speed", fallback=10.0),
             },
             "inputs": inputs,
+            "charging_step_size": cfg.getint(
+                "charging", "charging_step_size", fallback=1
+            ),
             "balanced_market_min_standing_time": cfg.getint(
                 "charging", "balanced_market_min_standing_time", fallback=15
             ),
