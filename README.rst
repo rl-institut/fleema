@@ -12,6 +12,11 @@ Get started
 
 Clone this repository and start contributing
 
+Documentation
+-------------
+
+The full documentation can be found `[here] <https://advantage-tool.readthedocs.io/en/latest/index.html>`_
+
 Setting up an environment
 -------------------------
 As a User

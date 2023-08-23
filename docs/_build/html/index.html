@@ -73,43 +73,63 @@
 <h1>Advantage Documentation<a class="headerlink" href="#advantage-documentation" title="Permalink to this heading">¶</a></h1>
 <p>A tool for the energy management of an autonomous vehicle fleet in the ADVANTAGE project.</p>
 <p>Link to GitHub-Project: <a class="reference external" href="https://github.com/rl-institut/advantage-tool">Click</a></p>
+<p><a class="reference external" href="https://github.com/rl-institut/advantage-tool/actions/workflows/python-package.yml"><img alt="GitHub Workflow Status" src="https://github.com/rl-institut/advantage-tool/actions/workflows/python-package.yml/badge.svg" /></a></p>
+<section id="features">
+<h2>Features<a class="headerlink" href="#features" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
-<li><p>The program uses inductive charging for autonomous electric fleets.</p></li>
-<li><p>automatic inductive charging station</p></li>
+<li><p>the program manages autonomous electric fleets.</p></li>
+<li><p>automatic inductive charging stations</p></li>
 <li><p>scenarios for grid beneficial applications are analysed</p></li>
-<li><p>autonomous electric vehicle fleets, pathways, charging stations, grid connections and local renewable energy sources</p></li>
+<li><p>autonomous electric vehicle fleets, pathways, charging stations, grid connections and local renewable energy sources (feed-in)</p></li>
 </ul>
-<dl class="simple">
-<dt>Simulation:</dt><dd><ol class="arabic simple">
-<li><p>simulation takes place in one minute steps</p></li>
-<li><p>first charging slots are allocated from breaks in the schedule of every vehicle through the use of SpiceEV</p></li>
-<li><p>then every charging slots gets a score</p></li>
-<li><p>in the end the best charging slots that fit together are chosen</p></li>
-<li><p>calculations are made</p></li>
-<li><p>outputs are being made</p></li>
+</section>
+<section id="simulation">
+<h2>Simulation<a class="headerlink" href="#simulation" title="Permalink to this heading">¶</a></h2>
+<ol class="arabic">
+<li><p><strong>Input:</strong>
+Inputs are parsed into a <cite>Simulation</cite> object where components like vehicles and locations are created.</p></li>
+<li><p><strong>Simulation</strong></p>
+<blockquote>
+<div><p>2.1. For every vehicle in the fleet, charging slots are allocated from breaks in the schedule.</p>
+<p>2.2. In order to find the best slot, the program runs every available slot through <a class="reference external" href="https://github.com/rl-institut/spice_ev">SpiceEV</a> and assigns it a score.</p>
+<p>2.3. Finally, the fleet simulates the best schedule step by step in one-minute increments for every vehicle. In each step, a vehicle can either drive or charge. Once again, <a class="reference external" href="https://github.com/rl-institut/spice_ev">SpiceEV</a> assists by simulating the vehicle’s charging.</p>
+</div></blockquote>
+</li>
+<li><p><strong>Output:</strong>
+Different outputs are created.</p></li>
 </ol>
-</dd>
-</dl>
-<ul class="simple">
-<li><p>as main input a config file is used that specifies parameters for charging, outputs, files, cost options, etc.</p></li>
-<li><p>the intput files that consist the fleet-scenario are: charging_points.json, vehicle_types.json, consumption.csv, schedule.csv, etc.</p></li>
-</ul>
+<p>For more detailed information about the simulation check out <a class="reference internal" href="simulating.html"><span class="doc">Simulating</span></a>.</p>
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="simulating.html">Simulating</a></li>
-<li class="toctree-l1"><a class="reference internal" href="code.html">Advantage Code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#setting-up-an-environment">Setting up an environment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#running-the-program">Running the program</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="simulating.html">Simulating</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="simulating.html#command-line-options">Command line options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulating.html#input-and-output-file-formats">Input and output file formats</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="code.html">Advantage Code</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="code.html#subpackages">Subpackages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="code.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="code.html#module-advantage.charger">advantage.charger module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="code.html#module-advantage.location">advantage.location module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="code.html#module-advantage.simulation">advantage.simulation module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="code.html#module-advantage.spiceev_interface">advantage.spiceev_interface module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="code.html#module-advantage.vehicle">advantage.vehicle module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="code.html#module-advantage">Module contents</a></li>
+</ul>
+</li>
 </ul>
 </div>
+<dl class="simple">
+<dt>Index</dt><dd><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p>
+</dd>
+</dl>
 </section>
-<section id="indices-and-tables">
-<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this heading">¶</a></h1>
-<ul class="simple">
-<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
-<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
-<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
-</ul>
 </section>
 
 
