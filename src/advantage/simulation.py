@@ -310,10 +310,15 @@ class Simulation:
         Parameters
         ----------
         location : Location
+            Used location.
         start_time : int
+            Starting time in step form.
         end_time : int
+            Ending time in step form
         vehicle : Vehicle
+            Vehicle that is used in a SpiceEV scenario.
         point_id : Optional[str]
+            ID of the ChargingPoint.
 
         Returns
         -------
