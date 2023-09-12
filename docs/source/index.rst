@@ -6,11 +6,14 @@ A tool for the energy management of an autonomous vehicle fleet in the ADVANTAGE
 Link to GitHub-Project: `Click <https://github.com/rl-institut/advantage-tool>`_
 
 
-|tests|
-
-.. |tests| image:: https://github.com/rl-institut/advantage-tool/actions/workflows/python-package.yml/badge.svg
+.. image:: https://github.com/rl-institut/advantage-tool/actions/workflows/python-package.yml/badge.svg
    :target: https://github.com/rl-institut/advantage-tool/actions/workflows/python-package.yml
    :alt: GitHub Workflow Status
+
+.. image:: https://readthedocs.org/projects/4connect/badge/?version=latest
+    :target: https://4connect.readthedocs.io/en/latest/?badge=latest
+    :alt: Documentation Status
+
 
 Features
 ^^^^^^^^
