@@ -2,11 +2,17 @@ Getting started
 ===============
 
 
-You can clone the current repository of SpiceEV to your local machine using:
+You can clone the current repository of SpiceEV to your local machine using HTTPS:
 
 .. code:: bash
 
-    git clone https://github.com/rl-institut/advantage-tool
+    git clone https://github.com/rl-institut/advantage-tool.git
+
+Or SSH:
+
+.. code:: bash
+
+    git clone git@github.com:rl-institut/advantage-tool.git
 
 
 Setting up an environment

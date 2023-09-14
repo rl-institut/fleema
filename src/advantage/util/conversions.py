@@ -47,8 +47,8 @@ def datetime_string_to_datetime(date_str):
 
     Returns
     -------
-    datetime.date
-        Datetime.date object of date_str with format YYYY-mm-dd HH:MM:SS. Example: 2021-07-05 07:42:00
+    datetime.datetime
+        Datetime.datetime object of date_str with format YYYY-mm-dd HH:MM:SS. Example: 2021-07-05 07:42:00
 
     """
     date_str = date_str.strip()
