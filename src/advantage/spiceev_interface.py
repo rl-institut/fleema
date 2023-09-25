@@ -70,7 +70,7 @@ def get_spice_ev_scenario_dict(
     return spice_ev_dict
 
 
-def run_spice_ev(spice_ev_dict, strategy, ignore_warnings=True) -> "Scenario":
+def run_spice_ev(spice_ev_dict, strategy, ignore_warnings=True, horizon=1, timing=False) -> "Scenario":
     """This function runs the scenario and returns it.
 
     Parameters
@@ -90,9 +90,9 @@ def run_spice_ev(spice_ev_dict, strategy, ignore_warnings=True) -> "Scenario":
     if ignore_warnings:
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", UserWarning)
-            scenario.run(strategy, {"timing": True, "HORIZON": 1})
+            scenario.run(strategy, {"HORIZON": horizon, "timing": timing})
     else:
-        scenario.run(strategy, {"timing": True, "HORIZON": 1})
+        scenario.run(strategy, {"HORIZON": horizon, "timing": timing})
     return scenario
 
 

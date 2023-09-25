@@ -121,6 +121,7 @@ class Simulation:
         self.alternative_strategy_min_standing_time = cfg_dict[
             "alternative_strategy_min_standing_time"
         ]
+        self.spiceev_horizon = cfg_dict["spiceev_horizon"]
 
         save_directory_name = "{}_{}_{}".format(
             cfg_dict["scenario_name"],
@@ -358,7 +359,7 @@ class Simulation:
         ] = list(spice_dict_main["components"]["charging_stations"].keys())[0]
 
         scenario_main = run_spice_ev(
-            spice_dict_main, strategy, self.ignore_spice_ev_warnings
+            spice_dict_main, strategy, self.ignore_spice_ev_warnings, horizon=self.spiceev_horizon
         )
 
         return scenario_main
@@ -706,6 +707,9 @@ class Simulation:
             "alternative_strategy_min_standing_time": cfg.getint(
                 "charging", "alternative_strategy_min_standing_time", fallback=15
             ),
+            "spiceev_horizon": cfg.getint(
+                "charging", "spiceev_horizon", fallback=1
+            )
         }
 
         data_dict = read_input_data(scenario_data_path, cfg)
