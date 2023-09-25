@@ -116,8 +116,10 @@ class Simulation:
         self.average_speed = cfg_dict["defaults"]["speed"]
         self.inputs = cfg_dict["inputs"]
         self.charging_step_size = cfg_dict["charging_step_size"]
-        self.balanced_market_min_standing_time = cfg_dict[
-            "balanced_market_min_standing_time"
+        self.charging_strategy = cfg_dict["charging_strategy"]
+        self.alternative_strategy = cfg_dict["alternative_strategy"]
+        self.alternative_strategy_min_standing_time = cfg_dict[
+            "alternative_strategy_min_standing_time"
         ]
 
         save_directory_name = "{}_{}_{}".format(
@@ -330,11 +332,11 @@ class Simulation:
         """
         time_stamp = step_to_timestamp(self.time_series, start_ts)
         charging_time = int(end_ts - start_ts)
-        # TODO add proper way to choose strategy (or put this in config)
+        # decide SpiceEV strategy to use
         strategy = (
-            "balanced_market"
-            if charging_time * self.step_size > self.balanced_market_min_standing_time
-            else "greedy"
+            self.alternative_strategy
+            if charging_time * self.step_size > self.alternative_strategy_min_standing_time
+            else self.charging_strategy
         )
 
         if charging_time < self.charging_step_size:
@@ -646,6 +648,7 @@ class Simulation:
         }
 
         # parse inputs
+        # TODO remove this doubled input?
         inputs = {
             "config": config_path.name,
             "basic_information": dict(cfg.items("basic")),
@@ -694,8 +697,14 @@ class Simulation:
             "charging_step_size": cfg.getint(
                 "charging", "charging_step_size", fallback=1
             ),
-            "balanced_market_min_standing_time": cfg.getint(
-                "charging", "balanced_market_min_standing_time", fallback=15
+            "charging_strategy": cfg.get(
+                "charging", "charging_strategy", fallback="greedy"
+            ),
+            "alternative_strategy": cfg.get(
+                "charging", "alternative_strategy", fallback="balanced"
+            ),
+            "alternative_strategy_min_standing_time": cfg.getint(
+                "charging", "alternative_strategy_min_standing_time", fallback=15
             ),
         }
 
