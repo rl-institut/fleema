@@ -29,12 +29,14 @@ class SimulationState:
         # charging_schedule = pd.DataFrame(columns=["start", "end", "vehicle", "location", "demand"])
 
     def remove_vehicle(self, vehicle: "Vehicle"):
+        """Removes given vehicle from the simulation state."""
         lists = [self.driving_vehicles, self.parking_vehicles, self.charging_vehicles]
         for current_list in lists:
             while vehicle in current_list:
                 current_list.remove(vehicle)
 
     def update_vehicle(self, vehicle: "Vehicle"):
+        """Adds given vehicle to the right list according to its status."""
         self.remove_vehicle(vehicle)
         if vehicle.status == Status.DRIVING:
             self.driving_vehicles.append(vehicle)

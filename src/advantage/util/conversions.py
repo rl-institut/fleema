@@ -26,18 +26,30 @@ def date_string_to_datetime(date_str):
     Parameter
     ---------
     date_str : str
-        String object of a specific date. Example: 2021-7-5
+        String object of a specific date with format YYYY-mm-dd. Example: 2021-7-5
 
     Returns
     -------
     datetime.date
-        Datetime.date object of date_str. Example: 2021-07-05
+        Datetime.date object of date_str with format YYYY-mm-dd. Example: 2021-07-05
 
     """
     return datetime.datetime.strptime(date_str, "%Y-%m-%d")
 
 
 def datetime_string_to_datetime(date_str):
-    # 2022-07-05 07:42:00
+    """This function converts a string of a date into a datetime.date object.
+
+    Parameter
+    ---------
+    date_str : str
+        String object of a specific date with format YYYY-mm-dd HH:MM:SS. Example: 2021-07-05 07:42:00
+
+    Returns
+    -------
+    datetime.datetime
+        Datetime.datetime object of date_str with format YYYY-mm-dd HH:MM:SS. Example: 2021-07-05 07:42:00
+
+    """
     date_str = date_str.strip()
     return datetime.datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")

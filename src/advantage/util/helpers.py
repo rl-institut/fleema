@@ -2,7 +2,7 @@
 
 Functions
 -------
-deep_update
+Iblock_printing, read_input_data, deep_update
 
 """
 import collections.abc
@@ -16,6 +16,7 @@ import json
 # see https://stackoverflow.com/questions/8391411/how-to-block-calls-to-print
 # decorator used to block function printing to the console
 def block_printing(func):
+    """Decorator which is used to block function printing to the console."""
     def func_wrapper(*args, **kwargs):
         # block all printing to the console
         sys.stdout = open(os.devnull, "w")

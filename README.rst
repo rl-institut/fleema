@@ -12,6 +12,11 @@ Get started
 
 Clone this repository and start contributing
 
+Documentation
+-------------
+
+The full documentation can be found `[here] <https://advantage-tool.readthedocs.io/en/latest/index.html>`_
+
 Setting up an environment
 -------------------------
 As a User
@@ -54,3 +59,22 @@ In PyCharm, this can be set up as a run configuration:
 * choose module name instead of script path
 * input the module name ``advantage``
 * set the root directory of this repository as the working directory
+
+Features
+--------
+
+- charging strategies: schedule, balanced market, on-demand
+- vehicle-to-grid
+- feed-in
+- variety of input and output
+
+Contribute
+----------
+
+- Issue Tracker: https://github.com/rl-institut/advantage-tool/issues
+- Source Code: https://github.com/rl-institut/advantage-tool
+
+License
+-------
+
+The project is licensed under the MIT license.

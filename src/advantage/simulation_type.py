@@ -32,6 +32,7 @@ class SimulationType:
         self.simulation = simulation
 
     def save_inputs(self):
+        """Saves basic input information in a separate directory in results."""
         import json
 
         (self.simulation.save_directory / "inputs").mkdir(parents=True, exist_ok=True)
