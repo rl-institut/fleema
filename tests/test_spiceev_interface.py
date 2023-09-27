@@ -59,7 +59,9 @@ def cost_options(time_series):
 def test_create_dict(car, time_series, spot, cost_options):
     start_step = 5
     time_stamp = step_to_timestamp(time_series, start_step)
-    spice_dict = get_spice_ev_scenario_dict(car, spot, "point_0", time_stamp, 10, cost_options)
+    spice_dict = get_spice_ev_scenario_dict(
+        car, spot, "point_0", time_stamp, 10, cost_options
+    )
     error_list = []
     if "vehicles" not in spice_dict["components"].keys():
         error_list.append("Vehicles is not in components.")
@@ -72,8 +74,12 @@ def test_create_dict(car, time_series, spot, cost_options):
 def test_run_spice_ev(car, time_series, spot, cost_options):
     start_step = 5
     time_stamp = step_to_timestamp(time_series, start_step)
-    spice_dict = get_spice_ev_scenario_dict(car, spot, "point_0", time_stamp, 10, cost_options)
-    spice_dict["components"]["vehicles"]["car"]["connected_charging_station"] = "point_0"
+    spice_dict = get_spice_ev_scenario_dict(
+        car, spot, "point_0", time_stamp, 10, cost_options
+    )
+    spice_dict["components"]["vehicles"]["car"][
+        "connected_charging_station"
+    ] = "point_0"
     scenario = run_spice_ev(spice_dict, "balanced")
     # check if soc is higher than before
     assert scenario.strat.world_state.vehicles[car.id].battery.soc > car.soc  # type: ignore

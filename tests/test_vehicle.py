@@ -43,9 +43,7 @@ def test_constructor(car):
             f"Battery capacity is {car.vehicle_type.base_consumption}, should be 0.2"
         )
     if car.usable_soc != 0.3:
-        error_list.append(
-            f"Battery capacity is {car.usable_soc}, should be 0.3"
-        )
+        error_list.append(f"Battery capacity is {car.usable_soc}, should be 0.3")
 
     assert not error_list, "errors occured:\n{}".format("\n".join(error_list))
 
@@ -77,17 +75,13 @@ def test_drive_input_checks(car, time_series):
     start_step = 5
     time_stamp = step_to_timestamp(time_series, start_step)
     with pytest.raises(TypeError, match="Argument has wrong type."):
-        car.drive(
-            time_stamp, start_step, "60", Location(), 0.7, 1
-        )
+        car.drive(time_stamp, start_step, "60", Location(), 0.7, 1)
 
 
 def test_charge_result(car, time_series):
     start_step = 5
     time_stamp = step_to_timestamp(time_series, start_step)
-    car.charge(
-        time_stamp, start_step, 60, 11, 0.8, 11
-    )
+    car.charge(time_stamp, start_step, 60, 11, 0.8, 11)
     assert car.soc == 0.8
 
 

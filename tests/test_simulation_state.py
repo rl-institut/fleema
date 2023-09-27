@@ -93,7 +93,6 @@ def test_update_vehicle_park(car, sim_state):
 
 
 def test_add_to_accumulated_results(sim_state):
-
     # test adding a new key-value pair to the accumulated results
     sim_state.add_to_accumulated_results("key1", 10.5)
     assert sim_state.accumulated_results == {"key1": 10.5}

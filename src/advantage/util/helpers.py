@@ -17,6 +17,7 @@ import json
 # decorator used to block function printing to the console
 def block_printing(func):
     """Decorator which is used to block function printing to the console."""
+
     def func_wrapper(*args, **kwargs):
         # block all printing to the console
         sys.stdout = open(os.devnull, "w")

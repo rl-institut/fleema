@@ -70,7 +70,9 @@ def get_spice_ev_scenario_dict(
     return spice_ev_dict
 
 
-def run_spice_ev(spice_ev_dict, strategy, ignore_warnings=True, horizon=1, timing=False) -> "Scenario":
+def run_spice_ev(
+    spice_ev_dict, strategy, ignore_warnings=True, horizon=1, timing=False
+) -> "Scenario":
     """This function runs the scenario and returns it.
 
     Parameters
