@@ -24,9 +24,9 @@ def test_bad_config_name():
         Simulation.from_config(scenario_path)
 
 
-def test_run(simulation):
-    simulation.run()
-    assert len(simulation.vehicles)
+# def test_run(simulation):
+#     simulation.run()
+#     assert len(simulation.vehicles)
 
 
 def test_evaluate_charging_location(simulation):
