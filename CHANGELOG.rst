@@ -10,6 +10,9 @@ Added
 * Vehicle object
   `#1 <https://github.com/rl-institut/advantage-tool/issues/1>`_
 * Example config
+* Usage of SpiceEV charging strategies (balanced_market for v2g)
+* Config options to set charging strategy
+* Adjust cost calculation to handle negative prices
 
 Changed
 -----
