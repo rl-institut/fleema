@@ -100,7 +100,7 @@ class Simulation:
         self.end_date = cfg_dict["end_date"]
         self.step_size = cfg_dict["step_size"]
         time_steps: datetime.timedelta = self.end_date - self.start_date
-        self.time_steps = int(time_steps.total_seconds() / 60 / self.step_size)
+        self.time_steps: int = int(time_steps.total_seconds() / 60 / self.step_size)
         self.time_series = pd.date_range(
             self.start_date,
             self.end_date,
@@ -196,6 +196,7 @@ class Simulation:
                 name, info["number_charging_points"], plug_types
             )
             self.locations[name].chargers.append(charger)
+            self.locations[name].init_occupation(self.time_steps)
             if "grid_connection" in info:
                 self.locations[name].set_power(float(info["grid_connection"]))
             if "energy_feed_in" in info:
