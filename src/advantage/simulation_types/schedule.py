@@ -102,6 +102,7 @@ class Schedule(SimulationType):
                 counter += 1
             print(f"==== Simulating vehicle {veh.id} ====")
             self._add_chosen_events(veh, chosen_events)
+            self.simulation.observer.add_all_vehicle_events(veh)
 
     def _find_charging_slots(
         self, start: int, end: int, vehicle: "Vehicle", end_soc: float
