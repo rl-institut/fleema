@@ -95,13 +95,14 @@ class Location:
     def available(self):
         """This methods checks availability."""
         return None
-    
+
     def init_occupation(self, time_steps):
         """Creates empty occupation DataFrame."""
-        self.occupation = pd.DataFrame(0,
-                                       index=np.arange(time_steps),
-                                       columns=["total"]  # [c.name for c in self.chargers]
-                                       )
+        self.occupation = pd.DataFrame(
+            0,
+            index=np.arange(time_steps),
+            columns=["total"],  # [c.name for c in self.chargers]
+        )
 
     def set_power(self, power: float):
         """Set power of grid connector at this location."""
@@ -118,14 +119,20 @@ class Location:
     def add_occupation_from_event(self, charging_event: "Task"):
         """Add occupation data from a given charging event."""
         if charging_event.task == Status.CHARGING:
-            self.add_occupation(charging_event.start_time, charging_event.end_time, "total")
-    
+            self.add_occupation(
+                charging_event.start_time, charging_event.end_time, "total"
+            )
+
     def add_occupation(self, start_time, end_time, column_name):
         """Add occupation data."""
         try:
-            self.occupation.loc[start_time:end_time, column_name] += 1 # TODO check for one off errors
+            self.occupation.loc[
+                start_time:end_time, column_name
+            ] += 1  # TODO check for one off errors
         except KeyError:
-            print("Warning: Invalid column name or index range when tracking occupation.")
+            print(
+                "Warning: Invalid column name or index range when tracking occupation."
+            )
 
     def is_available(self, start_time, end_time, column_name="total"):
         """Check if occupation in given time frame reaches the maximum. Returns True if time slot is available"""
