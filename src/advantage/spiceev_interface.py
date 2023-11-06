@@ -7,7 +7,13 @@ from advantage.util.helpers import deep_update
 
 
 def get_spice_ev_scenario_dict(
-    vehicle, location, point_id, timestamp: datetime.datetime, time, cost_options, step_size=1
+    vehicle,
+    location,
+    point_id,
+    timestamp: datetime.datetime,
+    time,
+    cost_options,
+    step_size=1,
 ):
     """This function creates a dictionary for SpiceEV.
 
@@ -64,7 +70,9 @@ def get_spice_ev_scenario_dict(
     return spice_ev_dict
 
 
-def run_spice_ev(spice_ev_dict, strategy, ignore_warnings=True) -> "Scenario":
+def run_spice_ev(
+    spice_ev_dict, strategy, ignore_warnings=True, horizon=1, timing=False
+) -> "Scenario":
     """This function runs the scenario and returns it.
 
     Parameters
@@ -84,9 +92,9 @@ def run_spice_ev(spice_ev_dict, strategy, ignore_warnings=True) -> "Scenario":
     if ignore_warnings:
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", UserWarning)
-            scenario.run(strategy, {})
+            scenario.run(strategy, {"HORIZON": horizon, "timing": timing})
     else:
-        scenario.run(strategy, {})
+        scenario.run(strategy, {"HORIZON": horizon, "timing": timing})
     return scenario
 
 
@@ -122,6 +130,7 @@ def get_charging_characteristic(
     """
     total_cost = 0
     total_charge = 0
+    total_v2g = 0
     total_charge_from_feed_in = 0
     total_emission = 0
     timestamp = scenario.start_time
@@ -133,13 +142,17 @@ def get_charging_characteristic(
         feed_in = scenario.localGenerationPower["GC1"][i]
         cost = scenario.prices["GC1"][i]
 
-        total_charge += charge
-        charge_from_feed_in = min(charge, feed_in)
+        total_charge += max(charge, 0)
+        total_v2g += min(charge, 0)
+        charge_from_feed_in = max(min(charge, feed_in), 0)
         total_charge_from_feed_in += charge_from_feed_in
 
-        total_cost += (
-            max(charge - feed_in, 0) * cost + charge_from_feed_in * feed_in_cost
-        ) / scenario.stepsPerHour
+        if charge >= 0:
+            total_cost += (
+                max(charge - feed_in, 0) * cost + charge_from_feed_in * feed_in_cost
+            ) / scenario.stepsPerHour
+        else:
+            total_cost += (charge * cost) / scenario.stepsPerHour
 
         if emission_df is not None:
             current_emission = get_current_time_series_value(
@@ -156,10 +169,11 @@ def get_charging_characteristic(
     else:
         feed_in_factor = min(total_charge_from_feed_in / total_charge, 1)
     result_dict = {
-        "cost": max(total_cost, 0),
+        "cost": total_cost,
         "feed_in": max(feed_in_factor, 0),
         "emission": max(total_emission, 0),
-        "grid_energy": max(total_charge / scenario.stepsPerHour, 0),
+        "grid_energy": total_charge / scenario.stepsPerHour,
+        "v2g_energy": total_v2g / scenario.stepsPerHour,
     }
     return result_dict
 

@@ -43,6 +43,8 @@ class VehicleType:
     min_charging_power: float = 0.0
     event_csv: bool = True
     label: Optional[str] = None
+    v2g: bool = False
+    v2g_power_factor: float = 0.5
 
     @property
     def plugs(self):
@@ -81,7 +83,6 @@ class Vehicle:
         vehicle_type: "VehicleType" = VehicleType(),
         status: Status = Status.PARKING,
         soc: float = 1.0,
-        availability: bool = True,  # TODO Warum availability, wenn es schon einen Status gibt?
         rotation: Optional[str] = None,
         current_location: Optional["Location"] = None,
     ):
@@ -110,7 +111,6 @@ class Vehicle:
         self.status = status
         self.soc_start = soc
         self.soc = soc
-        self.availability = availability
         self.rotation = rotation
         self.current_location = current_location
         self.tasks: Dict[int, "Task"] = {}
@@ -137,6 +137,7 @@ class Vehicle:
             "emission": [],
             "consumption": [],
             "level_of_loading": [],
+            "v2g_energy": [],
         }
 
     def _update_activity(
@@ -145,11 +146,11 @@ class Vehicle:
         event_start,
         event_time,
         simulation_state,
-        charging_power=0.,
-        nominal_charging_capacity=0.,
+        charging_power=0.0,
+        nominal_charging_capacity=0.0,
         distance=0.0,
         charging_result=None,
-        interp_consumption=0.,
+        interp_consumption=0.0,
         level_of_loading=0.0,
     ):
         """Records newest energy and activity in the attributes soc and output.
@@ -210,12 +211,14 @@ class Vehicle:
                 )
                 self.output["energy_cost"].append(charging_result["cost"])
                 self.output["emission"].append(charging_result["emission"])
+                self.output["v2g_energy"].append(charging_result["v2g_energy"])
             else:
                 self.output["actual_energy_from_grid"].append(0)
                 self.output["energy_from_feed_in"].append(0)
                 self.output["energy_from_grid"].append(0)
                 self.output["energy_cost"].append(0)
                 self.output["emission"].append(0)
+                self.output["v2g_energy"].append(0)
 
             if self.current_location is not None:
                 self.output["end_location"].append(self.current_location.name)
@@ -343,7 +346,7 @@ class Vehicle:
         power,
         new_soc,
         charging_capacity,
-        level_of_loading=0.,
+        level_of_loading=0.0,
         charging_result=None,
         observer=None,
     ):
@@ -396,9 +399,9 @@ class Vehicle:
         destination: "Location",
         new_soc: float,
         distance: float,
-        level_of_loading=0.,
+        level_of_loading=0.0,
         observer=None,
-        interp_consumption=0.,
+        interp_consumption=0.0,
     ):
         """This method updates the vehicle with driving results.
 
@@ -514,8 +517,8 @@ class Vehicle:
                         "mileage": self.vehicle_type.base_consumption * 100,
                         "charging_curve": self.vehicle_type.charging_curve,
                         "min_charging_power": self.vehicle_type.min_charging_power,
-                        "v2g": False,
-                        "v2g_power_factor": 0.5,
+                        "v2g": self.vehicle_type.v2g,
+                        "v2g_power_factor": self.vehicle_type.v2g_power_factor,
                     }
                 },
                 "vehicles": {

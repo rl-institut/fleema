@@ -177,7 +177,7 @@ class Schedule(SimulationType):
 
                 chosen_events.append(charge_option)
                 # TODO implement not choosing events if max charge is satisfied
-                # and they don't contribute to min_soc or end_soc
+                # and they don't contribute to min_soc or end_soc, or check if already implemented
 
                 if (
                     total_charge > max_charge

@@ -113,8 +113,15 @@ class Simulation:
         self.weights = cfg_dict["weights"]
         self.outputs = cfg_dict["outputs"]
         self.ignore_spice_ev_warnings = cfg_dict["ignore_spice_ev_warnings"]
-        self.average_speed = cfg_dict["average_speed"]
+        self.average_speed = cfg_dict["defaults"]["speed"]
         self.inputs = cfg_dict["inputs"]
+        self.charging_step_size = cfg_dict["charging_step_size"]
+        self.charging_strategy = cfg_dict["charging_strategy"]
+        self.alternative_strategy = cfg_dict["alternative_strategy"]
+        self.alternative_strategy_min_standing_time = cfg_dict[
+            "alternative_strategy_min_standing_time"
+        ]
+        self.spiceev_horizon = cfg_dict["spiceev_horizon"]
 
         save_directory_name = "{}_{}_{}".format(
             cfg_dict["scenario_name"],
@@ -167,6 +174,9 @@ class Simulation:
                 info["charging_curve"],
                 self.min_charging_power,
                 self.outputs["vehicle_csv"],
+                None,
+                info.get("v2g", False),
+                info.get("v2g_power_factor", 0.5),
             )
         self.vehicles: Dict[Union[str, int], "Vehicle"] = {}
 
@@ -300,8 +310,8 @@ class Simulation:
     def call_spiceev(
         self,
         location: "Location",
-        start_time: int,
-        end_time: int,
+        start_ts: int,
+        end_ts: int,
         vehicle: "Vehicle",
         point_id=None,
     ):
@@ -311,9 +321,9 @@ class Simulation:
         ----------
         location : Location
             Used location.
-        start_time : int
+        start_ts : int
             Starting time in step form.
-        end_time : int
+        end_ts : int
             Ending time in step form
         vehicle : Vehicle
             Vehicle that is used in a SpiceEV scenario.
@@ -326,14 +336,19 @@ class Simulation:
             SpiceEV scenario object
 
         """
-        time_stamp = step_to_timestamp(self.time_series, start_time)
-        charging_time = int(end_time - start_time)
+        time_stamp = step_to_timestamp(self.time_series, start_ts)
+        charging_time = int(end_ts - start_ts)
+        # decide SpiceEV strategy to use
+        strategy = (
+            self.alternative_strategy
+            if charging_time * self.step_size
+            > self.alternative_strategy_min_standing_time
+            else self.charging_strategy
+        )
 
-        # TODO: where comes the scenario step size from
-        spice_ev_step_size = 1
-        if charging_time < spice_ev_step_size:
+        if charging_time < self.charging_step_size:
             return None
-        charging_time = charging_time // spice_ev_step_size
+        charging_time = charging_time // self.charging_step_size
 
         # create scenario
         spice_dict_main = get_spice_ev_scenario_dict(
@@ -343,14 +358,17 @@ class Simulation:
             time_stamp,
             charging_time,
             self.cost_options,
-            spice_ev_step_size,
+            self.charging_step_size,
         )
         spice_dict_main["components"]["vehicles"][vehicle.id][
             "connected_charging_station"
         ] = list(spice_dict_main["components"]["charging_stations"].keys())[0]
 
         scenario_main = run_spice_ev(
-            spice_dict_main, "balanced", self.ignore_spice_ev_warnings
+            spice_dict_main,
+            strategy,
+            self.ignore_spice_ev_warnings,
+            horizon=self.spiceev_horizon,
         )
 
         return scenario_main
@@ -402,7 +420,7 @@ class Simulation:
         }
         # run pre calculations
         time_window = end_time - start_time
-        # TODO add load level on location eval
+        # TODO add load level on location eval?
         trip_to = self.driving_sim.calculate_trip(
             current_location, charging_location, vehicle_type, self.average_speed
         )
@@ -418,9 +436,8 @@ class Simulation:
         # call spiceev to calculate charging
         charging_start = int(start_time + round(trip_to["trip_time"], 0))
         charging_time = time_window - driving_time
-        mock_vehicle = Vehicle(
-            "vehicle", vehicle_type, soc=current_soc + trip_to["soc_delta"]
-        )
+        charge_start_soc = current_soc + trip_to["soc_delta"]
+        mock_vehicle = Vehicle("vehicle", vehicle_type, soc=charge_start_soc)
         # filter tasks which are too small
         spiceev_scenario = self.call_spiceev(
             charging_location,
@@ -433,12 +450,12 @@ class Simulation:
 
         charged_soc = (
             spiceev_scenario.strat.world_state.vehicles[mock_vehicle.id].battery.soc
-            - current_soc
+            - charge_start_soc
         )
-        if charged_soc <= 0 or math.isnan(charged_soc):
+        if (charged_soc <= 0 and not vehicle_type.v2g) or math.isnan(charged_soc):
             return empty_dict
-        charge_score = 1 - ((-drive_soc) / charged_soc)
-        if charge_score <= 0:
+        charge_score = max(1 - ((-drive_soc) / charged_soc), 0)
+        if charge_score == 0 and not vehicle_type.v2g:
             return empty_dict
 
         charging_result = get_charging_characteristic(
@@ -446,14 +463,28 @@ class Simulation:
             self.feed_in_cost,
         )
 
+        # calculate maximum price difference
         max_cost_score = self.max_cost - self.min_cost
-        cost_score = (
-            self.max_cost
-            - charging_result["cost"]
-            / (charged_soc * mock_vehicle.vehicle_type.battery_capacity)
-        ) / max_cost_score
+        # cost score calculation varies for v2g applications with negative (or 0) charged energy
+        # when charged energy is positive, v2g is already included in the cost
+        charged_energy = charged_soc * mock_vehicle.vehicle_type.battery_capacity
+        if charged_energy > 0:
+            cost_score = (
+                self.max_cost - charging_result["cost"] / charged_energy
+            ) / max_cost_score
+        elif vehicle_type.v2g and charging_result["cost"] < 0:
+            if charged_energy == 0:
+                cost_score = 2
+            else:
+                # cost and charged energy are both negative
+                # absolute charged energy should be small, absolute cost high for a good score
+                cost_score = (charging_result["cost"] / charged_energy) / max_cost_score
+        else:
+            cost_score = 0
+
         local_feed_in_score = charging_result["feed_in"]
         soc_score = 0.1 if current_soc < 0.8 else 0  # TODO improve this formula
+        # TODO maybe add specific v2g score
         score = (
             time_score * self.weights["time_factor"]
             + charge_score * self.weights["energy_factor"]
@@ -590,8 +621,12 @@ class Simulation:
 
         # parse cost options
         cost_options = {
-            "csv_path": pathlib.Path(scenario_data_path, cfg.get("files", "cost", fallback="cost.csv")),
-            "start_time": cfg.get("cost_options", "start_time", fallback="2021-01-01 00:00:00"),
+            "csv_path": pathlib.Path(
+                scenario_data_path, cfg.get("files", "cost", fallback="cost.csv")
+            ),
+            "start_time": cfg.get(
+                "cost_options", "start_time", fallback="2021-01-01 00:00:00"
+            ),
             "step_duration": cfg.getint("cost_options", "step_duration", fallback=3600),
             "column": cfg.get("cost_options", "column", fallback="cost"),
         }
@@ -623,6 +658,7 @@ class Simulation:
         }
 
         # parse inputs
+        # TODO remove this doubled input?
         inputs = {
             "config": config_path.name,
             "basic_information": dict(cfg.items("basic")),
@@ -657,14 +693,30 @@ class Simulation:
             ),
             "emission_options": emission_options,
             "delete_rides": cfg.getboolean("sim_params", "delete_rides", fallback=True),
-            "average_speed": cfg.getfloat("charging", "average_speed", fallback=8.65),
             "defaults": {
-                "level_of_loading": cfg.getfloat("defaults", "load_level_default", fallback=0.),
-                "incline": cfg.getfloat("defaults", "incline_default", fallback=0.),
-                "temperature": cfg.getfloat("defaults", "temperature_default", fallback=20.),
-                "speed": cfg.getfloat("charging", "average_speed", fallback=10.),
+                "level_of_loading": cfg.getfloat(
+                    "defaults", "load_level_default", fallback=0.0
+                ),
+                "incline": cfg.getfloat("defaults", "incline_default", fallback=0.0),
+                "temperature": cfg.getfloat(
+                    "defaults", "temperature_default", fallback=20.0
+                ),
+                "speed": cfg.getfloat("charging", "average_speed", fallback=10.0),
             },
             "inputs": inputs,
+            "charging_step_size": cfg.getint(
+                "charging", "charging_step_size", fallback=1
+            ),
+            "charging_strategy": cfg.get(
+                "charging", "charging_strategy", fallback="greedy"
+            ),
+            "alternative_strategy": cfg.get(
+                "charging", "alternative_strategy", fallback="balanced"
+            ),
+            "alternative_strategy_min_standing_time": cfg.getint(
+                "charging", "alternative_strategy_min_standing_time", fallback=15
+            ),
+            "spiceev_horizon": cfg.getint("charging", "spiceev_horizon", fallback=1),
         }
 
         data_dict = read_input_data(scenario_data_path, cfg)

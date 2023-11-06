@@ -46,7 +46,10 @@ class RideCalc:
         if self.defaults["speed"] <= 0:
             raise ValueError("Speed can not be smaller or equal to zero.")
 
-        self.uniques = [sorted(self.consumption_table[col].unique()) for col in self.consumption_table.iloc[:, :-1]]
+        self.uniques = [
+            sorted(self.consumption_table[col].unique())
+            for col in self.consumption_table.iloc[:, :-1]
+        ]
 
     def calculate_trip(
         self,
@@ -131,7 +134,9 @@ class RideCalc:
             Returns consumption in kWh and the SoC delta resulting from this trip
 
         """
-        consumption_factor = self.get_consumption(vehicle_type.name, level_of_loading, incline, temperature, speed)
+        consumption_factor = self.get_consumption(
+            vehicle_type.name, level_of_loading, incline, temperature, speed
+        )
         if distance < 0:
             raise ValueError("Distance is smaller than zero.")
         consumption = consumption_factor * distance
@@ -167,11 +172,18 @@ class RideCalc:
             Returns consumption factor in kWh/km
 
         """
-        level_of_loading, incline, temperature, speed = self._validate_consumption_inputs_and_get_defaults(
+        (
+            level_of_loading,
+            incline,
+            temperature,
+            speed,
+        ) = self._validate_consumption_inputs_and_get_defaults(
             level_of_loading, incline, temperature, speed
         )
 
-        df = self.consumption_table[self.consumption_table["vehicle_type"] == vehicle_type_name]
+        df = self.consumption_table[
+            self.consumption_table["vehicle_type"] == vehicle_type_name
+        ]
 
         inc_col = df["incline"]
         tmp_col = df["t_amb"]
@@ -180,7 +192,9 @@ class RideCalc:
         cons_col = df["consumption"]
         data_table = list(zip(lol_col, inc_col, speed_col, tmp_col, cons_col))
 
-        consumption_value = self.nd_interp((level_of_loading, incline, speed, temperature), data_table)
+        consumption_value = self.nd_interp(
+            (level_of_loading, incline, speed, temperature), data_table
+        )
 
         return consumption_value * (-1)
 
@@ -349,13 +363,17 @@ class RideCalc:
         try:
             datetime.datetime.strptime(departure_time, "%Y-%m-%d %H:%M:%S")
         except ValueError:
-            warnings.warn("Bad format: Wrong datetime string format. Example: '2022-01-01 01:01:00'")
+            warnings.warn(
+                "Bad format: Wrong datetime string format. Example: '2022-01-01 01:01:00'"
+            )
             departure_time = "2022-01-01 12:00:00"
         step = datetime.datetime.strptime(departure_time, "%Y-%m-%d %H:%M:%S").hour
         row = self.temperature.loc[self.temperature["hour"] == step]
         return row[self.temperature_option].values[0]
 
-    def _validate_consumption_inputs_and_get_defaults(self, level_of_loading, incline, temperature, speed):
+    def _validate_consumption_inputs_and_get_defaults(
+        self, level_of_loading, incline, temperature, speed
+    ):
         """Returns validated inputs with respective defaults if needed.
 
         Parameters
@@ -386,7 +404,9 @@ class RideCalc:
 
         # speed
         if defaults["speed"] < 0:
-            warnings.warn(f"Bad option: Speed is smaller than 0. Default is set to {self.defaults['speed']}.")
+            warnings.warn(
+                f"Bad option: Speed is smaller than 0. Default is set to {self.defaults['speed']}."
+            )
             defaults["speed"] = self.defaults["speed"]
 
         return tuple(defaults.values())

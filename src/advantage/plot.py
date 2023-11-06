@@ -105,7 +105,9 @@ def grid_timeseries(simulation: "Simulation"):
             ax.set_title("Total Power Grid Timeseries")
             ax.set_ylabel("kWh")
             fig.autofmt_xdate(rotation=45)
-            plt.savefig(simulation.save_directory / "plots" / "total_power_timeseries.png")
+            plt.savefig(
+                simulation.save_directory / "plots" / "total_power_timeseries.png"
+            )
             plt.clf()
 
         # timeseries by location (grid)
@@ -145,7 +147,9 @@ def grid_timeseries(simulation: "Simulation"):
                 )
                 fig = px.line(total_df, x="time", y="total power", title="Total Power")
                 fig.write_html(
-                    simulation.save_directory / "plots/html" / "total_power_timeseries.html"
+                    simulation.save_directory
+                    / "plots/html"
+                    / "total_power_timeseries.html"
                 )
                 # single grid
                 single_df = pd.DataFrame()
@@ -175,7 +179,9 @@ def grid_timeseries(simulation: "Simulation"):
                     / "individual_power_timeseries.html"
                 )
     except KeyError:
-        print("Grid timeseries could not be created: not all necessary values have been calculated.")
+        print(
+            "Grid timeseries could not be created: not all necessary values have been calculated."
+        )
 
 
 def energy_from_grid_feedin(simulation: "Simulation"):

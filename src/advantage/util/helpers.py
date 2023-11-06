@@ -17,6 +17,7 @@ import json
 # decorator used to block function printing to the console
 def block_printing(func):
     """Decorator which is used to block function printing to the console."""
+
     def func_wrapper(*args, **kwargs):
         # block all printing to the console
         sys.stdout = open(os.devnull, "w")
@@ -96,7 +97,7 @@ def read_input_data(scenario_data_path, cfg):
     if "level_of_loading" not in data_dict["schedule"].keys():
         if "occupation" not in data_dict["schedule"].keys():
             level_of_loading = [
-                cfg.getfloat("defaults", "load_level_default", fallback=0.)
+                cfg.getfloat("defaults", "load_level_default", fallback=0.0)
                 for _ in range(data_dict["schedule"].shape[0])
             ]
         else:
