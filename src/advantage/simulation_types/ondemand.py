@@ -7,13 +7,8 @@ class Ondemand(SimulationType):
     def __init__(self, simulation):
         super().__init__(simulation)
 
-    def evaluate_new_requests(self):
-        if veh.status == Status.DRIVING:
-            return
-        else:
-            pass
-            # wo wird geparkt, gebreakt oder gecharged?
-            #
+    def evaluate_step(self):
+        pass
 
     def run(self):
         # create tasks for all vehicles from input schedule
@@ -24,12 +19,9 @@ class Ondemand(SimulationType):
             self.save_inputs()
 
         for step in range(self.simulation.time_steps):
-            self.evaluate_new_requests()
             for veh in self.simulation.vehicles.values():
                 # check the horizon and see if any changes regarding the schedule are required
-                # horizon default=30min
-
-
+                self.evaluate_step()
                 task = veh.get_task(step)
                 if task is None:
                     continue
