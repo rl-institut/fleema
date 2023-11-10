@@ -1,12 +1,13 @@
 from advantage.simulation_type import SimulationType
 from advantage.event import Status
+from advantage.plot import plot
 
 
 class Ondemand(SimulationType):
     def __init__(self, simulation):
         super().__init__(simulation)
 
-    def evaluate_new_requests(self, veh):
+    def evaluate_new_requests(self):
         if veh.status == Status.DRIVING:
             return
         else:
@@ -23,16 +24,21 @@ class Ondemand(SimulationType):
             self.save_inputs()
 
         for step in range(self.simulation.time_steps):
+            self.evaluate_new_requests()
             for veh in self.simulation.vehicles.values():
                 # check the horizon and see if any changes regarding the schedule are required
                 # horizon default=30min
-                self.evaluate_new_requests(veh)
+
 
                 task = veh.get_task(step)
                 if task is None:
                     continue
                 else:
                     self.execute_task(veh, task)
+                veh.export(self.simulation.save_directory)
+        self.vehicle_output()
+        self.location_output()
+        plot(self.simulation)
 
     def _create_initial_schedule(self):
         """Creates vehicles and tasks from the scenario schedule."""
