@@ -297,6 +297,17 @@ class Vehicle:
             # Error disabled for testing purposes until schedule is fixed
             # raise AttributeError(f"Task list of vehicle {self.id} is not valid.")
         breaks = []
+        if not self.tasks:
+            breaks.append(
+                Task(
+                    start,
+                    end,
+                    self.current_location,
+                    self.current_location,
+                    Status.BREAK,
+                )
+            )
+            return breaks
         _, first_task = sorted(self.tasks.items())[0]
         if first_task.start_time > start:
             breaks.append(

@@ -161,7 +161,12 @@ class SimulationType:
                     )
                 if task.task == Status.CHARGING:
                     # TODO check how much this would charge, relevant for ondemand
-                    pass
+                    capacity = task.start_point.chargers["0"].charging_points["0"].plugs["0"]["capacity"]
+                    charging_time = task.end_time - task.start_time
+                    consumption += capacity * charging_time
+                    consumption_list.append(
+                        (task.start_time, task.end_time, vehicle.soc + consumption)
+                    )
         return pd.DataFrame(
             consumption_list, columns=["drive_start", "timestep", "soc"]
         )
