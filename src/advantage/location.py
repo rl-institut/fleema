@@ -123,12 +123,12 @@ class Location:
                 charging_event.start_time, charging_event.end_time, "total"
             )
 
-    def add_occupation(self, start_time, end_time, column_name):
+    def add_occupation(self, start_time, end_time, column_name="total"):
         """Add occupation data."""
         try:
             self.occupation.loc[
                 start_time:end_time, column_name
-            ] += 1  # TODO check for one off errors
+            ] += 1
         except KeyError:
             print(
                 "Warning: Invalid column name or index range when tracking occupation."
