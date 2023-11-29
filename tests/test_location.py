@@ -51,3 +51,8 @@ def test_add_occupation_from_event(parking_spot, charging_task):
     parking_spot.init_occupation(2)
     parking_spot.add_occupation_from_event(charging_task)
     assert not parking_spot.is_available(0, 0)
+
+
+def test_occupation(parking_spot):
+    parking_spot.init_occupation(2)
+    assert parking_spot.is_available(0, 0)
