@@ -1,5 +1,6 @@
 from advantage.vehicle import Vehicle
 from advantage.event import Status
+from advantage.util.helpers import deep_update
 
 import json
 
@@ -34,6 +35,14 @@ class SimulationState:
         for current_list in lists:
             while vehicle in current_list:
                 current_list.remove(vehicle)
+
+    def add_all_vehicle_events(self, vehicle: "Vehicle"):
+        """Adds all events of a given vehicle to self.events and all charging events to their respective Location."""
+        deep_update(self.events, vehicle.tasks)
+
+        for task in vehicle.tasks.values():
+            if task.task == Status.CHARGING:
+                task.start_point.add_occupation_from_event(task)
 
     def update_vehicle(self, vehicle: "Vehicle"):
         """Adds given vehicle to the right list according to its status."""

@@ -13,6 +13,8 @@ Added
 * Usage of SpiceEV charging strategies (balanced_market for v2g)
 * Config options to set charging strategy
 * Adjust cost calculation to handle negative prices
+* Limit charging of multiple vehicles at the same location
+  `#108 <https://github.com/rl-institut/advantage-tool/pull/108>`_
 
 Changed
 -----

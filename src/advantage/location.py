@@ -1,8 +1,14 @@
 from typing import List, TYPE_CHECKING, Optional
+import pandas as pd
+import numpy as np
+
+
 from advantage.util.helpers import deep_update
+from advantage.event import Status
 
 if TYPE_CHECKING:
     from advantage.charger import Charger
+    from advantage.event import Task
 
 
 class Location:
@@ -58,6 +64,7 @@ class Location:
         self.output = None
         self.event_csv = event_csv
         self.generator_exists = False
+        self.occupation = pd.DataFrame()
 
     @property
     def num_chargers(self):
@@ -89,6 +96,14 @@ class Location:
         """This methods checks availability."""
         return None
 
+    def init_occupation(self, time_steps):
+        """Creates empty occupation DataFrame."""
+        self.occupation = pd.DataFrame(
+            0,
+            index=np.arange(time_steps),
+            columns=["total"],  # [c.name for c in self.chargers]
+        )
+
     def set_power(self, power: float):
         """Set power of grid connector at this location."""
         if self.grid_info is None:
@@ -100,6 +115,30 @@ class Location:
         self.generator_dict = generator_dict
         self.generator_dict["grid_connector_id"] = "GC1"
         self.generator_exists = True
+
+    def add_occupation_from_event(self, charging_event: "Task"):
+        """Add occupation data from a given charging event."""
+        if charging_event.task == Status.CHARGING:
+            self.add_occupation(
+                charging_event.start_time, charging_event.end_time, "total"
+            )
+
+    def add_occupation(self, start_time, end_time, column_name="total"):
+        """Add occupation data."""
+        try:
+            self.occupation.loc[start_time:end_time, column_name] += 1
+        except KeyError:
+            print(
+                "Warning: Invalid column name or index range when tracking occupation."
+            )
+
+    def is_available(self, start_time, end_time, column_name="total"):
+        """Check if occupation in given time frame reaches the maximum. Returns True if time slot is available"""
+        try:
+            values_in_range = self.occupation.loc[start_time:end_time, column_name]
+            return (values_in_range < self.num_chargers).all()
+        except KeyError:
+            print("Invalid column name or index range.")
 
     def get_scenario_info(self, plug_types: List[str], point_id: Optional[str] = None):
         """Create SpiceEV scenario dict for this Location.

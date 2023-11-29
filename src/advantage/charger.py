@@ -15,7 +15,7 @@ class PlugType:
     capacity : float
         Capacity is specified in kW (kilowatt).
     plug : str, optional
-        Type of plug. Example: "CCS", "inductive", "Schucko"
+        Type of plug. Example: "CCS", "inductive", "Schuko"
 
     """
 

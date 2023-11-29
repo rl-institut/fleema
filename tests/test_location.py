@@ -1,5 +1,6 @@
 import advantage.location as location
 import advantage.charger as charger
+from advantage.event import Task, Status
 import pytest
 
 
@@ -18,6 +19,11 @@ def grid():
     return grid
 
 
+@pytest.fixture()
+def charging_task(parking_spot):
+    return Task(0, 1, parking_spot, parking_spot, Status.CHARGING)
+
+
 def test_constructor():
     obj = location.Location(name="school")
     assert obj.name == "school"
@@ -31,24 +37,17 @@ def test_charger(parking_spot):
     assert parking_spot.num_chargers
 
 
-# def test_availability(parking_spot):
-#     assert parking_spot.availability()
-
-
 def test_available_charger():
     pass
 
 
-#
-# def test_power(grid, charging_point):
-#
-#
-#
-#
-# def
-#
-#
-#
-# def test_allocation():
-#
-#
+def test_add_occupation(parking_spot):
+    parking_spot.init_occupation(2)
+    parking_spot.add_occupation(0, 1)
+    assert not parking_spot.is_available(0, 0)
+
+
+def test_add_occupation_from_event(parking_spot, charging_task):
+    parking_spot.init_occupation(2)
+    parking_spot.add_occupation_from_event(charging_task)
+    assert not parking_spot.is_available(0, 0)

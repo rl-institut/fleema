@@ -102,6 +102,7 @@ class Schedule(SimulationType):
                 counter += 1
             print(f"==== Simulating vehicle {veh.id} ====")
             self._add_chosen_events(veh, chosen_events)
+            self.simulation.observer.add_all_vehicle_events(veh)
 
     def _find_charging_slots(
         self, start: int, end: int, vehicle: "Vehicle", end_soc: float
@@ -154,6 +155,13 @@ class Schedule(SimulationType):
         for charge_option in charging_list:
             # only use options with a score higher than 0. TODO set higher minimum score in config?
             if charge_option["score"] > 0:
+                # if capacity of charger is already blocked, don't add this charging event
+                # currently charging events are calculated separately, so we have to prevent multi charging here
+                if not charge_option["charge_event"].start_point.is_available(
+                    charge_option["charge_event"].start_time,
+                    charge_option["charge_event"].end_time,
+                ):
+                    continue
                 # if not min_soc_satisfied:
                 charge_index = soc_df_slice.loc[
                     soc_df_slice["timestep"] >= charge_option["timestep"]
