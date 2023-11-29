@@ -126,9 +126,7 @@ class Location:
     def add_occupation(self, start_time, end_time, column_name="total"):
         """Add occupation data."""
         try:
-            self.occupation.loc[
-                start_time:end_time, column_name
-            ] += 1
+            self.occupation.loc[start_time:end_time, column_name] += 1
         except KeyError:
             print(
                 "Warning: Invalid column name or index range when tracking occupation."
