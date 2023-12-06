@@ -1,21 +1,21 @@
-advantage.util package
+fleema.util package
 ======================
 
 Submodules
 ----------
 
-advantage.util.conversions module
+fleema.util.conversions module
 ---------------------------------
 
-.. automodule:: advantage.util.conversions
+.. automodule:: fleema.util.conversions
    :members:
    :undoc-members:
    :show-inheritance:
 
-advantage.util.helpers module
+fleema.util.helpers module
 -----------------------------
 
-.. automodule:: advantage.util.helpers
+.. automodule:: fleema.util.helpers
    :members:
    :undoc-members:
    :show-inheritance:
@@ -23,7 +23,7 @@ advantage.util.helpers module
 Module contents
 ---------------
 
-.. automodule:: advantage.util
+.. automodule:: fleema.util
    :members:
    :undoc-members:
    :show-inheritance:

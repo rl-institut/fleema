@@ -1,6 +1,6 @@
-import advantage.location as location
-import advantage.charger as charger
-from advantage.event import Task, Status
+import fleema.location as location
+import fleema.charger as charger
+from fleema.event import Task, Status
 import pytest
 
 

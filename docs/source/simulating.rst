@@ -9,7 +9,7 @@ This call happens from the root directory.
 
 .. code:: bash
 
-    python -m advantage ``<path-to-config/scenario.cfg>``
+    python -m fleema ``<path-to-config/scenario.cfg>``
 
 
 Input and output file formats
@@ -17,7 +17,7 @@ Input and output file formats
 
 .. image:: advantage_overview.jpg
    :width: 80 %
-   :alt: Advantage Overview
+   :alt: FLEEMA Overview
 
 
 Folder structure of inputs and outputs
@@ -47,7 +47,7 @@ Except the folder results/ that gets created when running the program, everythin
 
 The example inputs in the GitHub repository are a great way to familiarize yourself with the data:
 
-`Bad Birnbach <https://github.com/rl-institut/advantage-tool/tree/dev/scenario_data/bad_birnbach>`_
+`Bad Birnbach <https://github.com/rl-institut/fleema/tree/dev/scenario_data/bad_birnbach>`_
 
 
 Input

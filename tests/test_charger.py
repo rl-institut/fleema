@@ -1,4 +1,4 @@
-import advantage.charger as charger
+import fleema.charger as charger
 
 import pytest
 

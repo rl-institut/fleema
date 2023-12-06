@@ -2,21 +2,21 @@ from importlib import import_module
 from typing import TYPE_CHECKING
 import pandas as pd
 
-from advantage.util.conversions import step_to_timestamp
-from advantage.event import Status
-from advantage.spiceev_interface import get_charging_characteristic
+from fleema.util.conversions import step_to_timestamp
+from fleema.event import Status
+from fleema.spiceev_interface import get_charging_characteristic
 
 if TYPE_CHECKING:
-    from advantage.simulation import Simulation
-    from advantage.vehicle import Vehicle
-    from advantage.event import Task
+    from fleema.simulation import Simulation
+    from fleema.vehicle import Vehicle
+    from fleema.event import Task
 
 
 def class_from_str(strategy_name: str):
     """Returns a constructor from the specified strategy."""
     import_name = strategy_name.lower()
     class_name = "".join([s.capitalize() for s in strategy_name.split("_")])
-    module = import_module("advantage.simulation_types." + import_name)
+    module = import_module("fleema.simulation_types." + import_name)
     return getattr(module, class_name)
 
 

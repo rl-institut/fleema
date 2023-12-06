@@ -6,8 +6,8 @@ import pandas as pd
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from advantage.vehicle import VehicleType
-    from advantage.location import Location
+    from fleema.vehicle import VehicleType
+    from fleema.location import Location
 
 
 class RideCalc:

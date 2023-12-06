@@ -3,7 +3,7 @@ import warnings
 import math
 from spice_ev.scenario import Scenario
 
-from advantage.util.helpers import deep_update
+from fleema.util.helpers import deep_update
 
 
 def get_spice_ev_scenario_dict(

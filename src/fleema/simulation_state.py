@@ -1,6 +1,6 @@
-from advantage.vehicle import Vehicle
-from advantage.event import Status
-from advantage.util.helpers import deep_update
+from fleema.vehicle import Vehicle
+from fleema.event import Status
+from fleema.util.helpers import deep_update
 
 import json
 

@@ -1,8 +1,8 @@
-import advantage.vehicle as vehicle
-import advantage.location as location
-import advantage.charger as charger
-from advantage.util.conversions import step_to_timestamp
-from advantage.spiceev_interface import (
+import fleema.vehicle as vehicle
+import fleema.location as location
+import fleema.charger as charger
+from fleema.util.conversions import step_to_timestamp
+from fleema.spiceev_interface import (
     get_spice_ev_scenario_dict,
     run_spice_ev,
 )

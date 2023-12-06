@@ -2,8 +2,8 @@ from dataclasses import dataclass, field
 from typing import Optional, List, Dict
 import pandas as pd
 import pathlib
-from advantage.location import Location
-from advantage.event import Status, Task
+from fleema.location import Location
+from fleema.event import Status, Task
 
 
 @dataclass

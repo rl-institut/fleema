@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import List, Dict, Optional
 
-from advantage.util.helpers import deep_update
+from fleema.util.helpers import deep_update
 
 
 @dataclass

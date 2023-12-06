@@ -1,11 +1,11 @@
-advantage-tool
+FLEEMA
 ==============
-A tool for the energy management of an autonomous vehicle fleet in the ADVANTAGE project
+A tool for the flexible fleet energy management of an autonomous vehicle fleet in the ADVANTAGE project
 
 |tests|
 
-.. |tests| image:: https://github.com/rl-institut/advantage-tool/actions/workflows/python-package.yml/badge.svg
-      :target: https://github.com/rl-institut/advantage-tool/actions/workflows/python-package.yml
+.. |tests| image:: https://github.com/rl-institut/fleema/actions/workflows/python-package.yml/badge.svg
+      :target: https://github.com/rl-institut/fleema/actions/workflows/python-package.yml
 
 Get started
 -----------
@@ -15,7 +15,7 @@ Clone this repository and start contributing
 Documentation
 -------------
 
-The full documentation can be found `[here] <https://advantage-tool.readthedocs.io/en/latest/index.html>`_
+The full documentation can be found `[here] <https://fleema.readthedocs.io/en/latest/index.html>`_
 
 Setting up an environment
 -------------------------
@@ -40,7 +40,7 @@ As a Developer
 * For autoformatting your code:
     * ``black src``
 
-| Note: PyCharm might tell you that it can't find the advantage module.
+| Note: PyCharm might tell you that it can't find the fleema module.
 | In that case you have to right click the folder "src" and select
 | "Mark Directory as" -> "Sources Root"
 
@@ -50,14 +50,14 @@ Running the program
 
 
 To run this from the command line, go to the root folder of this repository,
-then type ``python -m advantage`` into the terminal. A config path can be given as 
+then type ``python -m fleema`` into the terminal. A config path can be given as 
 an additional argument.
 
 In PyCharm, this can be set up as a run configuration:
 
 * create a new python configuration
 * choose module name instead of script path
-* input the module name ``advantage``
+* input the module name ``fleema``
 * set the root directory of this repository as the working directory
 
 Features
@@ -71,8 +71,8 @@ Features
 Contribute
 ----------
 
-- Issue Tracker: https://github.com/rl-institut/advantage-tool/issues
-- Source Code: https://github.com/rl-institut/advantage-tool
+- Issue Tracker: https://github.com/rl-institut/fleema/issues
+- Source Code: https://github.com/rl-institut/fleema
 
 License
 -------

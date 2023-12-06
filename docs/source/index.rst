@@ -1,13 +1,13 @@
-Advantage Documentation
+FLEEMA Documentation
 =======================
-A tool for the energy management of an autonomous vehicle fleet in the ADVANTAGE project.
+A tool for the flexible fleet energy management of an autonomous vehicle fleet in the ADVANTAGE project.
 
 
-Link to GitHub-Project: `Click <https://github.com/rl-institut/advantage-tool>`_
+Link to GitHub-Project: `Click <https://github.com/rl-institut/fleema>`_
 
 
-.. image:: https://github.com/rl-institut/advantage-tool/actions/workflows/python-package.yml/badge.svg
-   :target: https://github.com/rl-institut/advantage-tool/actions/workflows/python-package.yml
+.. image:: https://github.com/rl-institut/fleema/actions/workflows/python-package.yml/badge.svg
+   :target: https://github.com/rl-institut/fleema/actions/workflows/python-package.yml
    :alt: GitHub Workflow Status
 
 .. image:: https://readthedocs.org/projects/4connect/badge/?version=latest

@@ -1,14 +1,14 @@
 import pandas as pd
 import pathlib
 
-from advantage.simulation_type import SimulationType
-from advantage.plot import plot
+from fleema.simulation_type import SimulationType
+from fleema.plot import plot
 from typing import TYPE_CHECKING
 from operator import itemgetter
 
 if TYPE_CHECKING:
-    from advantage.simulation import Simulation
-    from advantage.vehicle import Vehicle
+    from fleema.simulation import Simulation
+    from fleema.vehicle import Vehicle
 
 
 class Schedule(SimulationType):

@@ -3,12 +3,12 @@ import pandas as pd
 import numpy as np
 
 
-from advantage.util.helpers import deep_update
-from advantage.event import Status
+from fleema.util.helpers import deep_update
+from fleema.event import Status
 
 if TYPE_CHECKING:
-    from advantage.charger import Charger
-    from advantage.event import Task
+    from fleema.charger import Charger
+    from fleema.event import Task
 
 
 class Location:
