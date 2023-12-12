@@ -91,7 +91,13 @@ class RideCalc:
                 f"Bad option: Speed is smaller than or equal to zero. Default is set to {self.defaults['speed']}"
             )
             speed = self.defaults["speed"]
-        trip_time = distance / speed * 60
+        if distance == 0:
+            return {
+                "consumption": 0,
+                "soc_delta": 0,
+                "trip_time": 0,
+            }
+        trip_time = max(distance / speed * 60, 1)
         consumption, soc_delta = self.calculate_consumption(
             vehicle_type, incline, temperature, speed, level_of_loading, distance
         )

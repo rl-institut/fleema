@@ -64,6 +64,8 @@ class SimulationType:
                     str(self.simulation.time_series[task.start_time]),
                     task.level_of_loading,
                 )
+                if trip["trip_time"] == 0:
+                    return
                 task.consumption = trip["consumption"]
                 task.delta_soc = trip["soc_delta"]
                 task.float_time = trip["trip_time"]
