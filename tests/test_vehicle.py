@@ -1,7 +1,7 @@
-from advantage.vehicle import Vehicle, VehicleType
-from advantage.event import Task, Status
-from advantage.location import Location
-from advantage.util.conversions import step_to_timestamp
+from fleema.vehicle import Vehicle, VehicleType
+from fleema.event import Task, Status
+from fleema.location import Location
+from fleema.util.conversions import step_to_timestamp
 
 import pytest
 import datetime

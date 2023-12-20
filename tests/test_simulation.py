@@ -1,5 +1,5 @@
-from advantage.simulation import Simulation
-from advantage.event import Task, Status
+from fleema.simulation import Simulation
+from fleema.event import Task, Status
 
 import pytest
 

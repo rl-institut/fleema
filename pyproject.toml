@@ -7,13 +7,13 @@ requires = [
 build-backend = 'setuptools.build_meta'
 
 [tool.pytest.ini_options]
-addopts = "--cov=advantage"
+addopts = "--cov=fleema"
 testpaths = [
   "tests"
 ]
 
 [tool.mypy]
-mypy_path = "advantage"
+mypy_path = "fleema"
 exclude = "spice-ev"
 ignore_missing_imports = true
 no_implicit_optional = true

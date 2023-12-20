@@ -4,7 +4,7 @@ from dataclasses import dataclass, asdict
 from enum import Enum
 
 if TYPE_CHECKING:
-    from advantage.location import Location
+    from fleema.location import Location
 
 
 class Status(Enum):

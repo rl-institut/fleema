@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import importlib
 
-from advantage.simulation import Simulation
+from fleema.simulation import Simulation
 
 
 def lazy_import(module_name):

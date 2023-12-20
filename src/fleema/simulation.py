@@ -14,26 +14,26 @@ import warnings
 import math
 from typing import List, Dict, Union
 
-from advantage.location import Location
-from advantage.vehicle import Vehicle, VehicleType
-from advantage.event import Task
-from advantage.charger import Charger, PlugType
-from advantage.simulation_state import SimulationState
-from advantage.simulation_type import class_from_str
-from advantage.ride import RideCalc
-from advantage.spiceev_interface import (
+from fleema.location import Location
+from fleema.vehicle import Vehicle, VehicleType
+from fleema.event import Task
+from fleema.charger import Charger, PlugType
+from fleema.simulation_state import SimulationState
+from fleema.simulation_type import class_from_str
+from fleema.ride import RideCalc
+from fleema.spiceev_interface import (
     get_spice_ev_scenario_dict,
     run_spice_ev,
     get_charging_characteristic,
 )
-from advantage.event import Status
+from fleema.event import Status
 
-from advantage.util.conversions import (
+from fleema.util.conversions import (
     date_string_to_datetime,
     datetime_string_to_datetime,
     step_to_timestamp,
 )
-from advantage.util.helpers import block_printing, read_input_data
+from fleema.util.helpers import block_printing, read_input_data
 
 
 class Simulation:

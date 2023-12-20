@@ -6,13 +6,13 @@ You can clone the current repository of SpiceEV to your local machine using HTTP
 
 .. code:: bash
 
-    git clone https://github.com/rl-institut/advantage-tool.git
+    git clone https://github.com/rl-institut/fleema.git
 
 Or SSH:
 
 .. code:: bash
 
-    git clone git@github.com:rl-institut/advantage-tool.git
+    git clone git@github.com:rl-institut/fleema.git
 
 
 Setting up an environment
@@ -69,7 +69,7 @@ As a Developer
 
     black src
 
-| Note: PyCharm might tell you that it can't find the advantage module.
+| Note: PyCharm might tell you that it can't find the fleema module.
 | In that case you have to right click the folder "src" and select
 | "Mark Directory as" -> "Sources Root"
 
@@ -81,7 +81,7 @@ To run this from the command line, go to the root folder of this repository, the
 
 .. code:: bash
 
-    python -m advantage
+    python -m fleema
 
 into the terminal. A config path can be given as
 an additional argument.
@@ -90,6 +90,6 @@ In PyCharm, this can be set up as a run configuration:
 
 * create a new python configuration
 * choose module name instead of script path
-* input the module name ``advantage``
+* input the module name ``fleema``
 * set the root directory of this repository as the working directory
 

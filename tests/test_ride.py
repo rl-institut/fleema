@@ -1,6 +1,6 @@
-from advantage.ride import RideCalc
-from advantage.location import Location
-from advantage.vehicle import VehicleType
+from fleema.ride import RideCalc
+from fleema.location import Location
+from fleema.vehicle import VehicleType
 import pandas as pd
 import pytest
 import pathlib

@@ -1,9 +1,9 @@
-from advantage.simulation import Simulation
+from fleema.simulation import Simulation
 import argparse
 
 
 def main():
-    """Main function of the advantage tool. Starts the program by parsing a scenario name from the command line."""
+    """Main function of FLEEMA. Starts the program by parsing a scenario name from the command line."""
     parser = argparse.ArgumentParser(
         description="SimBEV modelling tool for generating timeseries of electric "
         "vehicles."
@@ -16,7 +16,7 @@ def main():
     )
     p_args = parser.parse_args()
 
-    print("Running the ADVANTAGE tool...")
+    print("Running FLEEMA...")
     simulation = Simulation.from_config(p_args.config)
     simulation.run()
     print("-- Done --")

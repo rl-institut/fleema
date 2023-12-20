@@ -1,85 +1,85 @@
-Advantage Code
+FLEEMA Code
 =================
 
 .. contents:: Table of Contents
 
 
-advantage.charger module
+fleema.charger module
 ------------------------
 
-.. automodule:: advantage.charger
+.. automodule:: fleema.charger
    :members:
    :undoc-members:
    :show-inheritance:
 
-advantage.event module
+fleema.event module
 ----------------------
 
-.. automodule:: advantage.event
+.. automodule:: fleema.event
    :members:
    :undoc-members:
    :show-inheritance:
 
-advantage.location module
+fleema.location module
 -------------------------
 
-.. automodule:: advantage.location
+.. automodule:: fleema.location
    :members:
    :undoc-members:
    :show-inheritance:
 
-advantage.plot module
+fleema.plot module
 ---------------------
 
-.. automodule:: advantage.plot
+.. automodule:: fleema.plot
    :members:
    :undoc-members:
    :show-inheritance:
 
-advantage.ride module
+fleema.ride module
 ---------------------
 
-.. automodule:: advantage.ride
+.. automodule:: fleema.ride
    :members:
    :undoc-members:
    :show-inheritance:
 
-advantage.simulation module
+fleema.simulation module
 ---------------------------
 
-.. automodule:: advantage.simulation
+.. automodule:: fleema.simulation
    :members:
    :undoc-members:
    :show-inheritance:
 
-advantage.simulation_state module
+fleema.simulation_state module
 ---------------------------------
 
-.. automodule:: advantage.simulation_state
+.. automodule:: fleema.simulation_state
    :members:
    :undoc-members:
    :show-inheritance:
 
-advantage.simulation_type module
+fleema.simulation_type module
 --------------------------------
 
-.. automodule:: advantage.simulation_type
+.. automodule:: fleema.simulation_type
    :members:
    :undoc-members:
    :show-inheritance:
 
-advantage.spiceev\_interface module
+fleema.spiceev\_interface module
 -----------------------------------
 
-.. automodule:: advantage.spiceev_interface
+.. automodule:: fleema.spiceev_interface
    :members:
    :undoc-members:
    :show-inheritance:
 
-advantage.vehicle module
+fleema.vehicle module
 ------------------------
 
-.. automodule:: advantage.vehicle
+.. automodule:: fleema.vehicle
    :members:
    :undoc-members:
    :show-inheritance:
@@ -91,4 +91,4 @@ Subpackages
 .. toctree::
    :maxdepth: 0
 
-   advantage.util
+   fleema.util

@@ -1,8 +1,8 @@
-import advantage.vehicle as vehicle
-from advantage.util.conversions import step_to_timestamp
-from advantage.simulation_state import SimulationState
-from advantage.location import Location
-from advantage.event import Status
+import fleema.vehicle as vehicle
+from fleema.util.conversions import step_to_timestamp
+from fleema.simulation_state import SimulationState
+from fleema.location import Location
+from fleema.event import Status
 
 import pytest
 import datetime

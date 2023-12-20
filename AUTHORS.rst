@@ -6,3 +6,6 @@ Authors
 * timroepcke
 * justinhodura
 * yplatow
+* alexkens
+* j-brendel
+* RSgitData
