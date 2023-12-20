@@ -135,7 +135,7 @@ class Simulation:
         # scenario data
         self.schedule = data_dict["schedule"]
         self.cost_options = cfg_dict["cost_options"]
-        self.cost_time_series = pd.read_csv(self.cost_options["csv_path"], index_col=0)
+        self.cost_time_series = pd.read_csv(self.cost_options["csv_path"])
         self.max_cost = self.cost_time_series[self.cost_options["column"]].max()
         self.min_cost = self.cost_time_series[self.cost_options["column"]].min()
         self.feed_in_cost = cfg_dict["feed_in_cost"]
@@ -264,6 +264,9 @@ class Simulation:
             row.departure_time,
             row["level_of_loading"],
         )
+        if trip["trip_time"] == 0:
+            # TODO add warning about bad schedule here?
+            return
         dep_time = self.datetime_to_timesteps(row.departure_time)
         arr_time = self.datetime_to_timesteps(row.arrival_time)
         calc_time = dep_time + int(round(trip["trip_time"], 0))
