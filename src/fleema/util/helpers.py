@@ -138,3 +138,7 @@ def deep_update(source, overrides):
         else:
             source[key] = overrides[key]
     return source
+
+def get_next_index(index, list_length):
+    new_index = index + 1 if index + 1 < list_length else 0
+    return new_index

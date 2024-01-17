@@ -156,14 +156,11 @@ class SimulationType:
         consumption_list = [(start, start, vehicle.soc)]
         for _, task in sorted(vehicle.tasks.items()):
             if start < task.end_time < end:
-                if task.task == Status.DRIVING:
+                if task.task in [Status.DRIVING, Status.CHARGING]:
                     consumption += task.delta_soc
                     consumption_list.append(
                         (task.start_time, task.end_time, vehicle.soc + consumption)
                     )
-                if task.task == Status.CHARGING:
-                    # TODO check how much this would charge, relevant for ondemand
-                    pass
         return pd.DataFrame(
             consumption_list, columns=["drive_start", "timestep", "soc"]
         )

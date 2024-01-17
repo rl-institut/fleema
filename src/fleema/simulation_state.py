@@ -1,5 +1,5 @@
 from fleema.vehicle import Vehicle
-from fleema.event import Status
+from fleema.event import Status, Task
 from fleema.util.helpers import deep_update
 
 import json
@@ -35,6 +35,12 @@ class SimulationState:
         for current_list in lists:
             while vehicle in current_list:
                 current_list.remove(vehicle)
+    
+    def add_vehicle_event(self, task):
+        """Adds all tasks of a given vehicle to self.events and all charging events to their respective Location."""
+        deep_update(self.events, {task.start_time: task})
+        if task.task == Status.CHARGING:
+            task.start_point.add_occupation_from_event(task)
 
     def add_all_vehicle_events(self, vehicle: "Vehicle"):
         """Adds all events of a given vehicle to self.events and all charging events to their respective Location."""

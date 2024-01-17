@@ -117,6 +117,7 @@ class Vehicle:
         self.schedule = (
             None  # TODO add dataframe which has information for all timesteps
         )
+        self.charging_list = None
 
         self.output: dict = {
             "timestamp": [],
@@ -337,6 +338,9 @@ class Vehicle:
                 )
             )
         return breaks
+    
+    def set_charging_list(self, charging_list):
+        self.charging_list = charging_list
 
     def charge(
         self,
