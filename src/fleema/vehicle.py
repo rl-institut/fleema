@@ -281,7 +281,11 @@ class Vehicle:
                     previous_task.end_point == task.start_point
                     and previous_task.end_time <= task.start_time
                 ):
-                    print(f"Warning: Error found in task list at timestep {timestep}.")
+                    print(
+                        f"Warning: Error found in task list at timestep {timestep}.\n"
+                        f"Vehicle is at {previous_task.end_point.name} at timestep {previous_task.end_time}\n"
+                        f"Next task starts at {task.start_point.name} at timestep {task.start_time}"
+                    )
                     return False
             previous_task = task
         return True
@@ -432,10 +436,10 @@ class Vehicle:
             raise TypeError("Argument has wrong type.")
         if not all(i >= 0 for i in [start, time]):
             raise ValueError("Arguments can't be negative.")
-        if new_soc <= 0:
-            raise ValueError(
-                f"SoC of vehicle {self.id} became negative at {timestamp}!"
-            )
+        # if new_soc <= 0:  # TODO check for allow negative or remove this part?
+        #     raise ValueError(
+        #         f"SoC of vehicle {self.id} became negative at {timestamp}!"
+        #     )
         if new_soc > self.soc:
             raise ValueError("SoC of vehicle can't be higher after driving.")
         # if (

@@ -196,7 +196,7 @@ class Schedule(SimulationType):
                         print(
                             f"Desired SoC {end_soc} for the last time step couldn't be met for vehicle {vehicle.id}"
                         )
-                    return charge_option
+                    return None
 
                 # TODO rename to allow_negative_soc
                 if not self.simulation.delete_rides:
