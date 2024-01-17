@@ -342,7 +342,7 @@ class Vehicle:
                 )
             )
         return breaks
-    
+
     def set_charging_list(self, charging_list):
         self.charging_list = charging_list
 

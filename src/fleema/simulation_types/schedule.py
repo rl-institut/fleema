@@ -93,7 +93,7 @@ class Schedule(SimulationType):
         vehicles = list(self.simulation.vehicles.values())
         index = 0
         # rerun the loop until valid schedule has been created
-        print(f"==== Distributing charging slots ====")
+        print("==== Distributing charging slots ====")
         while vehicles:
             veh = vehicles[index]
             chosen_event = self._find_next_charging_slot(start, end, veh, end_soc)
@@ -147,18 +147,13 @@ class Schedule(SimulationType):
             last_row = soc_df.loc[last_index, :].copy()
             last_row["necessary_charging"] = self.simulation.soc_min - last_row["soc"]
             soc_df_slice.loc[last_index] = last_row
-        
+
         min_soc_bool = soc_df_slice["necessary_charging"] <= 0
         min_soc_satisfied = min_soc_bool.all()
-        end_soc_satisfied = (
-            soc_df_slice.iat[-1, -1] < self.simulation.soc_min - end_soc
-        )
-        if (
-            min_soc_satisfied
-            and end_soc_satisfied
-        ):
+        end_soc_satisfied = soc_df_slice.iat[-1, -1] < self.simulation.soc_min - end_soc
+        if min_soc_satisfied and end_soc_satisfied:
             return None
-        
+
         # iterate through a sorted list of charging options, best options first
         while True:
             if vehicle.charging_list:
@@ -206,9 +201,7 @@ class Schedule(SimulationType):
                 else:
                     # TODO remove delete_ride function
                     # self.delete_ride(soc_df_slice, vehicle)
-                    print(
-                            f"SoC requirements for vehicle {vehicle.id} couldn't be met"
-                        )
+                    print(f"SoC requirements for vehicle {vehicle.id} couldn't be met")
                     return None
 
     def delete_ride(self, soc_df, vehicle):
