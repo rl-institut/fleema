@@ -117,6 +117,7 @@ class Vehicle:
         self.schedule = (
             None  # TODO add dataframe which has information for all timesteps
         )
+        self.charging_list = None
 
         self.output: dict = {
             "timestamp": [],
@@ -280,7 +281,11 @@ class Vehicle:
                     previous_task.end_point == task.start_point
                     and previous_task.end_time <= task.start_time
                 ):
-                    print(f"Warning: Error found in task list at timestep {timestep}.")
+                    print(
+                        f"Warning: Error found in task list at timestep {timestep}.\n"
+                        f"Vehicle {self.id} is at {previous_task.end_point.name} at timestep {previous_task.end_time}\n"
+                        f"Next task starts at {task.start_point.name} at timestep {task.start_time}"
+                    )
                     return False
             previous_task = task
         return True
@@ -295,8 +300,8 @@ class Vehicle:
         end : int
             Ending timestep
         """
-        if not self.has_valid_task_list:
-            print(f"Task list of vehicle {self.id} is not valid.")
+        if not self.charging_list and not self.has_valid_task_list:
+            pass
             # Error disabled for testing purposes until schedule is fixed
             # raise AttributeError(f"Task list of vehicle {self.id} is not valid.")
         breaks = []
@@ -337,6 +342,9 @@ class Vehicle:
                 )
             )
         return breaks
+
+    def set_charging_list(self, charging_list):
+        self.charging_list = charging_list
 
     def charge(
         self,
@@ -428,10 +436,10 @@ class Vehicle:
             raise TypeError("Argument has wrong type.")
         if not all(i >= 0 for i in [start, time]):
             raise ValueError("Arguments can't be negative.")
-        if new_soc <= 0:
-            raise ValueError(
-                f"SoC of vehicle {self.id} became negative at {timestamp}!"
-            )
+        # if new_soc <= 0:  # TODO check for allow negative or remove this part?
+        #     raise ValueError(
+        #         f"SoC of vehicle {self.id} became negative at {timestamp}!"
+        #     )
         if new_soc > self.soc:
             raise ValueError("SoC of vehicle can't be higher after driving.")
         # if (

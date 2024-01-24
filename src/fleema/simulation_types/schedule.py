@@ -3,6 +3,7 @@ import pathlib
 
 from fleema.simulation_type import SimulationType
 from fleema.plot import plot
+from fleema.util.helpers import get_next_index
 from typing import TYPE_CHECKING
 from operator import itemgetter
 
@@ -89,25 +90,25 @@ class Schedule(SimulationType):
         # evaluate charging slots
         # distribute slots by highest total score (?)
         # for conflicts, check amount of charging spots at location and total possible power
-        for veh in self.simulation.vehicles.values():
-            # rerun the loop until valid schedule has been created
-            # TODO check if this could ever be an infinite loop, in theory it should delete tasks until possible
-            chosen_events = None
-            counter = 1
-            while chosen_events is None:
-                print(
-                    f"==== Finding charging slots for vehicle {veh.id}, iteration {counter} ===="
-                )
-                chosen_events = self._find_charging_slots(start, end, veh, end_soc)
-                counter += 1
-            print(f"==== Simulating vehicle {veh.id} ====")
-            self._add_chosen_events(veh, chosen_events)
-            self.simulation.observer.add_all_vehicle_events(veh)
+        vehicles = list(self.simulation.vehicles.values())
+        index = 0
+        # rerun the loop until valid schedule has been created
+        print("==== Distributing charging slots ====")
+        while vehicles:
+            veh = vehicles[index]
+            chosen_event = self._find_next_charging_slot(start, end, veh, end_soc)
+            if chosen_event is None:
+                del vehicles[index]
+                index = get_next_index(index, len(vehicles))
+                continue
+            self._add_chosen_event(veh, chosen_event)
+            self.simulation.observer.add_vehicle_event(chosen_event["charge_event"])
+            index = get_next_index(index, len(vehicles))
 
-    def _find_charging_slots(
+    def _find_next_charging_slot(
         self, start: int, end: int, vehicle: "Vehicle", end_soc: float
     ):
-        """Tries to find working charging slots for a vehicle.
+        """Tries to find the next best charging slot for a vehicle.
 
         Parameters
         ----------
@@ -126,20 +127,16 @@ class Schedule(SimulationType):
         # initialize variables
         soc_df = self.get_predicted_soc(vehicle, start, end)
         break_list = vehicle.get_breaks(start, end)
-        charging_list = self.get_charging_slots(break_list, soc_df, vehicle)
-
-        chosen_events = []
-        total_charge = 0
-        min_soc_satisfied = False
-        end_soc_satisfied = False
+        if vehicle.charging_list is None:
+            charging_list = self.get_charging_slots(break_list, soc_df, vehicle)
+            vehicle.set_charging_list(charging_list)
 
         last_soc = soc_df.iat[-1, -1]
-        max_charge = 1 - last_soc
         # check if vehicle falls under minimum soc
         min_charge = max(self.simulation.soc_min - last_soc, 0)
         end_of_day_charge = max(end_soc - last_soc, 0)
         if not min_charge and not end_of_day_charge:
-            return []
+            return None
 
         soc_df_slice = soc_df.loc[soc_df["soc"] <= self.simulation.soc_min].copy()
         soc_df_slice["necessary_charging"] = (
@@ -151,8 +148,18 @@ class Schedule(SimulationType):
             last_row["necessary_charging"] = self.simulation.soc_min - last_row["soc"]
             soc_df_slice.loc[last_index] = last_row
 
+        min_soc_bool = soc_df_slice["necessary_charging"] <= 0
+        min_soc_satisfied = min_soc_bool.all()
+        end_soc_satisfied = soc_df_slice.iat[-1, -1] < self.simulation.soc_min - end_soc
+        if min_soc_satisfied and end_soc_satisfied:
+            return None
+
         # iterate through a sorted list of charging options, best options first
-        for charge_option in charging_list:
+        while True:
+            if vehicle.charging_list:
+                charge_option = vehicle.charging_list.pop(0)
+            else:
+                return None
             # only use options with a score higher than 0. TODO set higher minimum score in config?
             if charge_option["score"] > 0:
                 # if capacity of charger is already blocked, don't add this charging event
@@ -176,23 +183,7 @@ class Schedule(SimulationType):
                     soc_df_slice.at[i, "soc"] = new_soc
                     soc_df_slice.at[i, "necessary_charging"] -= delta_soc
 
-                min_soc_bool = soc_df_slice["necessary_charging"] <= 0
-                min_soc_satisfied = min_soc_bool.all()
-                total_charge += charge_option["delta_soc"]
-                end_soc_satisfied = (
-                    soc_df_slice.iat[-1, -1] < self.simulation.soc_min - end_soc
-                )
-
-                chosen_events.append(charge_option)
-                # TODO implement not choosing events if max charge is satisfied
-                # and they don't contribute to min_soc or end_soc, or check if already implemented
-
-                if (
-                    total_charge > max_charge
-                    and min_soc_satisfied
-                    and end_soc_satisfied
-                ):
-                    return chosen_events
+                return charge_option
 
             else:
                 if min_soc_satisfied:
@@ -200,51 +191,25 @@ class Schedule(SimulationType):
                         print(
                             f"Desired SoC {end_soc} for the last time step couldn't be met for vehicle {vehicle.id}"
                         )
-                    return chosen_events
+                    return None
 
-                if not self.simulation.delete_rides:
+                # TODO rename to allow_negative_soc
+                if not self.simulation.allow_negative_soc:
                     raise ValueError(
                         f"Not enough charging possible for vehicle {vehicle.id}!"
                     )
                 else:
-                    self.delete_ride(soc_df_slice, vehicle)
+                    # TODO remove delete_ride function
+                    # self.delete_ride(soc_df_slice, vehicle)
+                    print(f"SoC requirements for vehicle {vehicle.id} couldn't be met")
                     return None
 
-    def delete_ride(self, soc_df, vehicle):
-        # get all tasks that still need charging to be possible
-        impossible_tasks = soc_df.loc[soc_df["necessary_charging"] > 0]
-        # get starting time of first impossible task (row 0, column 0: "timestep")
-        first_impossible_task_start = impossible_tasks.iat[0, 0]
-        # cancel the impossible task. not setting the valid_schedule flag results in
-        # a recalculation of charging slots without the impossible task
-        first_impossible_task = vehicle.get_task(first_impossible_task_start)
-        if first_impossible_task is None:
-            raise ValueError("No task to remove or change to has been found")
-        vehicle.remove_task(first_impossible_task)
-
-        next_task = vehicle.get_next_task(int(first_impossible_task_start))
-        if next_task is not None:
-            vehicle.remove_task(next_task)
-            next_task.start_point = first_impossible_task.start_point
-            next_task.is_calulated = False
-            vehicle.add_task(next_task)
-            # TODO change time needed for this task?
-
-        print(
-            f"Not enough charging possible for vehicle {vehicle.id},",
-            f"ride starting at timestep {first_impossible_task_start} had to be removed!",
-        )
-        self.simulation.observer.add_to_accumulated_results(
-            f"deleted_rides_vehicle_{vehicle.id}", 1
-        )
-
-    def _add_chosen_events(self, vehicle, chosen_events):
-        for charge_option in chosen_events:
-            vehicle.add_task(charge_option["charge_event"])
-            if "task_to" in charge_option:
-                vehicle.add_task(charge_option["task_to"])
-            if "task_from" in charge_option:
-                vehicle.add_task(charge_option["task_from"])
+    def _add_chosen_event(self, vehicle, charge_option):
+        vehicle.add_task(charge_option["charge_event"])
+        if "task_to" in charge_option:
+            vehicle.add_task(charge_option["task_to"])
+        if "task_from" in charge_option:
+            vehicle.add_task(charge_option["task_from"])
 
     def run(self):
         """Run the scenario with this strategy."""
