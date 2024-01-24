@@ -194,7 +194,7 @@ class Schedule(SimulationType):
                     return None
 
                 # TODO rename to allow_negative_soc
-                if not self.simulation.delete_rides:
+                if not self.simulation.allow_negative_soc:
                     raise ValueError(
                         f"Not enough charging possible for vehicle {vehicle.id}!"
                     )
@@ -203,34 +203,6 @@ class Schedule(SimulationType):
                     # self.delete_ride(soc_df_slice, vehicle)
                     print(f"SoC requirements for vehicle {vehicle.id} couldn't be met")
                     return None
-
-    def delete_ride(self, soc_df, vehicle):
-        # get all tasks that still need charging to be possible
-        impossible_tasks = soc_df.loc[soc_df["necessary_charging"] > 0]
-        # get starting time of first impossible task (row 0, column 0: "timestep")
-        first_impossible_task_start = impossible_tasks.iat[0, 0]
-        # cancel the impossible task. not setting the valid_schedule flag results in
-        # a recalculation of charging slots without the impossible task
-        first_impossible_task = vehicle.get_task(first_impossible_task_start)
-        if first_impossible_task is None:
-            raise ValueError("No task to remove or change to has been found")
-        vehicle.remove_task(first_impossible_task)
-
-        next_task = vehicle.get_next_task(int(first_impossible_task_start))
-        if next_task is not None:
-            vehicle.remove_task(next_task)
-            next_task.start_point = first_impossible_task.start_point
-            next_task.is_calulated = False
-            vehicle.add_task(next_task)
-            # TODO change time needed for this task?
-
-        print(
-            f"Not enough charging possible for vehicle {vehicle.id},",
-            f"ride starting at timestep {first_impossible_task_start} had to be removed!",
-        )
-        self.simulation.observer.add_to_accumulated_results(
-            f"deleted_rides_vehicle_{vehicle.id}", 1
-        )
 
     def _add_chosen_event(self, vehicle, charge_option):
         vehicle.add_task(charge_option["charge_event"])

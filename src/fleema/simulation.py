@@ -92,7 +92,7 @@ class Simulation:
         """
         self.soc_min = cfg_dict["soc_min"]
         self.end_of_day_soc = cfg_dict["end_of_day_soc"]
-        self.delete_rides = cfg_dict["delete_rides"]
+        self.allow_negative_soc = cfg_dict["allow_negative_soc"]
         # TODO check if it's enough to have min_charging_power in vehicle, else add to charger
         self.rng_seed = cfg_dict["rng_seed"]
         self.min_charging_power = cfg_dict["min_charging_power"]
@@ -673,6 +673,10 @@ class Simulation:
             "charging_points": charging_points,
         }
 
+        if cfg.has_option("sim_params", "delete_rides"):
+            print("Option delete_rides is deprecated, use allow_negative_soc instead.")
+            cfg.set("sim_params", "allow_negative_soc", str(cfg.getboolean("sim_params", "delete_rides")))
+
         cfg_dict = {
             "soc_min": cfg.getfloat("charging", "soc_min", fallback=0.2),
             "end_of_day_soc": cfg.getfloat("charging", "end_of_day_soc", fallback=0.8),
@@ -696,7 +700,7 @@ class Simulation:
                 "sim_params", "ignore_spice_ev_warnings", fallback=True
             ),
             "emission_options": emission_options,
-            "delete_rides": cfg.getboolean("sim_params", "delete_rides", fallback=True),
+            "allow_negative_soc": cfg.getboolean("sim_params", "allow_negative_soc", fallback=True),
             "defaults": {
                 "level_of_loading": cfg.getfloat(
                     "defaults", "load_level_default", fallback=0.0

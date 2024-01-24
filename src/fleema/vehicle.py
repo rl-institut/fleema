@@ -283,7 +283,7 @@ class Vehicle:
                 ):
                     print(
                         f"Warning: Error found in task list at timestep {timestep}.\n"
-                        f"Vehicle is at {previous_task.end_point.name} at timestep {previous_task.end_time}\n"
+                        f"Vehicle {self.id} is at {previous_task.end_point.name} at timestep {previous_task.end_time}\n"
                         f"Next task starts at {task.start_point.name} at timestep {task.start_time}"
                     )
                     return False
@@ -300,8 +300,8 @@ class Vehicle:
         end : int
             Ending timestep
         """
-        if not self.has_valid_task_list:
-            print(f"Task list of vehicle {self.id} is not valid.")
+        if not self.charging_list and not self.has_valid_task_list:
+            pass
             # Error disabled for testing purposes until schedule is fixed
             # raise AttributeError(f"Task list of vehicle {self.id} is not valid.")
         breaks = []
